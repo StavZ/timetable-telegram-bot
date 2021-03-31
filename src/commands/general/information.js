@@ -1,0 +1,30 @@
+const { Context } = require('telegraf');
+const Client = require('../../structures/client/Client');
+const Command = require('../../structures/client/Command');
+
+class InformationCommand extends Command {
+  /**
+   * @param {Client} client
+   */
+  constructor (client) {
+    super({
+      name: 'информация',
+      aliases: ['о-боте', 'about'],
+      category: 'general',
+      ownerOnly: false,
+      description: 'Информация о боте.',
+      includeInHelp: true,
+      path: __filename
+    });
+    this.client = client;
+  }
+
+  /**
+   * @param {Context} ctx
+   * @param {string[]} args
+   */
+  async exec (ctx, args) {
+    ctx.replyWithMarkdown(`Разработчик: [ВК](https://vk.com/stavzdev) | @StavZDev`);
+  }
+}
+module.exports = InformationCommand;
