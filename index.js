@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const config = require('dotenv').config().parsed;
 const Client = require('./src/structures/client/Client');
-const client = new Client(config.TOKEN);
+const client = new Client(process.env.TOKEN);
 
 client.run();
 
