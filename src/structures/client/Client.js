@@ -10,7 +10,7 @@ class Client extends Telegraf {
     super(token, ...args);
     this.owner = 408057291;
     this.commandHandler = new CommandHandler(this);
-    this.config = dotenv.config().parsed;
+    this.config = process.env.NODE_ENV === 'heroku' ? process.env : dotenv.config().parsed;
     this.logger = consola;
     this.parser = new (require('../schedule/Parser'))(this);
     this.manager = new (require('../schedule/ScheduleManager'))(this);
