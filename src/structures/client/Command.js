@@ -18,7 +18,7 @@ class Command {
     this.aliases = options.aliases;
     this.category = options.category;
     this.description = options.description;
-    this.usgae = options.usage;
+    this.usage = options.usage;
     this.ownerOnly = typeof options.ownerOnly === 'boolean' ? options.ownerOnly : false;
     this.path = options.path;
     this.includeInHelp = typeof options.includeInHelp === 'boolean' ? options.includeInHelp : true;

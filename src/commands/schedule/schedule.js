@@ -35,7 +35,6 @@ class ScheduleCommand extends Command {
       today = false;
     }
     const schedule = await this.client.parser.getScheduleByGroup(user.group, today);
-    ctx.replyWithMarkdownV2('`\n1 пара - **Математика** у Мелюхина ЛВ • 511 | Академика Веденеева 9\n`');
     ctx.replyWithMarkdown(this.parse(schedule));
   }
   /**

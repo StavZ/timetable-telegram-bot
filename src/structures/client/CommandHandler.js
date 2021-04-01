@@ -5,6 +5,9 @@ const Command = require('./Command');
 const Collection = require('./Collection');
 
 class CommandHandler {
+  /**
+   * @param {Client} client
+   */
   constructor (client) {
     this.client = client;
     this.commands = new Collection();
@@ -26,6 +29,7 @@ class CommandHandler {
   }
   /**
    * @param {string} command
+   * @returns {Command}
    */
   reload (input) {
     return new Promise((resolve, reject) => {
@@ -63,6 +67,14 @@ class CommandHandler {
     } else {
       return null;
     }
+  }
+
+  /**
+   * @param {string} command
+   * @returns {boolean}
+   */
+  hasCommand(command) {
+    return this.commands.has(command) || this.aliases.has(command);
   }
 }
 module.exports = CommandHandler;

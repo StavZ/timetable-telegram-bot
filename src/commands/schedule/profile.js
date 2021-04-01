@@ -13,6 +13,7 @@ class ProfileCommand extends Command {
       aliases: ['profile'],
       category: 'schedule',
       ownerOnly: false,
+      usage: 'профиль',
       description: 'Ваш профиль.',
       includeInHelp: true,
       path: __filename
