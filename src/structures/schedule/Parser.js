@@ -98,13 +98,14 @@ class Parser {
   }
 
   parseLesson (string) {
-    const fullRegex = /^([0-9])\n\n([ЁёА-я0-9_\-,() ]*)\n([ЁёА-я0-9_ ]*)(\n([ЁёА-я0-9_" ]*))?/gm;
+    const fullRegex = /^([0-9])\n([0-9])?\n([ЁёА-я0-9_\-,() ]*)\n([ЁёА-я0-9_ ]*)(\n([ЁёА-я0-9_" ]*))?/gm;
     const parsed = fullRegex.exec(string);
     const result = {};
     result.lessonNumber = parseInt(parsed[1], 10);
-    result.lesson = parsed[2].trim();
-    result.teacher = parsed[3] ? parsed[3].trim() : null;
-    const parsedClassroomAdress = parseClassroomAddress(parsed[4]);
+    result.subgroup = parsed[2] ? parsed[2] : null;
+    result.lesson = parsed[3].trim();
+    result.teacher = parsed[4] ? parsed[4].trim() : null;
+    const parsedClassroomAdress = parseClassroomAddress(parsed[5]);
     result.classroom = parsedClassroomAdress.classroom;
     result.address = parsedClassroomAdress.address;
     function parseClassroomAddress (str) {

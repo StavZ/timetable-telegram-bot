@@ -13,7 +13,7 @@ class ScheduleCommand extends Command {
       aliases: ['schedule'],
       category: 'schedule',
       ownerOnly: false,
-      usage: 'расписание',
+      usage: 'расписание [сегодня|завтра]',
       description: 'Показывает расписание на сегодня (на завтра).',
       includeInHelp: true,
       path: __filename
@@ -30,11 +30,11 @@ class ScheduleCommand extends Command {
     if (!user || !user.group) {
       return this.client.commandHandler.getCommand('selectgroup').exec(ctx, []);
     }
-    //let today = true;
-    //if (args.length && args[0].match(/завтра/i)) {
-    //  today = false;
-    //}
-    const schedule = await this.client.parser.getScheduleByGroup(user.group, false);
+    let today = false;
+    if (args.length && args[0].match(/сегодня/i)) {
+      today = true;
+    }
+    const schedule = await this.client.parser.getScheduleByGroup(user.group, today);
     ctx.replyWithMarkdown(this.parse(schedule));
   }
   /**
