@@ -35,19 +35,7 @@ class ScheduleCommand extends Command {
       today = true;
     }
     const schedule = await this.client.parser.getScheduleByGroup(user.group, today);
-    ctx.replyWithMarkdown(this.parse(schedule));
-  }
-  /**
-   * @param {Schedule} schedule
-   */
-  parse (schedule) {
-    let msg = `Расписание на ${this.client.moment(schedule.date, 'DD-MM-YYYY')}`;
-    msg += `\nГруппа: \`${schedule.group}\`\n\`\`\`\n`;
-    schedule.schedule.forEach((l) => {
-      msg += `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`;
-    });
-    msg += `\n\`\`\``;
-    return msg;
+    ctx.replyWithMarkdown(this.client.parser.parseSchedule(schedule));
   }
 }
 module.exports = ScheduleCommand;

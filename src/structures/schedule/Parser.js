@@ -130,5 +130,19 @@ class Parser {
     }
     return result;
   }
+
+  /**
+   * @param {Schedule} schedule
+   * @return {string}
+   */
+  parseSchedule (schedule) {
+    let msg = `Расписание на ${this.client.moment(schedule.date, 'DD-MM-YYYY')}`;
+    msg += `\nГруппа: \`${schedule.group}\`\n\`\`\`\n`;
+    schedule.schedule.forEach((l) => {
+      msg += `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`;
+    });
+    msg += `\n\`\`\`[Ссылка на сайт](https://ppkslavyanova.ru/lessonlist)`;
+    return msg;
+  }
 }
 module.exports = Parser;

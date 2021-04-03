@@ -37,7 +37,7 @@ class HelpCommand extends Command {
     if (this.client.commandHandler.hasCommand(args[0])) {
       const command = this.client.commandHandler.getCommand(args[0]);
       if (command.ownerOnly) return;
-      return ctx.replyWithMarkdown(`Команда: \`${this.client.prefix}${command.name}\`\nОписание: \`${command.description}\`\nИспользование: \`${this.client.prefix}${command.usage}\`${command.aliases.length ? `\nСокращени${command.aliases.length > 1 ? 'я' : 'е'}: ${command.aliases.map((a) => `\`${a}\``).join(', ')}` : ``}`);
+      return ctx.replyWithMarkdown(`Команда: \`${this.client.prefix}${command.name}\`\nОписание: \`${command.description}\`\nИспользование: \`${this.client.prefix}${command.usage}\`${command.aliases.length ? `\nСокращени${command.aliases.length > 1 ? 'я' : 'е'}: ${command.aliases.map((a) => `\`${this.client.prefix}${a}\``).join(' | ')}` : ``}`);
     }
   }
 }

@@ -11,7 +11,8 @@ class ChoiceGroupCommand extends Command {
       name: 'выбратьгруппу',
       aliases: ['selectgroup', 'выбрать-группу'],
       category: 'schedule',
-      description: 'Выбор группы, чтобы получать расписание.',
+      usage: 'выбратьгруппу',
+      description: 'Выбор группы.',
       ownerOnly: false,
       path: __filename
     });
@@ -29,7 +30,7 @@ class ChoiceGroupCommand extends Command {
     parsed.forEach((e) => {
       this.client.action(e.callback_data, (ctx) => {
         this.client.userManager.setGroup(ctx.from.id, e.text);
-        ctx.editMessageText(`Вы выбрали группу \`${e.text}\`.\n\n\`/расписание\` - Текущее раcписание группы.\n\`/выбратьгруппу\` - Выбрать группу.`, { parse_mode: 'Markdown' });
+        ctx.editMessageText(`Вы выбрали группу \`${e.text}\`.\n\n\`${this.client.prefix}расписание\` - Раcписание группы.`, { parse_mode: 'Markdown' });
       });
     });
   }
