@@ -89,7 +89,7 @@ class Parser {
         continue;
       }
       if (rows.item(i).childElementCount !== 3) {
-        timetable[timetable.length - 1].timetable.push(this.parseLesson(rows.item(i).textContent.trim()));
+        timetable[timetable.length - 1].timetable.push(await this.parseLesson(rows.item(i).textContent.trim()));
       }
     }
     return timetable.map((r) => new Schedule({ date: date, group: r.group, generatedAt: Date.now(), schedule: r.timetable }));
@@ -120,38 +120,49 @@ class Parser {
     return teachers;
   }
 
+  /**
+   * @param {string} string
+   * @returns {Lesson}
+   */
   parseLesson (string) {
-    const fullRegex = /^([0-9])\n([0-9])?\n([ЁёА-я0-9_\-,(). ]*)\n([ЁёА-я0-9_ ]*)(\n([ЁёА-я0-9_" ]*))?/gm;
-    const parsed = fullRegex.exec(string);
-    const result = {};
-    result.lessonNumber = parseInt(parsed[1], 10);
-    result.subgroup = parsed[2] ? parsed[2] : null;
-    result.lesson = parsed[3].trim();
-    result.teacher = parsed[4] ? parsed[4].trim() : null;
-    const parsedClassroomAdress = parseClassroomAddress(parsed[5]);
-    result.classroom = parsedClassroomAdress.classroom;
-    result.address = parsedClassroomAdress.address;
-    function parseClassroomAddress (str) {
-      if (str) {
-        str = str.replace(/\n/g, '');
+    return new Promise((resolve, reject) => {
+      const fullRegex = /^(.*)\n(.*)\n(.*)\n(.*)\n?(.*)$/gm;
+      const parsed = fullRegex.exec(string);
+      const result = {};
+      try {
+        if (!parsed) resolve(new Lesson({ error: 'Произошла ошибка во время обработки.' }));
+        result.lessonNumber = parseInt(parsed[1], 10);
+        result.subgroup = parsed[2] ? parsed[2] : null;
+        result.lesson = parsed[3].trim();
+        result.teacher = parsed[4] ? parsed[4].replace(/\-/g, '').trim() : null;
+        const parsedClassroomAdress = parseClassroomAddress(parsed[5]);
+        result.classroom = parsedClassroomAdress.classroom;
+        result.address = parsedClassroomAdress.address;
+      } catch (e) {
+        reject(e);
       }
-      const classroomRegex = /(([0-9]{1,3}([а-я]{1})?)\s)?([ЁёА-я0-9_" ]*)/gm;
-      const remoteRegex = /Дистанционное обучение/;
-      const result = { classroom: null, address: null };
-      if (str && str.match(/^\d/)) {
-        const parsedClassroom = classroomRegex.exec(str);
-        result.classroom = parsedClassroom[1] ? parsedClassroom[1].trim() : null;
-        result.address = parsedClassroom[4];
-      } else if (str && str.match(remoteRegex)) {
-        result.classroom = 'Дистанционное обучение';
-        result.address = null;
-      } else if (str && str !== undefined) {
-        result.classroom = null;
-        result.address = classroomRegex.exec(str)[4];
+      function parseClassroomAddress (str) {
+        if (str) {
+          str = str.replace(/\n/g, '');
+        }
+        const classroomRegex = /(([0-9]{1,3}([а-я]{1})?)\s)?([ЁёА-я0-9_" ]*)/gm;
+        const remoteRegex = /Дистанционное обучение/;
+        const result = { classroom: null, address: null };
+        if (str && str.match(/^\d/)) {
+          const parsedClassroom = classroomRegex.exec(str);
+          result.classroom = parsedClassroom[1] ? parsedClassroom[1].trim() : null;
+          result.address = parsedClassroom[4];
+        } else if (str && str.match(remoteRegex)) {
+          result.classroom = 'Дистанционное обучение';
+          result.address = null;
+        } else if (str && str !== undefined) {
+          result.classroom = null;
+          result.address = classroomRegex.exec(str)[4];
+        }
+        return result;
       }
-      return result;
-    }
-    return result;
+      resolve(new Lesson(result));
+    });
   }
 
   /**
@@ -161,9 +172,10 @@ class Parser {
   parseSchedule (schedule) {
     let msg = `Расписание на ${this.client.moment(schedule.date, 'DD-MM-YYYY')}`;
     msg += `\nГруппа: \`${schedule.group}\`\n\`\`\`\n`;
-    schedule.schedule.forEach((l) => {
-      msg += `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`;
-    });
+    for (const l of schedule.schedule) {
+      msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
+      if (l.error && msg.includes(l.error)) break;
+    }
     msg += `\n\`\`\`[Ссылка на сайт](https://ppkslavyanova.ru/lessonlist)`;
     return msg;
   }

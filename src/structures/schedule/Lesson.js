@@ -1,5 +1,6 @@
 class Lesson {
   constructor (data) {
+    this.error = data.error || null;
     this.title = data.lesson;
     this.subgroup = data.subgroup;
     this.teacher = data.teacher;

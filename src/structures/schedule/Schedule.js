@@ -8,7 +8,7 @@ class Schedule {
     /**
      * @type {Lesson[]}
      */
-    this.schedule = data.schedule.map((s) => new Lesson(s));
+    this.schedule = data.schedule;
   }
   toString () {
     return '';
