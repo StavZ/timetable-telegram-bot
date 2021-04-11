@@ -12,6 +12,7 @@ class Client extends Telegraf {
       dayInMs: 8.64e+7
     };
     this.owner = 408057291;
+    this.ownerChatID = 408057291;
     this.commandHandler = new CommandHandler(this);
     this.config = process.env.NODE_ENV === 'heroku' ? process.env : dotenv.config().parsed;
     this.logger = consola;
