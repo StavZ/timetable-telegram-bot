@@ -35,7 +35,7 @@ class UserManager {
 
   /**
    * @param {number} id
-   * @returns {userSchema}
+   * @returns {Promise<Object>}
    */
   async getUserSchema (id) {
     const schema = await User.findOne({ id: id });
@@ -47,7 +47,7 @@ class UserManager {
 
   /**
    * @param {number} id
-   * @param {userSchema} data
+   * @param {Object} data
    */
   async updateUserSchema (id, name, value) {
     const schema = await User.findOne({ id });
@@ -56,11 +56,3 @@ class UserManager {
   }
 }
 module.exports = UserManager;
-
-/**
- * @typedef {Object} userSchema
- * @property {number} user
- * @property {Schedule} lastSentSchedule
- * @property {string} group
- * @property {string} role
- */

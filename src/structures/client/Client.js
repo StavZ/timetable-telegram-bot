@@ -8,21 +8,25 @@ require('../prototypes/Array');
 class Client extends Telegraf {
   constructor (token, ...args) {
     super(token, ...args);
+    this.constants = {
+      dayInMs: 8.64e+7
+    };
     this.owner = 408057291;
     this.commandHandler = new CommandHandler(this);
     this.config = process.env.NODE_ENV === 'heroku' ? process.env : dotenv.config().parsed;
     this.logger = consola;
     this.parser = new (require('../schedule/Parser'))(this);
     this.manager = new (require('../schedule/ScheduleManager'))(this);
-    this.historyManager = new (require('../schedule/ScheduleHistoryManager'))(this);
     this.userManager = new (require('../schedule/UserManager'))(this);
-    this.fetcher = new (require('../schedule/Fetcher'));
     this.moment = function (date, format) {
-      // eslint-disable-next-line no-var
       const parsedDate = require('moment')(date);
       return parsedDate.format(format);
     };
     this.lastReload = Date.now();
+  }
+
+  isOwner(ctx) {
+    return ctx.from.id === this.owner;
   }
 
   async run () {

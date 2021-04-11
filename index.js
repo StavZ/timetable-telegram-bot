@@ -25,7 +25,7 @@ client.on('message', (ctx) => {
     cmd = client.commandHandler.commands.get(client.commandHandler.aliases.get(command));
   }
   if (!cmd) return;
-  if (cmd.ownerOnly && ctx.from.id !== client.owner) {
+  if (cmd.ownerOnly && !client.isOwner(ctx)) {
     return ctx.reply('Данная команда доступна только разработчику!');
   }
   try {

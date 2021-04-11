@@ -5,7 +5,7 @@ const User = new Schema({
   newsletter: Boolean,
   lastSentSchedule: {
     date: { type: String, default: null },
-    group: { type: String, default: null },
+    group: { type: String, default: '' },
     schedule: [{
       title: { type: String, default: null },
       teacher: { type: String, default: null },
@@ -14,10 +14,11 @@ const User = new Schema({
       classroom: { type: Number, default: null }
     }]
   },
+  lastSupportMessage: { type: Number, default: null },
   teacher: { type: String, default: null },
   group: { type: String, default: null },
   role: { type: String, default: null },
-  constants: { type: Object, default: null },
+  // constants: { type: Object, default: null },
   messageFormat: {type: String, default: null }
 });
 module.exports = model('user', User);

@@ -36,7 +36,7 @@ class Parser {
         date = divs.item(i).textContent; break;
       }
     }
-    const res = /Расписание на дату ([0-9]{1,2}) ([а-я]+) ([0-9]{4})/gim.exec(date);
+    const res = /Расписание на дату ([0-9]{1,2})? ?([а-я]+)? ?([0-9]{4})?/gim.exec(date);
     if (res[1] === 0) {
       return null;
     }
@@ -70,7 +70,15 @@ class Parser {
     const schedule = await this.getScheduleForEachGroup(today);
     return schedule.find((s) => s.group === group);
   }
+  /**
+   * @param {boolean} today
+   * @returns {Promise<Schedule[]>}
+   */
   async getScheduleForEachGroup (today = false) {
+    const date = await this.parseDate(today);
+    if (!date) {
+      return this.getScheduleForEachGroup(true);
+    }
     const document = await this.parsePage(today);
     const timetable = [];
     const rows = document.getElementsByClassName('R8');
@@ -84,7 +92,6 @@ class Parser {
         timetable[timetable.length - 1].timetable.push(this.parseLesson(rows.item(i).textContent.trim()));
       }
     }
-    const date = await this.parseDate(today);
     return timetable.map((r) => new Schedule({ date: date, group: r.group, generatedAt: Date.now(), schedule: r.timetable }));
   }
   async getGroups () {
@@ -97,8 +104,24 @@ class Parser {
     return groups;
   }
 
+  /**
+   * @returns {Promise<string[]>}
+   */
+  async getTeachers () {
+    const teachers = [];
+    const scheduleForEachGroup = await this.getScheduleForEachGroup();
+    for (const schedule of scheduleForEachGroup) {
+      schedule.schedule.forEach((l) => {
+        if (l.teacher && !teachers.includes(l.teacher)) {
+          teachers.push(l.teacher);
+        }
+      });
+    }
+    return teachers;
+  }
+
   parseLesson (string) {
-    const fullRegex = /^([0-9])\n([0-9])?\n([ЁёА-я0-9_\-,() ]*)\n([ЁёА-я0-9_ ]*)(\n([ЁёА-я0-9_" ]*))?/gm;
+    const fullRegex = /^([0-9])\n([0-9])?\n([ЁёА-я0-9_\-,(). ]*)\n([ЁёА-я0-9_ ]*)(\n([ЁёА-я0-9_" ]*))?/gm;
     const parsed = fullRegex.exec(string);
     const result = {};
     result.lessonNumber = parseInt(parsed[1], 10);
