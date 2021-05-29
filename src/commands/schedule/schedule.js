@@ -34,8 +34,6 @@ class ScheduleCommand extends Command {
     if (!selectedSchedule) {
       selectedSchedule = schedules[0].date.regular;
     }
-    console.log(message_id);
-    console.log(inline_id);
     schedules.push({ date: { regular: { custom_callback_data: 'cancel', custom_text: 'Отмена' } } });
     const keyboard = this.parseKeyboard(schedules, selectedSchedule);
     if (edit) {
@@ -47,7 +45,6 @@ class ScheduleCommand extends Command {
     keyboard[0].forEach((k) => {
       this.client.action(k.callback_data, (ctx_copy) => {
         selectedSchedule = k.text;
-        console.log(ctx_copy.update);
         this.client.commandHandler.getCommand('schedule').exec(ctx, [], k.callback_data, true, ctx_copy.update.callback_query.message.message_id, ctx_copy.update.callback_query.message.message_id);
         //ctx.editMessageText(this.parseScheduleMessage(schedules.find((s) => s.date.regular === k.text), user.group), { parse_mode: 'Markdown' });
       });
