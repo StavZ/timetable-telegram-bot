@@ -3,9 +3,11 @@ const { Schema, model } = require('mongoose');
 const User = new Schema({
   id: Number,
   newsletter: Boolean,
+  autoScheduler: { type: Boolean, default: false },
   lastSentSchedule: {
     date: { type: String, default: null },
     group: { type: String, default: '' },
+    generatedAt: { type: Number, default: null },
     schedule: [{
       title: { type: String, default: null },
       teacher: { type: String, default: null },

@@ -11,3 +11,14 @@ Object.defineProperty(Array.prototype, 'chunk', {
     );
   }
 });
+Object.defineProperty(Array.prototype, 'removeItem', {
+  value: function (item) {
+    // eslint-disable-next-line no-var
+    var array = this;
+    const index = array.indexOf(item);
+    if (index > -1) {
+      array.splice(index, 1);
+    }
+    return array;
+  }
+});

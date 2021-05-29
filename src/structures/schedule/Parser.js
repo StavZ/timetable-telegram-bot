@@ -10,10 +10,12 @@ class Parser {
    */
   constructor (client) {
     this.client = client;
-    this.scheduleUploadedAt = null;
-    this.lastUploadedSchedule = {};
+    // this.scheduleUploadedAt = null;
+    // this.lastUploadedSchedule = {};
   }
+
   /**
+   * @param {boolean} today
    * @returns {Promise<Document>}
    */
   async parsePage (today = false) {
@@ -27,15 +29,25 @@ class Parser {
       });
     });
   }
+
+  /**
+   * @param {boolean} today
+   * @returns {string}
+   */
   async parseDate (today = false) {
     const document = await this.parsePage(today);
     let date;
     const divs = document.getElementsByTagName('div');
+    //if (divs.item(32).textContent.startsWith('Расписание')) {
+    //  date = divs.item(32).textContent;
+    //} else {
     for (let i = 0; i < (divs.length - 1); i++) {
       if (divs.item(i).textContent.startsWith('Расписание')) {
+        console.log(i);
         date = divs.item(i).textContent; break;
       }
     }
+    //}
     const res = /Расписание на дату ([0-9]{1,2})? ?([а-я]+)? ?([0-9]{4})?/gim.exec(date);
     if (res[1] === 0) {
       return null;
@@ -54,7 +66,6 @@ class Parser {
       'ноября': 11,
       'декабря': 12
     };
-    if (res[1] === 0) return;
     const day = res[1];
     const month = months[res[2]];
     const year = res[3];
@@ -70,15 +81,12 @@ class Parser {
     const schedule = await this.getScheduleForEachGroup(today);
     return schedule.find((s) => s.group === group);
   }
+
   /**
    * @param {boolean} today
    * @returns {Promise<Schedule[]>}
    */
   async getScheduleForEachGroup (today = false) {
-    const date = await this.parseDate(today);
-    if (!date) {
-      return this.getScheduleForEachGroup(true);
-    }
     const document = await this.parsePage(today);
     const timetable = [];
     const rows = document.getElementsByClassName('R8');
@@ -92,8 +100,12 @@ class Parser {
         timetable[timetable.length - 1].timetable.push(await this.parseLesson(rows.item(i).textContent.trim()));
       }
     }
-    return timetable.map((r) => new Schedule({ date: date, group: r.group, generatedAt: Date.now(), schedule: r.timetable }));
+    return timetable.map((r) => new Schedule({ /* date: date,*/ group: r.group, generatedAt: Date.now(), schedule: r.timetable }));
   }
+
+  /**
+   * @returns {string[]}
+   */
   async getGroups () {
     const document = await this.parsePage();
     const groupsArray = Array.from(document.getElementsByClassName('R8C0'));
@@ -141,6 +153,11 @@ class Parser {
       } catch (e) {
         reject(e);
       }
+
+      /**
+       * @param {string} str
+       * @returns {{classroom:string|null,address:string|null}}
+       */
       function parseClassroomAddress (str) {
         if (str) {
           str = str.replace(/\n/g, '');

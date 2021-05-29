@@ -16,9 +16,9 @@ class Client extends Telegraf {
     this.commandHandler = new CommandHandler(this);
     this.config = process.env.NODE_ENV === 'heroku' ? process.env : dotenv.config().parsed;
     this.logger = consola;
-    this.parser = new (require('../schedule/Parser'))(this);
-    this.manager = new (require('../schedule/ScheduleManager'))(this);
-    this.userManager = new (require('../schedule/UserManager'))(this);
+    this.parser = new (require('../schedule/Parser.new'))(this);
+    this.manager = new (require('./managers/ScheduleManager'))(this);
+    this.userManager = new (require('./managers/UserManager'))(this);
     this.moment = function (date, format) {
       const parsedDate = require('moment')(date);
       return parsedDate.format(format);
@@ -32,7 +32,7 @@ class Client extends Telegraf {
 
   async run () {
     this.commandHandler.load();
-    await this.manager.run();
+    this.manager.run();
     this.launch({ allowedUpdates: true }).then(() => {
       this.logger.success(`Logged in as @${this.botInfo.username}`);
     });

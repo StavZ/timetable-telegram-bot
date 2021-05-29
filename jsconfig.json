@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "module": "commonJS",
+    "target": "es6",
+    "paths": {
+      "@commands/*": [
+        "./src/commands/*"
+      ],
+      "@schedule/*": [
+        "./src/structures/schedule/*"
+      ],
+      "@managers/*": [
+        "./src/scructures/client/managers/*"
+      ],
+      "@models/*": [
+        "./src/structures/models/*"
+      ],
+      "@client-structures/*": [
+        "./src/structures/client/*"
+      ]
+    },
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "src/**/*"
+  ]
+}

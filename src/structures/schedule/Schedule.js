@@ -2,8 +2,9 @@ const Lesson = require('./Lesson');
 
 class Schedule {
   constructor (data) {
-    this.date = data.date;
-    this.generatedAt = data.generatedAt;
+    /**
+     * @type {string}
+     */
     this.group = data.group;
     /**
      * @type {Lesson[]}
