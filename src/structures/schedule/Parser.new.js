@@ -33,9 +33,10 @@ class Parser {
   /**
    * Parses date
    * @param {string} string
+   * @param {number} id
    * @returns {{regular:string,parsed:Date}}
    */
-  parseDate (string) {
+  parseDate (string, id) {
     const months = {
       'января': 1,
       'февраля': 2,
@@ -56,11 +57,13 @@ class Parser {
     const date = moment(new Date(`${months[res[2]]}-${res[1]}-${GMT.getUTCFullYear()} GMT`));
     return {
       regular: date.format('DD/MM/YYYY'),
-      parsed: date
+      parsed: date,
+      id
     };
   }
 
   /**
+   * Get available schedules
    * @returns {Promise<AvailableSchedulesData[]>}
    */
   async getAvailableSchedules () {
@@ -69,8 +72,9 @@ class Parser {
     const a = [];
     for (const schedule of schedules) {
       const url = `https://ppkslavyanova.ru/lessonlist${schedule.href}`;
-      const date = this.parseDate(schedule.textContent);
-      a.push({ dateString: `${schedule.textContent} ${new Date().getUTCFullYear()}`, link: url, date: date, schedule: await this.generateSchedule(url) });
+      const id = /^\?day=([0-9]{4})$/.exec(schedule.href)[1];
+      const date = this.parseDate(schedule.textContent, id);
+      a.push({ dateString: `${schedule.textContent} ${new Date().getUTCFullYear()}`, link: url, date: date, id: Number(id), schedule: await this.generateSchedule(url, date, Number(id)) });
     }
     return a;
   }
@@ -105,10 +109,11 @@ class Parser {
 
   /**
    * @param {string} url
-   * @param {Date} date
+   * @param {parsedDate} date
+   * @param {number} id
    * @returns
    */
-  async generateSchedule (url) {
+  async generateSchedule (url, date, id) {
     const document = await this.getDocument(url);
     const timetable = [];
     const rows = document.getElementsByClassName('R8');
@@ -122,7 +127,7 @@ class Parser {
         timetable[timetable.length - 1].timetable.push(await this.parseLesson(rows.item(i).textContent.trim()));
       }
     }
-    return timetable.map((r) => new Schedule({ group: r.group, schedule: r.timetable }));
+    return timetable.map((r) => new Schedule({ id: id, group: r.group, schedule: r.timetable, date }));
   }
   /**
    * @param {string} string
@@ -174,12 +179,17 @@ class Parser {
     });
   }
 }
-module.exports = Parser;
-
 /**
  * @typedef {object} AvailableSchedulesData
  * @property {string} dateString
  * @property {string} link
- * @property {{parsed: moment.Moment, regular: string}} date
+ * @property {parsedDate} date
+ * @property {number} id
  * @property {Schedule[]} schedule
  */
+/**
+ * @typedef {object} parsedDate
+ * @property {moment.Moment} parsed
+ * @property {string} regular
+ */
+module.exports = Parser;

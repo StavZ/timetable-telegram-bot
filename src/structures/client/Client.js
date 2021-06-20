@@ -3,7 +3,10 @@ const CommandHandler = require('./CommandHandler');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const consola = require('consola');
+const moment = require('moment-timezone');
+moment.tz.setDefault('Asia/Yekaterinburg');
 require('../prototypes/Array');
+dotenv.config();
 
 class Client extends Telegraf {
   constructor (token, ...args) {
@@ -14,11 +17,12 @@ class Client extends Telegraf {
     this.owner = 408057291;
     this.ownerChatID = 408057291;
     this.commandHandler = new CommandHandler(this);
-    this.config = process.env.NODE_ENV === 'heroku' ? process.env : dotenv.config().parsed;
+    this.config = process.env;
     this.logger = consola;
     this.parser = new (require('../schedule/Parser.new'))(this);
     this.manager = new (require('./managers/ScheduleManager'))(this);
     this.userManager = new (require('./managers/UserManager'))(this);
+    // this.notionIntegration = new (require('../integrations/NotionIntegration'));
     this.moment = function (date, format) {
       const parsedDate = require('moment')(date);
       return parsedDate.format(format);
@@ -26,13 +30,17 @@ class Client extends Telegraf {
     this.lastReload = Date.now();
   }
 
-  isOwner(ctx) {
+  isOwner (ctx) {
     return ctx.from.id === this.owner;
+  }
+
+  getCurrentDate () {
+    return moment().set({ hours: 0, seconds: 0, minutes: 0 });
   }
 
   async run () {
     this.commandHandler.load();
-    this.manager.run();
+    await this.manager.run();
     this.launch({ allowedUpdates: true }).then(() => {
       this.logger.success(`Logged in as @${this.botInfo.username}`);
     });
@@ -40,6 +48,40 @@ class Client extends Telegraf {
       this.logger.success('Connected to MongoBD!');
     }).catch((e) => {
       this.logger.error(e);
+    });
+
+
+    this.manager.on('newSchedule', (schedule, userSchedule, user) => {
+      let msg = `Новое расписание на ${schedule.date.regular}\nГруппа: ${user.group}\n\`\`\`\n`;
+      if (!userSchedule) return `Прозошла ошибка! Посетите сайт для просмотра расписания на ${schedule.date.regular}\n[Ссылка на сайт](${schedule.link})`;
+      for (const l of userSchedule.schedule) {
+        msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
+        if (l.error && msg.includes(l.error)) break;
+      }
+      msg += `\n\`\`\`[Ссылка на сайт](${schedule.link})`;
+      if (user.chatId) {
+        this.telegram.sendMessage(user.chatId, msg, { parse_mode: 'Markdown' }).then((r) => {
+          this.userManager.updateUserSchema(user.id, 'lastSentSchedule', userSchedule);
+        }).catch((e) => {
+          this.userManager.updateUserSchema(user.id, 'lastSentSchedule', null);
+        });
+      }
+    });
+    this.manager.on('editedSchedule', (schedule, userSchedule, user) => {
+      let msg = `Обновленное расписание на ${schedule.date.regular}\nГруппа: ${user.group}\n\`\`\`\n`;
+      if (!userSchedule) return `Прозошла ошибка! Посетите сайт для просмотра расписания на ${schedule.date.regular}\n[Ссылка на сайт](${schedule.link})`;
+      for (const l of userSchedule.schedule) {
+        msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
+        if (l.error && msg.includes(l.error)) break;
+      }
+      msg += `\n\`\`\`[Ссылка на сайт](${schedule.link})`;
+      if (user.chatId) {
+        this.telegram.sendMessage(user.chatId, msg, { parse_mode: 'Markdown' }).then((r) => {
+          this.userManager.updateUserSchema(user.id, 'lastSentSchedule', userSchedule);
+        }).catch((e) => {
+          this.userManager.updateUserSchema(user.id, 'lastSentSchedule', null);
+        });
+      }
     });
   }
 }

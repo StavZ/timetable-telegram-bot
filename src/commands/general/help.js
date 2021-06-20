@@ -29,7 +29,7 @@ class HelpCommand extends Command {
       const commands = this.client.commandHandler.commands;
       let msg = `Список команд @ppkslavyanovabot\n\n`;
       commands.filter((c) => c.includeInHelp).forEach((c) => {
-        msg += `\`- ${c.name}\` - ${c.description}\n`;
+        msg += `\`- ${this.client.prefix}${c.name}\` - ${c.description}\n`;
       });
       msg += `\nИспользование: \`${this.client.prefix}команда\``;
       return ctx.replyWithMarkdown(msg);

@@ -20,15 +20,20 @@ class UserManager {
     return this.updateUserSchema(id, 'newsletter', bool);
   }
 
+  async getAllUsers (options) {
+    return await User.find(options);
+  }
+
   /**
    * @param {number} id
    */
-  async createUserSchema (id) {
+  async createUserSchema (id, chatId) {
     const newSchema = new User({
       id: id,
       selectedGroup: null,
       lastSentSchedule: {},
-      role: 'student'
+      role: 'student',
+      chatId
     });
     return await newSchema.save();
   }

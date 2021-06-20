@@ -24,7 +24,7 @@ class InformationCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    ctx.replyWithMarkdown(`Разработчик: [ВК](https://vk.com/stavzdev) | @StavZDev`);
+    ctx.replyWithMarkdown(`Версия: \`v${require('../../../package.json').version}\`\nРазработчик: [ВК](https://vk.com/stavzdev) | @StavZDev`);
   }
 }
 module.exports = InformationCommand;

@@ -23,6 +23,14 @@ class StartCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
+    const userSchema = await this.client.userManager.getUserSchema(ctx.from.id);
+    if (!userSchema) {
+      this.client.userManager.createUserSchema(ctx.from.id, ctx.chat.id);
+    } else {
+      if (!userSchema.chatId) {
+        this.client.userManager.updateUserSchema(ctx.from.id, 'chatId', ctx.chat.id);
+      }
+    }
     this.client.commandHandler.getCommand('help').exec(ctx, []);
   }
 }
