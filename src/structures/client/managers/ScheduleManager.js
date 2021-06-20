@@ -35,6 +35,7 @@ class ScheduleManager extends EventEmitter {
    * @param {Schedule} lastSentSchedule
    */
   isScheduleNew (schedule, user) {
+    if (!user || !user.group) return;
     const userSchedule = schedule.schedule.find((s) => s.group === user.group);
     const lastSentSchedule = user.lastSentSchedule ? new Schedule(user.lastSentSchedule) : null;
 
