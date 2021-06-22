@@ -52,7 +52,7 @@ class Parser {
       'декабря': 12
     };
     const GMT = new Date(); GMT.setUTCHours(0); GMT.setUTCMinutes(0); GMT.setUTCSeconds(0); GMT.setUTCMilliseconds(0);
-    const regex = /Расписание на ([0-9]{1,2})? ?([а-я]+)?/gim;
+    const regex = /([0-9]{1,2})? ?([а-я]+)?/gim;
     const res = regex.exec(string);
     const date = moment(new Date(`${months[res[2]]}-${res[1]}-${GMT.getUTCFullYear()} GMT`));
     return {
@@ -74,7 +74,7 @@ class Parser {
       const url = `https://ppkslavyanova.ru/lessonlist${schedule.href}`;
       const id = /^\?day=([0-9]{4})$/.exec(schedule.href)[1];
       const date = this.parseDate(schedule.textContent, id);
-      a.push({ dateString: `${schedule.textContent} ${new Date().getUTCFullYear()}`, link: url, date: date, id: Number(id), schedule: await this.generateSchedule(url, date, Number(id)) });
+      a.push({ dateString: `Расписание ${schedule.textContent} ${new Date().getUTCFullYear()}`, link: url, date: date, id: Number(id), schedule: await this.generateSchedule(url, date, Number(id)) });
     }
     return a;
   }
