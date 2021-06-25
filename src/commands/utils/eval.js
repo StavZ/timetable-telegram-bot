@@ -12,8 +12,8 @@ class EvalCommand extends Command {
       name: 'eval',
       aliases: [],
       category: 'utils',
-      ownerOnly: false,
-      description: '',
+      ownerOnly: true,
+      description: 'Eval command',
       includeInHelp: false,
       path: __filename
     });
@@ -25,7 +25,7 @@ class EvalCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    if (!args.length) return ctx.reply('I need code.');
+    if (!args.length) return ctx.reply('Мне нужен код.');
     let code = args.join(' ');
     if (code.includes('await')) code = `(async () => { ${code} })()`;
     let result;

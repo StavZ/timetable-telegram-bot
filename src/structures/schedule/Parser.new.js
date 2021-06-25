@@ -33,10 +33,9 @@ class Parser {
   /**
    * Parses date
    * @param {string} string
-   * @param {number} id
    * @returns {{regular:string,parsed:Date}}
    */
-  parseDate (string, id) {
+  parseDate (string) {
     const months = {
       'января': 1,
       'февраля': 2,
@@ -57,8 +56,7 @@ class Parser {
     const date = moment(new Date(`${months[res[2]]}-${res[1]}-${GMT.getUTCFullYear()} GMT`));
     return {
       regular: date.format('DD/MM/YYYY'),
-      parsed: date,
-      id
+      parsed: date
     };
   }
 
@@ -73,7 +71,7 @@ class Parser {
     for (const schedule of schedules) {
       const url = `https://ppkslavyanova.ru/lessonlist${schedule.href}`;
       const id = /^\?day=([0-9]{4})$/.exec(schedule.href)[1];
-      const date = this.parseDate(schedule.textContent, id);
+      const date = this.parseDate(schedule.textContent);
       a.push({ dateString: `Расписание ${schedule.textContent} ${new Date().getUTCFullYear()}`, link: url, date: date, id: Number(id), schedule: await this.generateSchedule(url, date, Number(id)) });
     }
     return a;
@@ -94,24 +92,10 @@ class Parser {
   }
 
   /**
-   * Get groups
-   * @returns {string[]}
-   */
-  async getGroups () {
-    const document = await this.getDocument();
-    const groupsArray = Array.from(document.getElementsByClassName('R8C0'));
-    const groups = [];
-    groupsArray.forEach((c) => {
-      groups.push(c.textContent);
-    });
-    return groups;
-  }
-
-  /**
    * @param {string} url
    * @param {parsedDate} date
    * @param {number} id
-   * @returns
+   * @returns {Schedule[]}
    */
   async generateSchedule (url, date, id) {
     const document = await this.getDocument(url);

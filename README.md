@@ -1,2 +1,2 @@
 # schedule-telegram-bot
-Bot that sends schedule from https://ppkslavyanova.ru/lessonlist.
+Telegram: [@ppkslavyanovabot](https://t.me/ppkslavyanovabot)

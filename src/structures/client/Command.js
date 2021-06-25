@@ -23,9 +23,6 @@ class Command {
     this.path = options.path;
     this.includeInHelp = typeof options.includeInHelp === 'boolean' ? options.includeInHelp : true;
   }
-  exec () {
-    return new Error('No exec function!');
-  }
 }
 module.exports = Command;
 

@@ -38,7 +38,7 @@ class ScheduleCommand extends Command {
     });
     for (const key in schedulesByKeys) {
       this.client.action(key, (ctx) => {
-        this.showSchedule(ctx, user, schedulesByKeys[key], schedules, { message_id: ctx.update.callback_query.message.message_id });
+        this.showSchedule(ctx, user, schedulesByKeys[key], schedules, { message_id: ctx.update.callback_query.message.message_id, key });
       });
     }
 
@@ -63,7 +63,7 @@ class ScheduleCommand extends Command {
       msg += `Расписание не найдено.`;
     }
     msg += `\n\`\`\`\n[Ссылка на сайт](${schedule.link})`;
-    const keyboard = this.parseKeyboard(schedules, userSchedule.date.regular);
+    const keyboard = this.parseKeyboard(schedules, (!userSchedule ? edit.key : userSchedule.date.regular));
     keyboard.push([{ text: 'Отмена', callback_data: 'cancel' }]);
     if (edit) {
       this.client.telegram.editMessageText(ctx.chat.id, edit.message_id, edit.message_id, msg, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
