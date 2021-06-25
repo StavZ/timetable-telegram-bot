@@ -30,7 +30,7 @@ class ChoiceGroupCommand extends Command {
     parsed.forEach((e) => {
       this.client.action(e.callback_data, (ctx) => {
         this.client.userManager.setGroup(ctx.from.id, e.text);
-        ctx.editMessageText(`Вы выбрали группу \`${e.text}\`.\n\n\`${this.client.prefix}расписание\` - Раcписание группы.`, { parse_mode: 'Markdown' });
+        ctx.editMessageText(`Вы выбрали группу \`${e.text}\`.\n\n\`${this.client.prefix}schedule\` - Раcписание группы.`, { parse_mode: 'Markdown' });
       });
     });
   }
