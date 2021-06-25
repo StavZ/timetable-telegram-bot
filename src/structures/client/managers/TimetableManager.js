@@ -13,7 +13,6 @@ class ScheduleManager extends EventEmitter {
     this.cache = {};
   }
   async runCacheManager () {
-    this.client.logger.info('Starting cache manager...');
     const schedule = await this.client.parser.getAvailableSchedules();
     this.cache = {
       generatedAt: Date.now(),
@@ -76,7 +75,6 @@ class ScheduleManager extends EventEmitter {
   }
 
   async runChecker () {
-    this.client.logger.info('Starting checker...');
     setInterval(async () => {
       if (!this.cache.schedule) return;
       const users = await this.client.userManager.getAllUsers({ autoScheduler: true });
@@ -87,7 +85,7 @@ class ScheduleManager extends EventEmitter {
   }
   async run () {
     await this.runCacheManager();
-    this.client.logger.info('Starting schedule-update-checker...');
+    this.client.logger.info('Starting timetable-update-checker...');
     this.runChecker();
   }
 }

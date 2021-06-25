@@ -20,7 +20,7 @@ class Client extends Telegraf {
     this.config = process.env;
     this.logger = consola;
     this.parser = new (require('../schedule/Parser.new'))(this);
-    this.manager = new (require('./managers/ScheduleManager'))(this);
+    this.manager = new (require('./managers/TimetableManager'))(this);
     this.userManager = new (require('./managers/UserManager'))(this);
     this.moment = function (date, format) {
       const parsedDate = require('moment')(date);
