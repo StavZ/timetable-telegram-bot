@@ -1,7 +1,7 @@
+/* eslint-disable guard-for-in */
 const { Context } = require('telegraf');
 const Client = require('../../structures/client/Client');
 const Command = require('../../structures/client/Command');
-const Schedule = require('../../structures/schedule/Schedule');
 
 class ScheduleCommand extends Command {
   /**
@@ -13,8 +13,7 @@ class ScheduleCommand extends Command {
       aliases: ['schedule'],
       category: 'schedule',
       ownerOnly: false,
-      usage: 'расписание',
-      description: 'Показывает расписание.',
+      description: 'Отправляет текущее расписание, размещенное на сайте.',
       includeInHelp: true,
       path: __filename
     });
@@ -25,54 +24,52 @@ class ScheduleCommand extends Command {
    * @param {Context} ctx
    * @param {string[]} args
    */
-  async exec (ctx, args, selectedSchedule, edit = false, message_id, inline_id) {
+  async exec (ctx, args) {
     const user = await this.client.userManager.getUserSchema(ctx.from.id);
     if (!user || !user.group) {
       return this.client.commandHandler.getCommand('selectgroup').exec(ctx, []);
     }
-    const schedules = await this.client.parser.getAvailableSchedules();
-    if (!selectedSchedule) {
-      selectedSchedule = schedules[0].date.regular;
-    }
-    schedules.push({ date: { regular: { custom_callback_data: 'cancel', custom_text: 'Отмена' } } });
-    const keyboard = this.parseKeyboard(schedules, selectedSchedule);
-    if (edit) {
-      this.client.telegram.editMessageText(ctx.chat.id, message_id, inline_id, this.parseScheduleMessage(schedules.find((s) => s.date.regular === selectedSchedule), user.group), { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
-    } else {
-      ctx.replyWithMarkdown(this.parseScheduleMessage(schedules[0], user.group), { reply_markup: { inline_keyboard: keyboard } });
-    }
-    // schedules
-    keyboard[0].forEach((k) => {
-      this.client.action(k.callback_data, (ctx_copy) => {
-        selectedSchedule = k.text;
-        this.client.commandHandler.getCommand('schedule').exec(ctx, [], k.callback_data, true, ctx_copy.update.callback_query.message.message_id, ctx_copy.update.callback_query.message.message_id);
-        //ctx.editMessageText(this.parseScheduleMessage(schedules.find((s) => s.date.regular === k.text), user.group), { parse_mode: 'Markdown' });
-      });
-    });
 
-    // cancel
-    keyboard[1].forEach((k) => {
-      this.client.action(k.callback_data, (ctx) => {
-        ctx.editMessageReplyMarkup({});
-      });
+    const schedules = await this.client.parser.getAvailableSchedules();
+    const schedulesByKeys = this.schedulesByKeys(schedules);
+
+    this.client.action('cancel', (ctx) => {
+      ctx.editMessageReplyMarkup({});
     });
+    for (const key in schedulesByKeys) {
+      this.client.action(key, (ctx) => {
+        this.showSchedule(ctx, user, schedulesByKeys[key], schedules, { message_id: ctx.update.callback_query.message.message_id });
+      });
+    }
+
+    this.showSchedule(ctx, user, schedules[0], schedules);
   }
 
   /**
-   * @param {import('@schedule/Parser.new').AvailableSchedulesData} schedule
-   * @param {string} selectedGroup
-   * @returns {string}
+   * @param {Context} ctx
+   * @param {*} user
+   * @param {import('../../structures/schedule/Parser.new').AvailableSchedulesData} schedule
+   * @param {import('../../structures/schedule/Parser.new').AvailableSchedulesData[]} schedules
    */
-  parseScheduleMessage (schedule, selectedGroup) {
-    let msg = `${schedule.dateString}\nГруппа: ${selectedGroup}\n\`\`\`\n`;
-    const groupSchedule = schedule.schedule.find((s) => s.group === selectedGroup);
-    if (!groupSchedule) return `Прозошла ошибка! Посетите сайт для просмотра расписания на ${schedule.date.regular}\n[Ссылка на сайт](${schedule.link})`;
-    for (const l of groupSchedule.schedule) {
-      msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
-      if (l.error && msg.includes(l.error)) break;
+  showSchedule (ctx, user, schedule, schedules, edit) {
+    const userSchedule = schedule.schedule.find((s) => s.group === user.group);
+    let msg = `${schedule.dateString}\nГруппа: ${user.group}\n\`\`\`\n`;
+    if (userSchedule) {
+      for (const l of userSchedule.schedule) {
+        msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
+        if (l.error && msg.includes(l.error)) break;
+      }
+    } else {
+      msg += `Расписание не найдено.`;
     }
-    msg += `\n\`\`\`[Ссылка на сайт](${schedule.link})`;
-    return msg;
+    msg += `\n\`\`\`\n[Ссылка на сайт](${schedule.link})`;
+    const keyboard = this.parseKeyboard(schedules, userSchedule.date.regular);
+    keyboard.push([{ text: 'Отмена', callback_data: 'cancel' }]);
+    if (edit) {
+      this.client.telegram.editMessageText(ctx.chat.id, edit.message_id, edit.message_id, msg, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
+    } else {
+      ctx.replyWithMarkdown(msg, { reply_markup: { inline_keyboard: keyboard } });
+    }
   }
 
   /**
@@ -85,9 +82,21 @@ class ScheduleCommand extends Command {
     const listWithoutSelected = list.removeItem(selectedSchedule);
     const data = [];
     listWithoutSelected.forEach((a) => {
-      data.push({ text: a.custom_text ? a.custom_text : a, callback_data: a.custom_callback_data ? a.custom_callback_data : a });
+      data.push({ text: a.custom_text ? a.custom_text : `${a}`, callback_data: a.custom_callback_data ? a.custom_callback_data : a });
     });
     return data.chunk(2);
+  }
+
+  /**
+   * @param {import('../../structures/schedule/Parser.new').AvailableSchedulesData[]} schedules
+   * @returns {Record<string,import('../../structures/schedule/Parser.new').AvailableSchedulesData}
+   */
+  schedulesByKeys (schedules) {
+    const s = {};
+    for (const schedule in schedules) {
+      s[schedules[schedule].date.regular] = schedules[schedule];
+    }
+    return s;
   }
 }
 module.exports = ScheduleCommand;
