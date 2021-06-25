@@ -24,7 +24,7 @@ class InformationCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    ctx.replyWithMarkdown(`Версия: \`v${require('../../../package.json').version}\`\nРазработчик: [ВК](https://vk.com/stavzdev) | @StavZDev\nИсходный код: [GitHub](https://github.com/StavZ/timetable-telegram-bot)`);
+    ctx.replyWithMarkdown(`Версия: \`v${require('../../../package.json').version}\`\nРазработчик: [ВК](https://vk.com/stavzdev) | @StavZDev\nИсходный код: [GitHub](https://github.com/StavZ/timetable-telegram-bot)`, { disable_web_page_preview: true });
   }
 }
 module.exports = InformationCommand;

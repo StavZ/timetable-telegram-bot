@@ -31,7 +31,8 @@ class StartCommand extends Command {
         this.client.userManager.updateUserSchema(ctx.from.id, 'chatId', ctx.chat.id);
       }
     }
-    this.client.commandHandler.getCommand('help').exec(ctx, []);
+    ctx.replyWithMarkdown('Моя главная функция:\nАвтоматическая рассылка расписания студентам колледжа.\nВ будущем будет добавлена автоматическая рассылка расписания преподавателям колледжа.\n\nМои основные команды:\n\`/selectgroup\` - Позволяет выбрать группу, чтобы в дальнейшем получать её расписание.\n\`/рассылка\` - Включить/выключить автоматическую рассылку расписания.\n\`/schedule\` - Отправляет текущее раcписание выбранной группы с сайта колледжа.\n\`/bells\` - Отправляет расписание звонков.\n\nБольше информации вы найдете с помощью \`/help\`.');
+    // this.client.commandHandler.getCommand('help').exec(ctx, []);
   }
 }
 module.exports = StartCommand;

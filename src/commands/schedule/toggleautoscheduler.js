@@ -8,8 +8,8 @@ class ToggleautoschedulerCommand extends Command {
    */
   constructor (client) {
     super({
-      name: 'toggleautoscheduler',
-      aliases: ['рассылка', 'auto'],
+      name: 'рассылка',
+      aliases: ['autoscheduler'],
       category: 'schedule',
       ownerOnly: false,
       description: 'Включить/выключить автоматическую рассылку нового расписания.',
