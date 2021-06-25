@@ -31,7 +31,6 @@ class HelpCommand extends Command {
       commands.filter((c) => c.includeInHelp).forEach((c) => {
         msg += `\`- ${this.client.prefix}${c.name}\` - ${c.description}\n`;
       });
-      msg += `\nИспользование: \`${this.client.prefix}команда\``;
       return ctx.replyWithMarkdown(msg);
     }
     if (this.client.commandHandler.hasCommand(args[0])) {
