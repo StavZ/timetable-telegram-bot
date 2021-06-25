@@ -10,9 +10,6 @@ class ScheduleManager extends EventEmitter {
      * @type {Client}
      */
     this.client = client;
-    /**
-     * @type
-     */
     this.cache = {};
   }
   async runCacheManager () {
@@ -40,7 +37,6 @@ class ScheduleManager extends EventEmitter {
     const lastSentSchedule = user.lastSentSchedule ? new Schedule(user.lastSentSchedule) : null;
 
     if ((userSchedule ? userSchedule.id : 0) > (lastSentSchedule ? lastSentSchedule.id : 0)) {
-      // const userSchedule = schedule.schedule.find((s) => s.group === user.group);
       if (userSchedule) {
         return this.emit('newSchedule', schedule, userSchedule, user);
       }
@@ -58,33 +54,6 @@ class ScheduleManager extends EventEmitter {
    */
   isScheduleEdited (schedule, lastSentSchedule, user, fullSchedule) {
     const result = [];
-    // schedule.schedule.forEach((l) => {
-    //   const keys = Object.keys(l);
-    //   for (let i = 0; i < keys.length; i++) {
-    //     console.log();
-    //     // console.log(`${lastSentSchedule[keys[i]]} === ${schedule[keys[i]]}`);
-    //     if (lastSentSchedule[keys[i]] !== schedule[keys[i]]) {
-    //       result.push(false);
-    //     } else {
-    //       result.push(true);
-    //     }
-    //   }
-    // });
-    // for (let i = 0; i < schedule.schedule.length; i++) {
-    //   const lesson = schedule.schedule[i];
-    //   const keys = Object.keys(lesson);
-    //   for (let x = 0; x < lastSentSchedule.schedule.length; x++) {
-    //     for (let y = 0; y < keys.length; y++) {
-    //       if (lastSentSchedule.schedule[x][keys[y]] !== lesson[keys[y]]) {
-    //         console.log(`${lastSentSchedule.schedule[x][keys[y]]} = ${lesson[keys[y]]} - ${lastSentSchedule.schedule[x][keys[y]] === lesson[keys[y]]}`);
-    //         result.push(false);
-    //       } else {
-    //         console.log(`${lastSentSchedule.schedule[x][keys[y]]} = ${lesson[keys[y]]} - ${lastSentSchedule.schedule[x][keys[y]] === lesson[keys[y]]}`);
-    //         result.push(true);
-    //       }
-    //     }
-    //   }
-    // }
     const keys = ['title', 'subgroup', 'teacher', 'number', 'address', 'classroom'];
     if (schedule.schedule.length !== lastSentSchedule.schedule.length) {
       result.push(false);
@@ -93,7 +62,6 @@ class ScheduleManager extends EventEmitter {
         const lessonL = lastSentSchedule.schedule[i];
         const lessonN = schedule.schedule[i];
         for (let y = 0; y < keys.length; y++) {
-          // console.log(`${lessonL[keys[y]]} = ${lessonN[keys[y]]}`);
           if (lessonL[keys[y]] !== lessonN[keys[y]]) {
             result.push(false);
           } else {
@@ -102,7 +70,6 @@ class ScheduleManager extends EventEmitter {
         }
       }
     }
-    // console.log(result);
     if (result.includes(false)) {
       return this.emit('editedSchedule', fullSchedule, schedule, user);
     }
