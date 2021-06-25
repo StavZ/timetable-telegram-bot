@@ -53,7 +53,7 @@ class Client extends Telegraf {
 
     this.manager.on('newSchedule', (schedule, userSchedule, user) => {
       let msg = `Новое расписание на ${schedule.date.regular}\nГруппа: ${user.group}\n\`\`\`\n`;
-      if (!userSchedule) return `Прозошла ошибка! Посетите сайт для просмотра расписания на ${schedule.date.regular}\n[Ссылка на сайт](${schedule.link})`;
+      if (!userSchedule) return;
       for (const l of userSchedule.schedule) {
         msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
         if (l.error && msg.includes(l.error)) break;
@@ -69,7 +69,7 @@ class Client extends Telegraf {
     });
     this.manager.on('editedSchedule', (schedule, userSchedule, user) => {
       let msg = `Обновленное расписание на ${schedule.date.regular}\nГруппа: ${user.group}\n\`\`\`\n`;
-      if (!userSchedule) return `Прозошла ошибка! Посетите сайт для просмотра расписания на ${schedule.date.regular}\n[Ссылка на сайт](${schedule.link})`;
+      if (!userSchedule) return;
       for (const l of userSchedule.schedule) {
         msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
         if (l.error && msg.includes(l.error)) break;
