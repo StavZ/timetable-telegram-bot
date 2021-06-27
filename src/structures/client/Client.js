@@ -12,7 +12,9 @@ class Client extends Telegraf {
   constructor (token, ...args) {
     super(token, ...args);
     this.constants = {
-      dayInMs: 8.64e+7
+      dayInMs: 8.64e+7,
+      end2021: 1625011200000,
+      start2021: 1630454400000
     };
     this.owner = 408057291;
     this.ownerChatID = 408057291;
@@ -23,7 +25,7 @@ class Client extends Telegraf {
     this.manager = new (require('./managers/TimetableManager'))(this);
     this.userManager = new (require('./managers/UserManager'))(this);
     this.moment = function (date, format) {
-      const parsedDate = require('moment')(date);
+      const parsedDate = require('moment-timezone')(date);
       return parsedDate.format(format);
     };
     this.lastReload = Date.now();

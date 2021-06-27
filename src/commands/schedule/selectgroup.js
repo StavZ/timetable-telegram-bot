@@ -1,6 +1,7 @@
 const { Context } = require('telegraf');
 const Client = require('../../structures/client/Client');
 const Command = require('../../structures/client/Command');
+const moment = require('moment-timezone');
 
 class ChoiceGroupCommand extends Command {
   /**
@@ -24,6 +25,10 @@ class ChoiceGroupCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
+    const currentDate = moment().format('x');
+    if (currentDate > this.client.constants.end2021 && currentDate < this.client.constants.start2021) {
+      return ctx.replyWithMarkdown('Команда \`selectgroup\` отключена до следующего учебного года.');
+    }
     const parsed = this.parse((await this.client.parser.getGroups()));
     const keyboard = parsed.chunk(4);
     ctx.reply('Выберете одну группу из списка, чтобы получать её раписание:', { reply_markup: { inline_keyboard: keyboard } });

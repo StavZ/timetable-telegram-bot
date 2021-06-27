@@ -4,7 +4,8 @@ const { gunzip } = require('zlib');
 const Schedule = require('./Schedule');
 const Lesson = require('./Lesson');
 const Client = require('../client/Client');
-const moment = require('moment');
+const moment = require('moment-timezone');
+moment.tz.setDefault('Asia/Yekaterinburg');
 class Parser {
   /**
    * @param {Client} client

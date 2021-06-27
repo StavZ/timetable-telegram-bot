@@ -2,6 +2,7 @@
 const { Context } = require('telegraf');
 const Client = require('../../structures/client/Client');
 const Command = require('../../structures/client/Command');
+const moment = require('moment-timezone');
 
 class ScheduleCommand extends Command {
   /**
@@ -25,6 +26,10 @@ class ScheduleCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
+    const currentDate = moment().format('x');
+    if (currentDate > this.client.constants.end2021 && currentDate < this.client.constants.start2021) {
+      return ctx.replyWithMarkdown('Команда \`schedule\` отключена до следующего учебного года.');
+    }
     const user = await this.client.userManager.getUserSchema(ctx.from.id);
     if (!user || !user.group) {
       return this.client.commandHandler.getCommand('selectgroup').exec(ctx, []);
@@ -63,7 +68,7 @@ class ScheduleCommand extends Command {
       msg += `Расписание не найдено.`;
     }
     msg += `\n\`\`\`\n[Ссылка на сайт](${schedule.link})`;
-    const keyboard = this.parseKeyboard(schedules, (!userSchedule ? edit.key : userSchedule.date.regular));
+    const keyboard = this.parseKeyboard(schedules, (!userSchedule ? (edit ? edit.key : schedules[0].date.regular) : userSchedule.date.regular));
     keyboard.push([{ text: 'Отмена', callback_data: 'cancel' }]);
     if (edit) {
       this.client.telegram.editMessageText(ctx.chat.id, edit.message_id, edit.message_id, msg, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
