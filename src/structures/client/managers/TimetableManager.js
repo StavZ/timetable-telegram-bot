@@ -34,13 +34,12 @@ class ScheduleManager extends EventEmitter {
     if (!user || !user.group) return;
     const userSchedule = schedule.schedule.find((s) => s.group === user.group);
     const lastSentSchedule = user.lastSentSchedule ? new Schedule(user.lastSentSchedule) : null;
-
-    if ((userSchedule ? userSchedule.id : 0) > (lastSentSchedule ? lastSentSchedule.id : 0)) {
-      if (userSchedule) {
+    if (userSchedule) {
+      if ((userSchedule ? userSchedule.id : 0) > (lastSentSchedule ? lastSentSchedule.id : 0)) {
         return this.emit('newSchedule', schedule, userSchedule, user);
+      } else if (userSchedule.id === lastSentSchedule.id) {
+        this.isScheduleEdited(userSchedule, lastSentSchedule, user, schedule);
       }
-    } else if (userSchedule.id === lastSentSchedule.id) {
-      this.isScheduleEdited(userSchedule, lastSentSchedule, user, schedule);
     } else {
       return;
     }
