@@ -38,7 +38,7 @@ class ScheduleCommand extends Command {
     const schedules = await this.client.parser.getAvailableSchedules();
     const schedulesByKeys = this.schedulesByKeys(schedules);
 
-    this.client.action('cancel', (ctx) => {
+    this.client.action('cancel-schedule', (ctx) => {
       ctx.editMessageReplyMarkup({});
     });
     for (const key in schedulesByKeys) {
@@ -69,7 +69,7 @@ class ScheduleCommand extends Command {
     }
     msg += `\n\`\`\`\n[Ссылка на сайт](${schedule.link})`;
     const keyboard = this.parseKeyboard(schedules, (!userSchedule ? (edit ? edit.key : schedules[0].date.regular) : userSchedule.date.regular));
-    keyboard.push([{ text: 'Отмена', callback_data: 'cancel' }]);
+    keyboard.push([{ text: 'Отмена', callback_data: 'cancel-schedule' }]);
     if (edit) {
       this.client.telegram.editMessageText(ctx.chat.id, edit.message_id, edit.message_id, msg, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
     } else {
