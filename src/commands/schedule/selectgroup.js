@@ -31,12 +31,17 @@ class ChoiceGroupCommand extends Command {
     }
     const parsed = this.parse((await this.client.parser.getGroups()));
     const keyboard = parsed.chunk(4);
+    keyboard.push([{ text: 'Отмена', callback_data: 'cancel' }]);
     ctx.reply('Выберете одну группу из списка, чтобы получать её раписание:', { reply_markup: { inline_keyboard: keyboard } });
     parsed.forEach((e) => {
       this.client.action(e.callback_data, (ctx) => {
         this.client.userManager.setGroup(ctx.from.id, e.text);
         ctx.editMessageText(`Вы выбрали группу \`${e.text}\`.\n\n\`${this.client.prefix}schedule\` - Раcписание группы.`, { parse_mode: 'Markdown' });
       });
+    });
+    this.client.action('cancel', (ctx) => {
+      ctx.editMessageReplyMarkup({});
+      ctx.editMessageText('Выбор группы был отменен.');
     });
   }
 
