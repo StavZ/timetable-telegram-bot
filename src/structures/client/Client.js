@@ -13,7 +13,7 @@ class Client extends Telegraf {
     super(token, ...args);
     this.constants = {
       dayInMs: 8.64e+7,
-      end2021: 1625011200000,
+      end2021: 1625270400000,
       start2021: 1630454400000
     };
     this.owner = 408057291;
