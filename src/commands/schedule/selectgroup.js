@@ -25,10 +25,7 @@ class ChoiceGroupCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    const currentDate = moment().format('x');
-    if (currentDate > this.client.constants.end2021 && currentDate < this.client.constants.start2021) {
-      return ctx.replyWithMarkdown('Команда \`selectgroup\` отключена до следующего учебного года.');
-    }
+    if (this.client.summerHolidays()) return ctx.replyWithMarkdown('Команда \`selectgroup\` отключена до следующего учебного года.');
     const parsed = this.parse((await this.client.parser.getGroups()));
     const keyboard = parsed.chunk(4);
     keyboard.push([{ text: 'Отмена', callback_data: 'cancel-select-group' }]);

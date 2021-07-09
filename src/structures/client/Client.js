@@ -16,6 +16,10 @@ class Client extends Telegraf {
       end2021: 1625270400000,
       start2021: 1630454400000
     };
+    /**
+     * @type {Record<string,array<{content:string,important:boolean}>}
+     */
+    this.changelog = require('../../../changelogs.json');
     this.owner = 408057291;
     this.ownerChatID = 408057291;
     this.commandHandler = new CommandHandler(this);
@@ -27,6 +31,13 @@ class Client extends Telegraf {
     this.moment = function (date, format) {
       const parsedDate = require('moment-timezone')(date);
       return parsedDate.format(format);
+    };
+    /**
+     * @returns {boolean}
+     */
+    this.summerHolidays = function () {
+      const currentDate = moment().format('x');
+      return currentDate > this.constants.end2021 && currentDate < this.constants.start2021;
     };
     this.lastReload = Date.now();
   }
@@ -41,7 +52,9 @@ class Client extends Telegraf {
 
   async run () {
     this.commandHandler.load();
-    await this.manager.run();
+    if (!this.summerHolidays()) {
+      await this.manager.run();
+    }
     this.launch({ allowedUpdates: true }).then(() => {
       this.logger.success(`Logged in as @${this.botInfo.username}`);
     });
@@ -51,39 +64,40 @@ class Client extends Telegraf {
       this.logger.error(e);
     });
 
-
-    this.manager.on('newSchedule', (schedule, userSchedule, user) => {
-      let msg = `Новое расписание на ${schedule.date.regular}\nГруппа: ${user.group}\n\`\`\`\n`;
-      if (!userSchedule) return;
-      for (const l of userSchedule.schedule) {
-        msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
-        if (l.error && msg.includes(l.error)) break;
-      }
-      msg += `\n\`\`\`[Ссылка на сайт](${schedule.link})`;
-      if (user.chatId) {
-        this.telegram.sendMessage(user.chatId, msg, { parse_mode: 'Markdown' }).then((r) => {
-          this.userManager.updateUserSchema(user.id, 'lastSentSchedule', userSchedule);
-        }).catch((e) => {
-          this.userManager.updateUserSchema(user.id, 'lastSentSchedule', null);
-        });
-      }
-    });
-    this.manager.on('editedSchedule', (schedule, userSchedule, user) => {
-      let msg = `Обновленное расписание на ${schedule.date.regular}\nГруппа: ${user.group}\n\`\`\`\n`;
-      if (!userSchedule) return;
-      for (const l of userSchedule.schedule) {
-        msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
-        if (l.error && msg.includes(l.error)) break;
-      }
-      msg += `\n\`\`\`[Ссылка на сайт](${schedule.link})`;
-      if (user.chatId) {
-        this.telegram.sendMessage(user.chatId, msg, { parse_mode: 'Markdown' }).then((r) => {
-          this.userManager.updateUserSchema(user.id, 'lastSentSchedule', userSchedule);
-        }).catch((e) => {
-          this.userManager.updateUserSchema(user.id, 'lastSentSchedule', null);
-        });
-      }
-    });
+    if (process.env.NODE_ENV === 'production') {
+      this.manager.on('newSchedule', (schedule, userSchedule, user) => {
+        let msg = `Новое расписание на ${schedule.date.regular}\nГруппа: ${user.group}\n\`\`\`\n`;
+        if (!userSchedule) return;
+        for (const l of userSchedule.schedule) {
+          msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
+          if (l.error && msg.includes(l.error)) break;
+        }
+        msg += `\n\`\`\`[Ссылка на сайт](${schedule.link})`;
+        if (user.chatId) {
+          this.telegram.sendMessage(user.chatId, msg, { parse_mode: 'Markdown' }).then((r) => {
+            this.userManager.updateUserSchema(user.id, 'lastSentSchedule', userSchedule);
+          }).catch((e) => {
+            this.userManager.updateUserSchema(user.id, 'lastSentSchedule', null);
+          });
+        }
+      });
+      this.manager.on('editedSchedule', (schedule, userSchedule, user) => {
+        let msg = `Обновленное расписание на ${schedule.date.regular}\nГруппа: ${user.group}\n\`\`\`\n`;
+        if (!userSchedule) return;
+        for (const l of userSchedule.schedule) {
+          msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
+          if (l.error && msg.includes(l.error)) break;
+        }
+        msg += `\n\`\`\`[Ссылка на сайт](${schedule.link})`;
+        if (user.chatId) {
+          this.telegram.sendMessage(user.chatId, msg, { parse_mode: 'Markdown' }).then((r) => {
+            this.userManager.updateUserSchema(user.id, 'lastSentSchedule', userSchedule);
+          }).catch((e) => {
+            this.userManager.updateUserSchema(user.id, 'lastSentSchedule', null);
+          });
+        }
+      });
+    }
   }
 }
 module.exports = Client;

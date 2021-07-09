@@ -1,0 +1,30 @@
+{
+  "2.0.0": {
+    "changelog": [
+      {
+        "content": "Добавлена автоматическая рассылка раписания",
+        "important": true
+      },
+      {
+        "content": "Добавлена поддержка нескольких расписаний с помощью inline-keyboard.",
+        "important": false
+      },
+      {
+        "content": "Команда schedule (расписание) была переработана и работает быстрее.",
+        "important": false
+      },
+      {
+        "content": "Добавлена команда bells (звонки) - расписание звонков.",
+        "important": false
+      },
+      {
+        "content": "Добавлена команда changelog (список-изменений) - список изменений.",
+        "important": false
+      },
+      {
+        "content": "Команды schedule (расписание) и selectgroup (выбрать-группу) будут отключаться на время летних каникул.",
+        "important": false
+      }
+    ]
+  }
+}

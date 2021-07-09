@@ -26,10 +26,7 @@ class ScheduleCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    const currentDate = moment().format('x');
-    if (currentDate > this.client.constants.end2021 && currentDate < this.client.constants.start2021) {
-      return ctx.replyWithMarkdown('Команда \`schedule\` отключена до следующего учебного года.');
-    }
+    if (this.client.summerHolidays()) return ctx.replyWithMarkdown('Команда \`schedule\` отключена до следующего учебного года.');
     const user = await this.client.userManager.getUserSchema(ctx.from.id);
     if (!user || !user.group) {
       return this.client.commandHandler.getCommand('selectgroup').exec(ctx, []);
