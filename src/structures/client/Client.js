@@ -14,7 +14,7 @@ class Client extends Telegraf {
     this.constants = {
       dayInMs: 8.64e+7,
       end2021: 1625270400000,
-      start2021: 1630454400000
+      start2021: 1630411200000
     };
     /**
      * @type {Record<string,array<{content:string,important:boolean}>}
