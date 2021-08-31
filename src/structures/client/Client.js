@@ -36,8 +36,9 @@ class Client extends Telegraf {
      * @returns {boolean}
      */
     this.summerHolidays = function () {
-      const currentDate = moment().format('x');
-      return currentDate > this.constants.end2021 && currentDate < this.constants.start2021;
+      // const currentDate = moment().format('x');
+      // return currentDate > this.constants.end2021 && currentDate < this.constants.start2021;
+      return false;
     };
     this.lastReload = Date.now();
   }
