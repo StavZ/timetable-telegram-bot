@@ -1,14 +1,18 @@
 /* eslint-disable no-console */
 require('dotenv').config();
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'development';
+}
+console.log(process.env.NODE_ENV);
 const Client = require('./src/structures/client/Client');
-const client = new Client(process.env.NODE_ENV === 'production' ? process.env.DEV_TOKEN : process.env.TOKEN);
+const client = new Client(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
 
 client.run();
 
 process.once('SIGINT', () => client.stop('SIGINT'));
 process.once('SIGTERM', () => client.stop('SIGTERM'));
 
-client.prefix = process.env.NODE_ENV === 'production' ? '.' : '/';
+client.prefix = process.env.NODE_ENV === 'development' ? '.' : '/';
 
 client.on('message', (ctx) => {
   if (!ctx.message.text.startsWith(client.prefix)) return;
