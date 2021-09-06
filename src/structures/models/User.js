@@ -3,7 +3,7 @@ const { Schema, model } = require('mongoose');
 const User = new Schema({
   id: Number,
   newsletter: Boolean,
-  autoScheduler: { type: Boolean, default: false },
+  autoScheduler: { type: Boolean, default: true },
   lastSentSchedule: { type: Schema.Types.Mixed, default: null },
   lastSupportMessage: { type: Number, default: null },
   teacher: { type: String, default: null },
