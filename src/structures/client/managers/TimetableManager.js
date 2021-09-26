@@ -88,9 +88,9 @@ export default class TimetableManager extends EventEmitter {
   runChecker () {
     setInterval(async () => {
       if (!this.cache.schedules) return;
-      let users = await this.client.userManager.getUsers({ id: 408057291 });
+      let users = await this.client.userManager.getUsers({ autoScheduler: true });
       users.filter(u => u.group !== null).forEach((u) => {
-        this.isScheduleNew(u, this.cache.schedules[0]);
+        this.isScheduleNew(u.toObject(), this.cache.schedules[0]);
       });
     }, 10000);
   }
