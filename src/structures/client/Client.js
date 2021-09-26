@@ -76,7 +76,7 @@ export default class Client extends Telegraf {
         msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
         if (lesson.error && msg.includes(lesson.error)) break;
       }
-      msg += `\n\`\`\`\nНачало: \`${this.constants.bells[schedule.lessons[0].number] ? this.constants.bells[schedule.lessons[0].number].start : 'нет данных'}\`\nКонец: \`${this.constants.bells[schedule.lessons[schedule.lessons.length - 1].number] ? this.constants.bells[schedule.lessons[schedule.lessons.length - 1].number].end : 'нет данных'}\`\n[Ссылка на сайт](${schedule.url})`;
+      msg += `\n\`\`\`${this.client.generateBells(schedule) ? `\n${this.client.generateBells(schedule)}` : ''}\n[Ссылка на сайт](${schedule.url})`;
 
       this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
@@ -88,7 +88,7 @@ export default class Client extends Telegraf {
         msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
         if (lesson.error && msg.includes(lesson.error)) break;
       }
-      msg += `\n\`\`\`\nНачало: \`${this.constants.bells[schedule.lessons[0].number] ? this.constants.bells[schedule.lessons[0].number].start : 'нет данных'}\`\nКонец: \`${this.constants.bells[schedule.lessons[schedule.lessons.length - 1].number] ? this.constants.bells[schedule.lessons[schedule.lessons.length - 1].number].end : 'нет данных'}\`\n[Ссылка на сайт](${schedule.url})`;
+      msg += `\n\`\`\`${this.generateBells(schedule) ? `\n${this.generateBells(schedule)}` : ''}\n[Ссылка на сайт](${schedule.url})`;
 
       this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
