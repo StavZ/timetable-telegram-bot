@@ -1,8 +1,6 @@
-
-class Command {
+export default class Command {
   /**
-   * @param {string} id
-   * @param {ClientOptions} options
+   * @param {CommandOptions} options
    */
   constructor (options = {
     name: '',
@@ -19,17 +17,19 @@ class Command {
     this.category = options.category;
     this.description = options.description;
     this.usage = options.usage;
-    this.ownerOnly = typeof options.ownerOnly === 'boolean' ? options.ownerOnly : false;
+    this.ownerOnly = Boolean(options.ownerOnly);
     this.path = options.path;
-    this.includeInHelp = typeof options.includeInHelp === 'boolean' ? options.includeInHelp : true;
+    this.includeInHelp = Boolean(options.includeInHelp);
   }
 }
-module.exports = Command;
 
 /**
- * @typedef {object} ClientOptions
+ * @typedef {object} CommandOptions
  * @prop {string} name
  * @prop {string[]} aliases
  * @prop {string} category
  * @prop {boolean} ownerOnly
+ * @prop {boolean} includeInHelp
+ * @prop {string} description
+ * @prop {string} usage
  */

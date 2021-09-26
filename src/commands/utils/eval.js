@@ -1,9 +1,12 @@
-const { Context } = require('telegraf');
-const Client = require('../../structures/client/Client');
-const Command = require('../../structures/client/Command');
-const { inspect } = require('util');
+import { Context } from 'telegraf';
+import Client from '../../structures/client/Client.js';
+import Command from '../../structures/client/Command.js';
+import { inspect } from 'util';
+import { config } from 'dotenv';
+import moment from 'moment-timezone';
+import { Worker } from 'worker_threads';
 
-class EvalCommand extends Command {
+export default class EvalCommand extends Command {
   /**
    * @param {Client} client
    */
@@ -13,9 +16,10 @@ class EvalCommand extends Command {
       aliases: [],
       category: 'utils',
       ownerOnly: true,
-      description: 'Eval command',
+      description: 'Запускает код JS.',
       includeInHelp: false,
-      path: __filename
+      usage: 'eval [код]',
+      path: import.meta.url
     });
     this.client = client;
   }
@@ -34,10 +38,10 @@ class EvalCommand extends Command {
     } catch (e) {
       result = e;
     }
+
     // eslint-disable-next-line camelcase
-    const o_o = RegExp(`${process.env.TOKEN}|${process.env.MONGOURI}|${process.env.DEV_TOKEN}`, 'gim');
-    result = inspect(result, { depth: 1 }).replace(o_o, '[👀]') + '';
+    const o_o = RegExp(`${process.env.TOKEN}${process.env.DEV_TOKEN ? `|${process.env.DEV_TOKEN}` : ''}|${process.env.MONGODB_PASS}|${process.env.MONGODB_USER}`, 'gim');
+    result = inspect(result, { depth: 1 }).replace(o_o, '[•••]') + '';
     ctx.replyWithMarkdown(`\`\`\`js\n${result.length > 4000 ? result.slice(0, 4000) : result}\n\`\`\``);
   }
 }
-module.exports = EvalCommand;

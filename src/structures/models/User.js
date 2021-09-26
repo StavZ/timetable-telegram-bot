@@ -1,16 +1,13 @@
-const { Schema, model } = require('mongoose');
+import mongoose from 'mongoose';
+const { model, Schema } = mongoose;
 
 const User = new Schema({
   id: Number,
-  newsletter: Boolean,
   autoScheduler: { type: Boolean, default: true },
-  lastSentSchedule: { type: Schema.Types.Mixed, default: null },
-  lastSupportMessage: { type: Number, default: null },
+  sentSchedule: { type: Schema.Types.Mixed, default: null },
+  supportMessages: { type: Array, default: null },
   teacher: { type: String, default: null },
   group: { type: String, default: null },
   role: { type: String, default: null },
-  messageFormat: { type: String, default: null },
-  notionDatabaseId: { type: String, default: null },
-  chatId: { type: Number, default: null }
 });
-module.exports = model('user', User);
+export default model('user', User);

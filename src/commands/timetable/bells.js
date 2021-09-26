@@ -1,20 +1,21 @@
-const { Context } = require('telegraf');
-const Client = require('../../structures/client/Client');
-const Command = require('../../structures/client/Command');
+import {Context} from 'telegraf';
+import Client from '../../structures/client/Client.js'
+import Command from '../../structures/client/Command.js'
 
-class BellsCommand extends Command {
+export default class BellsCommand extends Command {
   /**
    * @param {Client} client
    */
   constructor (client) {
     super({
-      name: 'звонки',
-      aliases: ['bells', 'расписание-звонков'],
-      category: 'schedule',
+      name: 'bells',
+      aliases: ['звонки', 'раcписание-звонков'],
+      category: 'timetable',
       ownerOnly: false,
-      description: 'Расписание звонков.',
+      description: 'Отправляет раписание звонков.',
+      usage: 'bells',
       includeInHelp: true,
-      path: __filename
+      path: import.meta.url
     });
     this.client = client;
   }
@@ -32,14 +33,12 @@ class BellsCommand extends Command {
       5: { start: '15:05', end: '16:25' },
       6: { start: '16:40', end: '18:00' }
     };
-    let msg = 'Расписание звонов\n\n```\n';
-    // eslint-disable-next-line guard-for-in
+    let msg = `Раcписание звонков\n\n\`\`\`\n`;
     for (const bellN in bells) {
       const bell = bells[bellN];
-      msg += `${bellN} пара | ${bell.start} - ${bell.end}\n`;
+      msg += `${bellN} пара | ${bell.start} - ${bell.end}\n`
     }
     msg += `\`\`\``;
-    ctx.replyWithMarkdown(msg);
+    ctx.replyWithMarkdownV2(msg);
   }
 }
-module.exports = BellsCommand;

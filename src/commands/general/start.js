@@ -1,19 +1,21 @@
-const { Context } = require('telegraf');
-const Client = require('../../structures/client/Client');
-const Command = require('../../structures/client/Command');
+import {Context} from 'telegraf';
+import Client from '../../structures/client/Client.js'
+import Command from '../../structures/client/Command.js'
 
-class StartCommand extends Command {
+export default class StartCommand extends Command {
   /**
    * @param {Client} client
    */
   constructor (client) {
     super({
       name: 'start',
-      aliases: ['старт'],
+      aliases: [],
       category: 'general',
       ownerOnly: false,
-      path: __filename,
-      includeInHelp: false
+      usage: 'start',
+      description: 'Стартовая команда бота.',
+      includeInHelp: false,
+      path: import.meta.url
     });
     this.client = client;
   }
@@ -23,16 +25,13 @@ class StartCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    const userSchema = await this.client.userManager.getUserSchema(ctx.from.id);
-    if (!userSchema) {
-      this.client.userManager.createUserSchema(ctx.from.id, ctx.chat.id);
+    const user = await this.client.userManager.getUser(ctx.from.id);
+
+    if (user) {
+      ctx.replyWithMarkdown(`Привет!\n\nЯ нашел твой профиль, настройки все сохранились!\nID: \`${user.id}\`\nВыбранная группа: \`${user.group}\`\nАвтоматическая рассылка: ${user.autoScheduler ? 'включена' : 'выключена'}`)
     } else {
-      if (!userSchema.chatId) {
-        this.client.userManager.updateUserSchema(ctx.from.id, 'chatId', ctx.chat.id);
-      }
+      this.client.userManager.createUser(ctx.from.id);
+      ctx.replyWithMarkdown(`Привет!\n\nМоя главная функция - это *автоматическая рассылка расписания* студентам колледжа ППК им. Н.Г. Славянова.\`*\`\n\nЧтобы выбрать группу /selectgroup.\n\nОзнакомится со всеми командами /help.\n\n\`*\`_Автоматическая рассылка включается по-умолчанию, когда Вы выбираете свою группу.\nЧтобы её отключить - _/autoscheduler.`);
     }
-    ctx.replyWithMarkdown('Моя главная функция:\nАвтоматическая рассылка расписания студентам колледжа.\nВ будущем будет добавлена автоматическая рассылка расписания преподавателям колледжа.\n\nМои основные команды:\n\`/selectgroup\` - Позволяет выбрать группу, чтобы в дальнейшем получать её расписание.\n\`/рассылка\` - Включить/выключить автоматическую рассылку расписания.\n\`/schedule\` - Отправляет текущее раcписание выбранной группы с сайта колледжа.\n\`/bells\` - Отправляет расписание звонков.\n\nБольше информации вы найдете с помощью \`/help\`.');
-    // this.client.commandHandler.getCommand('help').exec(ctx, []);
   }
 }
-module.exports = StartCommand;

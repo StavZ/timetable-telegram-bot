@@ -1,25 +1,30 @@
-/* eslint-disable no-console */
-require('dotenv').config();
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development';
 }
-console.log(process.env.NODE_ENV);
-const Client = require('./src/structures/client/Client');
-const client = new Client(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
 
+/**
+ * Timezone
+ */
+import moment from 'moment-timezone';
+moment.tz.setDefault(process.env.TZ);
+
+import Client from './src/structures/client/Client.js';
+const client = new Client(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
 client.run();
+client.prefix = '/';
 
 process.once('SIGINT', () => client.stop('SIGINT'));
 process.once('SIGTERM', () => client.stop('SIGTERM'));
 
-client.prefix = process.env.NODE_ENV === 'development' ? '.' : '/';
-
 client.on('message', (ctx) => {
   if (!ctx.message.text.startsWith(client.prefix)) return;
   if (ctx.from.is_bot) return;
-  client.logger.info(`[${ctx.from.id}] ${ctx.from.username} > ${ctx.message.text}`);
+  client.logger.info(`[${ctx.from.id}] ${ctx.from.username ? ctx.from.username : ctx.from.first_name} > ${ctx.message.text}`);
 
-  const args = ctx.message.text.slice('/'.length).trim().split(/ +/g);
+  const args = ctx.message.text.slice(client.prefix.length).trim().split(/ +/g);
   const command = args.shift();
 
   let cmd;

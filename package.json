@@ -1,35 +1,31 @@
 {
   "dependencies": {
-    "@discordjs/collection": "^0.1.6",
-    "@notionhq/client": "^0.1.9",
-    "@types/dotenv": "^8.2.0",
-    "chalk": "^4.1.0",
+    "@discordjs/collection": "^0.2.1",
     "consola": "^2.15.3",
-    "dotenv": "^8.2.0",
-    "jsdom": "^16.4.0",
-    "moment": "^2.29.1",
+    "dotenv": "^10.0.0",
+    "events": "^3.3.0",
+    "jsdom": "^17.0.0",
     "moment-timezone": "^0.5.33",
-    "mongoose": "^5.11.15",
-    "node-fetch": "^2.6.1",
+    "mongoose": "^6.0.4",
+    "node-fetch": "^3.0.0",
     "path": "^0.12.7",
-    "telegraf": "^4.0.3",
-    "walk": "^2.3.14",
-    "zlib": "^1.0.5"
+    "telegraf": "^4.4.1",
+    "walk": "^2.3.14"
   },
-  "name": "timetable-telegram-bot",
-  "version": "2.0.0",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node index",
-    "start": "node index",
-    "run": "npm run start --production"
+    "start": "node --trace-warnings index.js",
+    "production": "npm run start --production",
+    "dev": "yarn start"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "eslint-config-google": "^0.14.0"
+  "type": "module",
+  "license": "MIT",
+  "name": "timetable-telegram-bot",
+  "version": "3.0.0",
+  "engines": {
+    "node": "14.x",
+    "yarn": "1.x"
+  },
+  "cjs": {
+    "cache": true
   }
 }

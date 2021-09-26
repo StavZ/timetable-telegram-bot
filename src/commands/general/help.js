@@ -1,21 +1,21 @@
-const { Context } = require('telegraf');
-const { command } = require('../../structures/client/Client');
-const Client = require('../../structures/client/Client');
-const Command = require('../../structures/client/Command');
+import {Context} from 'telegraf';
+import Client from '../../structures/client/Client.js'
+import Command from '../../structures/client/Command.js'
 
-class HelpCommand extends Command {
+export default class HelpCommand extends Command {
   /**
    * @param {Client} client
    */
   constructor (client) {
     super({
-      name: 'помощь',
-      aliases: ['help'],
+      name: 'help',
+      aliases: ['помощь'],
       category: 'general',
-      description: 'Отправляет список команд или показывает информацию об указанной команде.',
-      usage: 'помощь [команда]',
       ownerOnly: false,
-      path: __filename
+      description: 'Список команд бота.',
+      includeInHelp: true,
+      usage: 'помощь [команда]',
+      path: import.meta.url
     });
     this.client = client;
   }
@@ -28,16 +28,14 @@ class HelpCommand extends Command {
     if (!args.length) {
       const commands = this.client.commandHandler.commands;
       let msg = `Список команд @ppkslavyanovabot\n\n`;
-      commands.filter((c) => c.includeInHelp).forEach((c) => {
-        msg += `\`- ${this.client.prefix}${c.name}\` - ${c.description}\n`;
-      });
+      commands.filter((c) => c.includeInHelp).forEach((command) => {
+        msg += `- ${this.client.prefix}${command.name} - ${command.description}\n`
+      })
       return ctx.replyWithMarkdown(msg);
     }
     if (this.client.commandHandler.hasCommand(args[0])) {
       const command = this.client.commandHandler.getCommand(args[0]);
-      if (command.ownerOnly) return;
-      return ctx.replyWithMarkdown(`Команда: \`${this.client.prefix}${command.name}\`\nОписание: \`${command.description}\`\nИспользование: \`${this.client.prefix}${command.usage}\`${command.aliases.length ? `\nСокращени${command.aliases.length > 1 ? 'я' : 'е'}: ${command.aliases.map((a) => `\`${this.client.prefix}${a}\``).join(' | ')}` : ``}`);
+      return ctx.replyWithMarkdown(`Команда: ${this.client.prefix}${command.name}\nОписание: ${command.description}\nИспользование: ${this.client.prefix}${command.usage}${command.aliases.length ? `\nСокращени${command.aliases.length > 1 ? 'я' : 'е'}: ${command.aliases.map((a) => `${this.client.prefix}${a}`).join(' | ')}` : ``}`)
     }
   }
 }
-module.exports = HelpCommand;

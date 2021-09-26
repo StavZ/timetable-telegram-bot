@@ -1,20 +1,23 @@
-const { Context } = require('telegraf');
-const Client = require('../../structures/client/Client');
-const Command = require('../../structures/client/Command');
+import { Context } from 'telegraf';
+import Client from '../../structures/client/Client.js';
+import Command from '../../structures/client/Command.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
-class InformationCommand extends Command {
+export default class InformationCommand extends Command {
   /**
    * @param {Client} client
    */
   constructor (client) {
     super({
-      name: 'информация',
-      aliases: ['о-боте', 'about'],
+      name: 'information',
+      aliases: ['информация', 'инфо', 'info', 'about'],
       category: 'general',
       ownerOnly: false,
-      description: 'Информация о боте.',
+      description: 'Информация и статистика бота.',
       includeInHelp: true,
-      path: __filename
+      usage: 'информация',
+      path: import.meta.url
     });
     this.client = client;
   }
@@ -24,7 +27,8 @@ class InformationCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    ctx.replyWithMarkdown(`Версия: \`v${require('../../../package.json').version}\`\nРазработчик: [ВК](https://vk.com/stavzdev) | @StavZDev\nИсходный код: [GitHub](https://github.com/StavZ/timetable-telegram-bot)`, { disable_web_page_preview: true });
+    const version = require('../../../package.json').version;
+    const userCount = await this.client.userManager.getUserCount();
+    ctx.replyWithMarkdown(`Версия: \`v${version}\`\nКоличество пользователей: \`${userCount}\`\n\nРазработчик: [VK](https://vk.com/stavzdev) | [TG](https://t.me/stavzdev)\nИсходный код: [GitHub](https://github.com/StavZ)`, { disable_web_page_preview: true, reply_markup: { inline_keyboard: [[{ text: 'VK', url: 'https://vk.com/stavzdev' }, { text: 'TG', url: 'https://t.me/stavzdev'}], [{text: 'GitHub', url: 'https://github.com/StavZ/timetable-telegram-bot'}]] } });
   }
 }
-module.exports = InformationCommand;

@@ -1,12 +1,13 @@
-/* eslint-disable prefer-promise-reject-errors */
-const walk = require('walk');
-const { resolve } = require('path');
-const Command = require('./Command');
-const Collection = require('./Collection');
+import { Collection } from "@discordjs/collection";
+import path, { resolve } from "path";
+import { walk } from "walk";
+import { createRequire } from 'module';
+import Client from "./Client.js";
+import Command from "./Command.js";
 
-class CommandHandler {
+export default class CommandHandler {
   /**
-   * @param {Client} client
+   * @param {Client} client 
    */
   constructor (client) {
     this.client = client;
@@ -15,41 +16,44 @@ class CommandHandler {
   }
 
   load () {
-    const walker = walk.walk('./src/commands');
-    walker.on('file', (root, stats, next) => {
+    const walker = walk('./src/commands');
+    walker.on('file', async (root, stats, next) => {
       if (!stats.name.endsWith('.js')) return;
-      const Command = require(`${resolve(root)}/${stats.name}`);
-      const command = new Command(this.client);
-      command.aliases.forEach((r) => {
-        this.aliases.set(r, command.name);
+      const Command = await import(`file://${resolve(root)}/${stats.name}`);
+      const command = new Command.default(this.client);
+      command.aliases.forEach((a) => {
+        this.aliases.set(a, command.name);
       });
       this.commands.set(command.name, command);
       next();
     });
   }
+
   /**
    * @param {string} command
-   * @returns {Command}
+   * @returns {Promise<boolean|Command>}
    */
   reload (input) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const command = this.getCommand(input);
       if (!command) return reject(false);
+      var commandCache = command;
       try {
-        delete require.cache[command.path];
-        const cmd = new (require(command.path))(this.client);
+        this.deleteCache(command);
+        const cmd = new ((await (import(commandCache.path))).default)(this.client)
         this.commands.delete(cmd.name);
         this.aliases.forEach((cmda, alias) => {
-          if (cmda.name == command.name) this.aliases.delete(alias);
+          if (cmda.name === cmd.name) this.aliases.delete(alias);
         });
-        this.commands.set(command.name, cmd);
+        this.commands.set(cmd.name, cmd);
         cmd.aliases.forEach((alias) => {
           this.aliases.set(alias, cmd.name);
         });
-        this.client.logger.success(`Command ${command.name} reloaded!`);
+        this.client.logger.success(`Command ${cmd.name} reloaded!`);
+        commandCache = null;
         resolve(cmd);
       } catch (e) {
-        this.client.logger.info(`Failed to reload \`${command.name}\` command...`);
+        this.client.logger.info(`Failed to reload ${commandCache.name}`);
         this.client.logger.error(e);
         reject(e);
       }
@@ -57,7 +61,17 @@ class CommandHandler {
   }
 
   /**
+   * @param {Command} command
+   */
+  deleteCache (command) {
+    const require = createRequire(import.meta.url);
+    const modulePath = path.resolve(command.path);
+    delete require.cache[modulePath];
+  }
+
+  /**
    * @param {string} command
+   * @returns {Command}
    */
   getCommand (command) {
     if (this.commands.has(command)) {
@@ -73,8 +87,7 @@ class CommandHandler {
    * @param {string} command
    * @returns {boolean}
    */
-  hasCommand(command) {
+  hasCommand (command) {
     return this.commands.has(command) || this.aliases.has(command);
   }
 }
-module.exports = CommandHandler;

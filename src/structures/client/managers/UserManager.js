@@ -1,63 +1,101 @@
-const User = require('../../models/User');
+import consola from 'consola';
+const { Consola } = consola;
+import User from "../../models/User.js";
+import Schedule from '../../parser/Schedule.js';
 
-class UserManager {
-  constructor (client) {
-    this.client = client;
-  }
-  /**
- * @param {number} id
- * @param {string} group
- */
-  async setGroup (id, group) {
-    return this.updateUserSchema(id, 'group', group);
-  }
-
-  /**
-   * @param {number} id
-   * @param {boolean} bool
-   */
-  async enableNewsletter (id, bool) {
-    return this.updateUserSchema(id, 'newsletter', bool);
-  }
-
-  async getAllUsers (options) {
-    return await User.find(options);
+export default class UserManager {
+  constructor (logger) {
+    /**
+     * @type {Consola}
+     */
+    this.logger = logger;
   }
 
   /**
    * @param {number} id
+   * @param {string} group
+   * @returns {user}
    */
-  async createUserSchema (id, chatId) {
-    const newSchema = new User({
-      id: id,
-      selectedGroup: null,
+  setGroup (id, group) {
+    return this.updateUser(id, 'group', group);
+  }
+
+  /**
+   * @param {number} id
+   * @param {Schedule} schedule
+   * @returns {user}
+   */
+  setLastSentSchedule (id, schedule) {
+    return this.updateUser(id, 'sentSchedule', schedule);
+  }
+
+  /**
+   * @param {number} id
+   * @param {supportmessage} message 
+   */
+  async pushSupportMessage (id, message) {
+    const user = await User.findOne({ id });
+    user.supportMessages.push(message);
+    return user.save();
+  }
+
+  /**
+   * @param {number} id
+   */
+  createUser (id) {
+    new User({
+      id,
+      group: null,
       lastSentSchedule: {},
-      role: 'student',
-      chatId
-    });
-    return await newSchema.save();
+      role: 'student'
+    }).save();
   }
 
   /**
    * @param {number} id
-   * @returns {Promise<Object>}
+   * @param {string} name
+   * @param {any} value
+   * @returns {user}
    */
-  async getUserSchema (id) {
-    const schema = await User.findOne({ id: id });
-    if (!schema) {
-      return (await this.createUserSchema(id));
-    }
-    return schema;
+  async updateUser (id, name, value) {
+    // const schema = await User.updateOne({ id }, { [name]: value });
+    return User.updateOne({ id }, { [name]: value });
   }
 
   /**
    * @param {number} id
-   * @param {Object} data
+   * @returns {Promise<user>}
    */
-  async updateUserSchema (id, name, value) {
+  async getUser (id) {
     const schema = await User.findOne({ id });
-    schema[name] = value;
-    return schema.save();
+    return schema.toObject();
+  }
+
+  /**
+   * @param {any} options 
+   * @returns {Promise<user[]>}
+   */
+  async getUsers (options) {
+    const users = await User.find(options);
+    return users;
+  }
+
+  /**
+   * @returns {number}
+   */
+  async getUserCount () {
+    const users = await User.find({});
+    return users.length;
   }
 }
-module.exports = UserManager;
+/**
+ * @typedef {object} user
+ * @prop {number} id
+ * @prop {string} group
+ * @prop {boolean} autoScheduler
+ */
+/**
+ * @typedef {object} supportmessage
+ * @prop {number} date
+ * @prop {string} message
+ */

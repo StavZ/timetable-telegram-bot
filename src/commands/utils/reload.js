@@ -1,8 +1,8 @@
-const { Context } = require('telegraf');
-const Client = require('../../structures/client/Client');
-const Command = require('../../structures/client/Command');
+import {Context} from 'telegraf';
+import Client from '../../structures/client/Client.js'
+import Command from '../../structures/client/Command.js'
 
-class ReloadCommand extends Command {
+export default class ReloadCommand extends Command {
   /**
    * @param {Client} client
    */
@@ -12,8 +12,10 @@ class ReloadCommand extends Command {
       aliases: [],
       category: 'utils',
       ownerOnly: true,
-      path: __filename,
-      includeInHelp: false
+      description: 'Позволяет перезагрузить команду.',
+      includeInHelp: false,
+      usage: 'reload [команда]',
+      path: import.meta.url
     });
     this.client = client;
   }
@@ -32,4 +34,3 @@ class ReloadCommand extends Command {
     });
   }
 }
-module.exports = ReloadCommand;

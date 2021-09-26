@@ -1,4 +1,4 @@
-class Lesson {
+export default class Lesson {
   constructor (data) {
     /**
      * @type {string|null}
@@ -21,13 +21,12 @@ class Lesson {
      */
     this.number = data.lessonNumber;
     /**
-     * @type {string}
+     * @type {string|null}
      */
     this.address = data.address;
     /**
-     * @type {number}
+     * @type {number|string}
      */
     this.classroom = data.classroom;
   }
 }
-module.exports = Lesson;
