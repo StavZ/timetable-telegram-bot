@@ -92,7 +92,7 @@ export default class TimetableManager extends EventEmitter {
       users.filter(u => u.group !== null).forEach((u) => {
         this.isScheduleNew(u.toObject(), this.cache.schedules[0]);
       });
-    }, 10000);
+    }, 20000);
   }
 
   run () {
