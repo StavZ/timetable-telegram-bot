@@ -60,7 +60,7 @@ export default class Client extends Telegraf {
   generateBells (schedule) {
     const lessons = schedule.lessons.filter((s) => { return s.classroom !== 'Дистанционное обучение'; });
     if (!lessons.length) return null;
-    return `Начало: \`${this.constants.bells[lessons[0].number] ? this.constants.bells[lessons[0].number].start : 'нет данных'}\`\nКонец: \`${this.constants.bells[lessons[lessons.length - 1].number] ? this.constants.bells[lessons[lessons.length - 1].number].end : 'нет данных'}`;
+    return `Начало: \`${this.constants.bells[lessons[0].number] ? this.constants.bells[lessons[0].number].start : 'нет данных'}\`\nКонец: \`${this.constants.bells[lessons[lessons.length - 1].number] ? this.constants.bells[lessons[lessons.length - 1].number].end : 'нет данных'}\``;
   }
 
   run () {
