@@ -68,7 +68,7 @@ export default class UserManager {
    */
   async getUser (id) {
     const schema = await User.findOne({ id });
-    return schema.toObject();
+    return schema;
   }
 
   /**
