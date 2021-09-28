@@ -80,7 +80,9 @@ export default class Client extends Telegraf {
 
       this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
-      }).catch(this.logger.error);
+      }).catch(e => {
+        this.logger.error('user error ' + user.id)
+});
     });
     this.manager.on('editedSchedule', (user, schedule) => {
       let msg = `Изменения в расписании на ${schedule.date.toString()}\nГруппа: ${schedule.group}\n\`\`\`\n`;
@@ -92,12 +94,16 @@ export default class Client extends Telegraf {
 
       this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
-      }).catch(this.logger.error);
+      }).catch(e => {
+        this.logger.error('user error ' + user.id)
+});
     });
     this.manager.on('scheduleNotFound', (user, schedule) => {
       this.telegram.sendMessage(user.id, `Расписание на ${schedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\nРасписание не найдено.\n\`\`\``).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
-      }).catch(this.logger.error);
+      }).catch(e => {
+        this.logger.error('user error ' + user.id)
+});
     });
 
     this.launch({ allowedUpdates: true }).then(() => {
