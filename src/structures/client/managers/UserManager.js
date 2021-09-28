@@ -68,6 +68,7 @@ export default class UserManager {
    */
   async getUser (id) {
     const schema = await User.findOne({ id });
+    if (!schema) return null;
     return schema;
   }
 
