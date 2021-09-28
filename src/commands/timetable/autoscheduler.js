@@ -26,9 +26,6 @@ export default class AutoschedulerCommand extends Command {
    */
   async exec (ctx, args) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    if (!user.group && !user.autoScheduler) {
-      return ctx.replyWithMarkdown('Автоматическая рассылка не будет работать, пока вы не выбрали группу.\nВыберете группу с помощью команды `/selectgroup` и затем снова введите команду `/рассылка`.');
-    }
     const currentStatus = user.autoScheduler;
     this.client.userManager.updateUser(ctx.from.id, 'autoScheduler', !currentStatus);
     ctx.reply(`Автоматическая рассылка ${!currentStatus ? 'включена' : 'выключена'}.`);
