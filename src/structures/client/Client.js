@@ -1,7 +1,7 @@
 // prototypes
 import '../protorypes/Array.js';
 
-import { Context, Telegraf } from "telegraf";
+import { Context, Telegraf, TelegramError } from "telegraf";
 import mongoose from 'mongoose';
 import consola from 'consola';
 import Parser from "../parser/Parser.js";
@@ -81,8 +81,13 @@ export default class Client extends Telegraf {
       this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
       }).catch(e => {
-        this.logger.error('user error ' + user.id)
-});
+        if (e instanceof TelegramError) {
+          if (e.code === 403) {
+            this.userManager.setLastSentSchedule(user.id, null);
+            this.userManager.updateUser(user.id, 'autoScheduler', false);
+          }
+        }
+      });
     });
     this.manager.on('editedSchedule', (user, schedule) => {
       let msg = `Изменения в расписании на ${schedule.date.toString()}\nГруппа: ${schedule.group}\n\`\`\`\n`;
@@ -95,15 +100,25 @@ export default class Client extends Telegraf {
       this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
       }).catch(e => {
-        this.logger.error('user error ' + user.id)
-});
+        if (e instanceof TelegramError) {
+          if (e.code === 403) {
+            this.userManager.setLastSentSchedule(user.id, null);
+            this.userManager.updateUser(user.id, 'autoScheduler', false);
+          }
+        }
+      });
     });
     this.manager.on('scheduleNotFound', (user, schedule) => {
       this.telegram.sendMessage(user.id, `Расписание на ${schedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\nРасписание не найдено.\n\`\`\``).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
       }).catch(e => {
-        this.logger.error('user error ' + user.id)
-});
+        if (e instanceof TelegramError) {
+          if (e.code === 403) {
+            this.userManager.setLastSentSchedule(user.id, null);
+            this.userManager.updateUser(user.id, 'autoScheduler', false);
+          }
+        }
+      });
     });
 
     this.launch({ allowedUpdates: true }).then(() => {
