@@ -32,6 +32,7 @@ export default class SupportCommand extends Command {
     }
 
     const user = await this.client.userManager.getUser(ctx.from.id);
+    if (!user) await this.client.userManager.createUser(ctx.from.id);
     let messages = user.supportMessages;
     if (user.supportMessages.length) {
       let lastMessage = messages[messages.length - 1];
