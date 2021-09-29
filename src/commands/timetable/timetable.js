@@ -62,6 +62,7 @@ export default class ScheduleCommand extends Command {
    */
   async showUserSchedule (ctx, schedules, message_id = null, key = null) {
     const user = await this.client.userManager.getUser(ctx.from.id);
+    if (!user) await this.client.userManager.createUser(ctx.from.id);
     const keys = this.client.parser.getSchedulesKeys(schedules);
     let schedule;
     if (key) {
@@ -69,7 +70,9 @@ export default class ScheduleCommand extends Command {
     } else {
       schedule = schedules[0];
     }
-
+    if (!user.group) {
+      return ctx.replyWithMarkdown('Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.');
+    }
     const userSchedule = schedule.getLessonlistByGroup(user.group);
     if (!userSchedule.lessons.length) return `Расписание на ${userSchedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\nРасписание не найдено.\n\`\`\``;
     let msg = `Расписание на ${userSchedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\n`;
