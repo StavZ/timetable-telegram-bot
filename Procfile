@@ -1,1 +1,1 @@
-worker: yarn dev
+worker: yarn production
