@@ -27,6 +27,6 @@ export default class StartCommand extends Command {
   async exec (ctx, args) {
     const user = await this.client.userManager.getUser(ctx.from.id);
     if (!user) await this.client.userManager.createUser(ctx.from.id);
-    ctx.replyWithMarkdown(`Привет!\n\nМоя главная функция - это *автоматическая рассылка расписания* студентам колледжа ППК им. Н.Г. Славянова.\`*\`\n\nЧтобы выбрать группу /selectgroup.\n\nОзнакомится со всеми командами /help.\n\n\`*\`_Автоматическая рассылка включается по-умолчанию, когда Вы выбираете свою группу.\nЧтобы её отключить - _/autoscheduler.`);
+    ctx.replyWithMarkdown(`Привет!\n\nМоя главная функция - это *автоматическая рассылка расписания* студентам колледжа ППК им. Н.Г. Славянова.\`*\`\n\nЧтобы выбрать группу /selectgroup.\n\nОзнакомится со всеми командами /help.\nРазработчик: [VK](https://vk.com/stavzdev) | [TG](https://t.me/stavzdev)\n\n\`*\`_Автоматическая рассылка включается по-умолчанию, когда Вы выбираете свою группу.\nЧтобы её отключить - _/autoscheduler.`);
   }
 }

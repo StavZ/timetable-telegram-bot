@@ -28,7 +28,7 @@ export default class SupportCommand extends Command {
   async exec (ctx, args) {
     // 1.8e+6
     if (!args.length) {
-      return ctx.replyWithMarkdown(`Вы не указали тему обращения.\nПожалуйста, указывайте Ваш вопрос полностью!\nИспользование: /${this.name} \`[вопрос]\`.`);
+      return ctx.replyWithMarkdown(`Вы не указали тему обращения.\nПожалуйста, указывайте Ваш вопрос полностью!\nИспользование: /${this.name} \`[вопрос]\`.\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
     }
 
     const user = await this.client.userManager.getUser(ctx.from.id);
@@ -37,7 +37,7 @@ export default class SupportCommand extends Command {
     if (user.supportMessages.length) {
       let lastMessage = messages[messages.length - 1];
       if (Date.now() - lastMessage.date < 1.8e+6) {
-        return ctx.replyWithMarkdown(`Обращение в поддержку доступно каждые 30 минут.\nСледующее обращение \`${moment(lastMessage.date + 1.8e+6).format('DD/MM/YYYY HH:MM')}\`.`);
+        return ctx.replyWithMarkdown(`Обращение в поддержку доступно каждые 30 минут.\nСледующее обращение \`${moment(lastMessage.date + 1.8e+6).format('DD/MM/YYYY HH:MM')}\`.\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
       }
     }
 
