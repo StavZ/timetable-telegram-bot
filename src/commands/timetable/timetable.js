@@ -117,7 +117,7 @@ export default class ScheduleCommand extends Command {
     }
 
     const groupSchedule = schedule.getLessonlistByGroup(group);
-    let msg = `Расписание на ${groupSchedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\n`;
+    let msg = `Расписание на ${groupSchedule.date.toString()}\nГруппа: ${group}\n\`\`\`\n`;
     if (groupSchedule.lessons.length) {
       for (const l of groupSchedule.lessons) {
         msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
