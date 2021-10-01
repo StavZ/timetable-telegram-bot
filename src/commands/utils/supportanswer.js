@@ -39,9 +39,9 @@ export default class SupportAnswer extends Command {
 
     const message = user.supportMessages[messageID - 1];
 
-    ctx.reply(`Ответ отправлен пользователю ${user.id}.`).then(() => {
-      this.client.telegram.sendMessage(user.id, `Ответ разработчика на ваше обращение \`#${messageID}\`.\n\nВаш вопрос: ${message.message}\n\nОтвет разработчика: ${answer}`, { parse_mode: 'Markdown' });
-    });
+    this.client.telegram.sendMessage(user.id, `Ответ разработчика на ваше обращение \`#${messageID}\`.\n\nВаш вопрос: ${message.message}\n\nОтвет разработчика: ${answer}`, { parse_mode: 'Markdown' }).then((r) => {
+      ctx.reply(`Ответ отправлен пользователю ${user.id}.`);
+    }).catch(this.client.logger.error);
 
   }
 }
