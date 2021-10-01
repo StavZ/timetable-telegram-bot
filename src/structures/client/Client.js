@@ -72,14 +72,10 @@ export default class Client extends Telegraf {
   async sendMessageAsDeveloper (ctx, message, type = 'all', user = null) {
     switch (type) {
       case 'all': {
-        let result = 'Сообщения отправлены!\n';
         const users = await this.userManager.getUsers({ autoScheduler: true });
         users.forEach(async (u) => {
-          await this.telegram.sendMessage(u.id, `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`, { parse_mode: 'Markdown', disable_notification: true }).then((r) => {
-            result += `- ${r.chat.username ? r.chat.username : r.chat.first_name} [${r.chat.id}]\n`;
-          }).catch(this.logger.error);
+          await this.telegram.sendMessage(u.id, `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`, { parse_mode: 'Markdown', disable_notification: true }).catch(this.logger.error);
         });
-        ctx.replyWithMarkdown(result);
         break;
       }
     }
