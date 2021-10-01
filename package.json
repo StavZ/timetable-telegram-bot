@@ -20,7 +20,7 @@
   "type": "module",
   "license": "MIT",
   "name": "timetable-telegram-bot",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "engines": {
     "node": "14.x",
     "yarn": "1.x"
