@@ -16,6 +16,10 @@ export default class Parser {
       const html = await page.text();
       const jsdom = new JSDOM(html);
       const document = jsdom.window.document;
+      const trs = document.getElementsByTagName('tr');
+      for (let i = 0; i < trs.length; i++) {
+        trs.item(i).classList.replace('R64', 'R8')
+      }
       resolve(document);
     });
   }
