@@ -63,6 +63,28 @@ export default class Client extends Telegraf {
     return `Начало: \`${this.constants.bells[lessons[0].number] ? this.constants.bells[lessons[0].number].start : 'нет данных'}\`\nКонец: \`${this.constants.bells[lessons[lessons.length - 1].number] ? this.constants.bells[lessons[lessons.length - 1].number].end : 'нет данных'}\``;
   }
 
+  /**
+   * @param {Context} ctx
+   * @param {string} message
+   * @param {'all'|'user'} type
+   * @param {number|null} user 
+   */
+  async sendMessageAsDeveloper (ctx, message, type = 'all', user = null) {
+    switch (type) {
+      case 'all': {
+        let result = 'Сообщения отправлены!\n';
+        const users = await this.userManager.getUsers({ autoScheduler: true });
+        users.forEach(async (u) => {
+          await this.telegram.sendMessage(u.id, `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`, { parse_mode: 'Markdown', disable_notification: true }).then((r) => {
+            result += `- ${r.chat.username ? r.chat.username : r.chat.first_name} [${r.chat.id}]\n`;
+          }).catch(this.logger.error);
+        });
+        ctx.replyWithMarkdown(result);
+        break;
+      }
+    }
+  }
+
   run () {
     if (process.env.NODE_ENV === 'development') {
       this.logger.warn('Development Version');
@@ -72,11 +94,15 @@ export default class Client extends Telegraf {
 
     this.manager.on('newSchedule', (user, schedule) => {
       let msg = `Новое расписание на ${schedule.date.toString()}\nГруппа: ${schedule.group}\n\`\`\`\n`;
-      for (const lesson of schedule.lessons) {
-        msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
-        if (lesson.error && msg.includes(lesson.error)) break;
+      if (schedule.lessons.length) {
+        for (const lesson of schedule.lessons) {
+          msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
+          if (lesson.error && msg.includes(lesson.error)) break;
+        }
+        msg += `\n\`\`\`${this.generateBells(schedule) ? `\n${this.generateBells(schedule)}` : ''}\n[Ссылка на сайт](${schedule.url})`;
+      } else {
+        msg += `Расписание не найдено*\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
       }
-      msg += `\n\`\`\`${this.generateBells(schedule) ? `\n${this.generateBells(schedule)}` : ''}\n[Ссылка на сайт](${schedule.url})`;
 
       this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
@@ -89,27 +115,20 @@ export default class Client extends Telegraf {
         }
       });
     });
+
     this.manager.on('editedSchedule', (user, schedule) => {
       let msg = `Изменения в расписании на ${schedule.date.toString()}\nГруппа: ${schedule.group}\n\`\`\`\n`;
-      for (const lesson of schedule.lessons) {
-        msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
-        if (lesson.error && msg.includes(lesson.error)) break;
+      if (schedule.lessons.length) {
+        for (const lesson of schedule.lessons) {
+          msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
+          if (lesson.error && msg.includes(lesson.error)) break;
+        }
+        msg += `\n\`\`\`${this.generateBells(schedule) ? `\n${this.generateBells(schedule)}` : ''}\n[Ссылка на сайт](${schedule.url})`;
+      } else {
+        msg += `Расписание не найдено*\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
       }
-      msg += `\n\`\`\`${this.generateBells(schedule) ? `\n${this.generateBells(schedule)}` : ''}\n[Ссылка на сайт](${schedule.url})`;
 
       this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
-        this.userManager.setLastSentSchedule(user.id, schedule);
-      }).catch(e => {
-        if (e instanceof TelegramError) {
-          if (e.code === 403) {
-            this.userManager.setLastSentSchedule(user.id, null);
-            this.userManager.updateUser(user.id, 'autoScheduler', false);
-          }
-        }
-      });
-    });
-    this.manager.on('scheduleNotFound', (user, schedule) => {
-      this.telegram.sendMessage(user.id, `Расписание на ${schedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\nРасписание не найдено.\n\`\`\``).then((r) => {
         this.userManager.setLastSentSchedule(user.id, schedule);
       }).catch(e => {
         if (e instanceof TelegramError) {

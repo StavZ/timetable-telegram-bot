@@ -73,7 +73,6 @@ export default class TimetableManager extends EventEmitter {
      * @type {schedule|null}
      */
     const userSchedule = schedule.getLessonlistByGroup(user.group);
-    if (!userSchedule.lessons.length) return this.emit('scheduleNotFound', user, userSchedule);
     /**
      * @type {schedule|null}
      */
@@ -101,7 +100,7 @@ export default class TimetableManager extends EventEmitter {
       this.runCache();
       this.runChecker();
     } else {
-      this.client.logger.info('Start of timetable manager aborted due to development version!')
+      this.client.logger.info('Start of timetable manager aborted due to development version!');
     }
   }
 }

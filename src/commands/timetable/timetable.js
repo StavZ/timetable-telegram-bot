@@ -74,13 +74,16 @@ export default class ScheduleCommand extends Command {
       return ctx.replyWithMarkdown('Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.');
     }
     const userSchedule = schedule.getLessonlistByGroup(user.group);
-    if (!userSchedule.lessons.length) return `Расписание на ${userSchedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\nРасписание не найдено.\n\`\`\``;
     let msg = `Расписание на ${userSchedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\n`;
-    for (const l of userSchedule.lessons) {
-      msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
-      if (l.error && msg.includes(l.error)) break;
+    if (userSchedule.lessons.length) {
+      for (const l of userSchedule.lessons) {
+        msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
+        if (l.error && msg.includes(l.error)) break;
+      }
+      msg += `\`\`\`${this.client.generateBells(userSchedule) ? `\n${this.client.generateBells(userSchedule)}` : ''}\n\n[Ссылка на сайт](${userSchedule.url})`;
+    } else {
+      msg += `Расписание не найдено*\n\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`
     }
-    msg += `\`\`\`${this.client.generateBells(userSchedule) ? `\n${this.client.generateBells(userSchedule)}` : ''}\n\n[Ссылка на сайт](${userSchedule.url})`;
     const keyboard = this.parseKeyboard(schedules, key ? key : userSchedule.date.regular, null, 2);
     keyboard.push([{ text: 'Расписание другой группы', callback_data: 'switch-group' }]);
     keyboard.push([{ text: 'Убрать кнопки', callback_data: 'cancel-timetable' }]);
@@ -114,13 +117,16 @@ export default class ScheduleCommand extends Command {
     }
 
     const groupSchedule = schedule.getLessonlistByGroup(group);
-    if (!groupSchedule.lessons.length) return ctx.replyWithMarkdown(`Расписание на ${groupSchedule.date.toString()}\nГруппа: ${groupSchedule.group}\n\`\`\`\nРасписание не найдено.\n\`\`\``);
-    let msg = `Расписание на ${groupSchedule.date.toString()}\nГруппа: ${groupSchedule.group}\n\`\`\`\n`;
-    for (const l of groupSchedule.lessons) {
-      msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
-      if (l.error && msg.includes(l.error)) break;
+    let msg = `Расписание на ${groupSchedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\n`;
+    if (groupSchedule.lessons.length) {
+      for (const l of groupSchedule.lessons) {
+        msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
+        if (l.error && msg.includes(l.error)) break;
+      }
+      msg += `\`\`\`${this.client.generateBells(groupSchedule) ? `\n${this.client.generateBells(groupSchedule)}` : ''}\n\n[Ссылка на сайт](${groupSchedule.url})`;
+    } else {
+      msg += `Расписание не найдено*\n\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`
     }
-    msg += `\`\`\`${this.client.generateBells(groupSchedule) ? `\n${this.client.generateBells(groupSchedule)}` : ''}\n\n[Ссылка на сайт](${groupSchedule.url})`;
 
     const keyboard = this.parseKeyboard(schedules, key ? key : groupSchedule.date.regular, `-${group}`, 2);
     keyboard.push([{ text: 'Расписание другой группы', callback_data: 'switch-group' }]);
