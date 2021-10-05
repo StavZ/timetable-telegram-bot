@@ -21,8 +21,8 @@ export default class RemoteControlCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    if (!args.length) return ctx.reply('Использование: /remote [module] [type] [setting] [value]');
-    const module = args[0].toLowerCase();
+    if (!args.length || args.length < 2) return ctx.reply('Использование: /remote [module] [type] [setting] [value]');
+    const module = args[0];
     const moduleType = args[1].toLowerCase();
     const moduleSchema = await this.client.remoteControl.getModule(module, moduleType, false);
     if (!moduleSchema) return ctx.reply('Модуль не найден.');
