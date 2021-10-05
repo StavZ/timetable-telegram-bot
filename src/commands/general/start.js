@@ -13,11 +13,8 @@ export default class StartCommand extends Command {
       name: 'start',
       aliases: [],
       category: 'general',
-      ownerOnly: false,
       usage: 'start',
       description: 'Стартовая команда бота.',
-      includeInHelp: false,
-      path: import.meta.url
     });
     this.client = client;
   }

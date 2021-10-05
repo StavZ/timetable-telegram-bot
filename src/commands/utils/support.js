@@ -12,11 +12,8 @@ export default class SupportCommand extends Command {
       name: 'support',
       aliases: ['поддержка'],
       category: 'utils',
-      ownerOnly: false,
       description: 'Обращение в поддержку бота',
-      includeInHelp: true,
-      usage: 'поддержка [вопрос]',
-      path: import.meta.url
+      usage: 'поддержка [вопрос]'
     });
     this.client = client;
   }

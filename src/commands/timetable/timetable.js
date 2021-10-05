@@ -13,10 +13,7 @@ export default class ScheduleCommand extends Command {
       aliases: ['расписание', 'timetable'],
       usage: 'timetable',
       category: 'schedule',
-      ownerOnly: false,
-      description: 'Отправляет текущее расписание, размещенное на сайте.',
-      includeInHelp: true,
-      path: import.meta.url
+      description: 'Отправляет текущее расписание, размещенное на сайте.'
     });
     this.client = client;
   }
@@ -26,9 +23,7 @@ export default class ScheduleCommand extends Command {
    * @param {string[]} args 
    */
   async exec (ctx, args) {
-    const schedules = await this.client.parser.getAvailableSchedules();
-    // const keys = this.client.parser.getSchedulesKeys(schedules);
-
+    if (!this.client.manager.cache) return ctx.reply('В данный момент нет информации о расписании!\nПопробуйте повторить попытку через минуту.')
     this.client.action('cancel-timetable', (ctx) => {
       ctx.editMessageReplyMarkup({});
     });
@@ -40,18 +35,18 @@ export default class ScheduleCommand extends Command {
       keyboard.push([{ text: 'Отмена', callback_data: 'back-to-user-schedule' }]);
       ctx.editMessageText('Выберете группу из списка ниже, чтобы посмотреть расписание.\n_Это не поменяет Вашу группу для получения расписания по умолчанию._', { parse_mode: 'Markdown', reply_markup: { inline_keyboard: keyboard } });
       groups.forEach((group) => {
-        this.client.action(`${group}-schedule`, (ctx) => {
-          this.execGroup(ctx, group, schedules, ctx.update.callback_query.message.message_id);
+        this.client.action(`${group}-schedule`, async (ctx) => {
+          this.execGroup(ctx, this.client.manager.cache.schedules, group, ctx.update.callback_query.message.message_id);
         });
       });
     });
 
-    this.client.action('back-to-user-schedule', (ctx) => {
+    this.client.action('back-to-user-schedule', async (ctx) => {
       ctx.editMessageReplyMarkup({});
-      this.showUserSchedule(ctx, schedules, ctx.update.callback_query.message.message_id);
+      this.showUserSchedule(ctx, this.client.manager.cache.schedules, ctx.update.callback_query.message.message_id);
     });
 
-    this.showUserSchedule(ctx, schedules);
+    this.showUserSchedule(ctx, this.client.manager.cache.schedules);
   }
 
   /**
@@ -107,7 +102,7 @@ export default class ScheduleCommand extends Command {
    * @param {number|null} message_id 
    * @param {string|null} key 
    */
-  async execGroup (ctx, group, schedules, message_id = null, key = null) {
+  async execGroup (ctx, schedules, group, message_id = null, key = null) {
     const keys = this.client.parser.getSchedulesKeys(schedules);
     let schedule;
     if (key) {
@@ -140,7 +135,7 @@ export default class ScheduleCommand extends Command {
 
     for (const key in keys) {
       this.client.action(`${key}-${group}`, (ctx) => {
-        this.execGroup(ctx, group, schedules, ctx.update.callback_query.message.message_id, key);
+        this.execGroup(ctx, schedules, group, ctx.update.callback_query.message.message_id, key);
       });
     }
   }

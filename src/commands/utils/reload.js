@@ -11,11 +11,8 @@ export default class ReloadCommand extends Command {
       name: 'reload',
       aliases: [],
       category: 'utils',
-      ownerOnly: true,
       description: 'Позволяет перезагрузить команду.',
-      includeInHelp: false,
-      usage: 'reload [команда]',
-      path: import.meta.url
+      usage: 'reload [команда]'
     });
     this.client = client;
   }

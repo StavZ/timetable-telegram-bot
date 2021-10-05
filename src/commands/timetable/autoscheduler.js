@@ -12,10 +12,7 @@ export default class AutoschedulerCommand extends Command {
       aliases: ['рассылка'],
       category: 'timetable',
       usage: 'autoscheduler',
-      ownerOnly: false,
-      description: 'Включить/Выключить автоматическую рассылку расписания.',
-      includeInHelp: true,
-      path: import.meta.url
+      description: 'Включить/Выключить автоматическую рассылку расписания.'
     });
     this.client = client;
   }

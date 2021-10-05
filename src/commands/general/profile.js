@@ -11,11 +11,8 @@ export default class ProfileCommand extends Command {
       name: 'profile',
       aliases: ['профиль'],
       category: 'general',
-      ownerOnly: false,
       description: 'Ваш профиль.',
-      includeInHelp: true,
-      usage: 'profile',
-      path: import.meta.url
+      usage: 'profile'
     });
     this.client = client;
     this.roles = {

@@ -11,6 +11,8 @@ import User from '../models/User.js';
 import moment from 'moment-timezone';
 import TimetableManager from './managers/TimetableManager.js';
 import Lesson from '../parser/Lesson.js';
+import RemoteControlManager from './managers/RemoteControlManager.js';
+import { editedSchedule, newSchedule } from './managers/listeners.js';
 
 export default class Client extends Telegraf {
   constructor (token, ...args) {
@@ -22,6 +24,7 @@ export default class Client extends Telegraf {
     this.userManager = new UserManager(this.logger);
     this.commandHandler = new CommandHandler(this);
     this.manager = new TimetableManager(this);
+    this.remoteControl = new RemoteControlManager(this);
   }
 
   async fetchBotConstants () {
@@ -64,18 +67,28 @@ export default class Client extends Telegraf {
   }
 
   /**
-   * @param {Context} ctx
    * @param {string} message
    * @param {'all'|'user'} type
    * @param {number|null} user 
    */
-  async sendMessageAsDeveloper (ctx, message, type = 'all', user = null) {
+  async sendMessageAsDeveloper (message, type = 'all', user = null) {
     switch (type) {
       case 'all': {
         const users = await this.userManager.getUsers({ autoScheduler: true });
-        users.forEach(async (u) => {
-          await this.telegram.sendMessage(u.id, `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`, { parse_mode: 'Markdown', disable_notification: true }).catch(this.logger.error);
+        users.forEach((u) => {
+          this.telegram.sendMessage(u.id, `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`, { parse_mode: 'Markdown', disable_notification: true }).catch(e => {
+            if (e instanceof TelegramError) {
+              if (e.code === 403) {
+                this.userManager.updateUser(u.id, 'autoScheduler', false);
+              }
+            }
+          });
         });
+        break;
+      }
+      case 'user': {
+        const user = await this.userManager.getUser(user);
+        this.telegram.sendMessage(user.id, message, { parse_mode: 'Markdown', disable_notification: true });
         break;
       }
     }
@@ -87,54 +100,6 @@ export default class Client extends Telegraf {
     }
     this.commandHandler.load();
     this.manager.run();
-
-    this.manager.on('newSchedule', (user, schedule) => {
-      let msg = `Новое расписание на ${schedule.date.toString()}\nГруппа: ${schedule.group}\n\`\`\`\n`;
-      if (schedule.lessons.length) {
-        for (const lesson of schedule.lessons) {
-          msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
-          if (lesson.error && msg.includes(lesson.error)) break;
-        }
-        msg += `\n\`\`\`${this.generateBells(schedule) ? `\n${this.generateBells(schedule)}` : ''}\n[Ссылка на сайт](${schedule.url})`;
-      } else {
-        msg += `Расписание не найдено*\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
-      }
-
-      this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
-        this.userManager.setLastSentSchedule(user.id, schedule);
-      }).catch(e => {
-        if (e instanceof TelegramError) {
-          if (e.code === 403) {
-            this.userManager.setLastSentSchedule(user.id, null);
-            this.userManager.updateUser(user.id, 'autoScheduler', false);
-          }
-        }
-      });
-    });
-
-    this.manager.on('editedSchedule', (user, schedule) => {
-      let msg = `Изменения в расписании на ${schedule.date.toString()}\nГруппа: ${schedule.group}\n\`\`\`\n`;
-      if (schedule.lessons.length) {
-        for (const lesson of schedule.lessons) {
-          msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
-          if (lesson.error && msg.includes(lesson.error)) break;
-        }
-        msg += `\n\`\`\`${this.generateBells(schedule) ? `\n${this.generateBells(schedule)}` : ''}\n[Ссылка на сайт](${schedule.url})`;
-      } else {
-        msg += `Расписание не найдено*\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
-      }
-
-      this.telegram.sendMessage(user.id, msg, { parse_mode: 'Markdown' }).then((r) => {
-        this.userManager.setLastSentSchedule(user.id, schedule);
-      }).catch(e => {
-        if (e instanceof TelegramError) {
-          if (e.code === 403) {
-            this.userManager.setLastSentSchedule(user.id, null);
-            this.userManager.updateUser(user.id, 'autoScheduler', false);
-          }
-        }
-      });
-    });
 
     this.launch({ allowedUpdates: true }).then(() => {
       this.logger.success(`Logged in as @${this.botInfo.username}`);

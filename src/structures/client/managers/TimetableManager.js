@@ -1,10 +1,12 @@
 import EventEmitter from "events";
 import Schedule from "../../parser/Schedule.js";
 import Client from "../Client.js";
+import { editedSchedule, newSchedule } from "./listeners.js";
 
 export default class TimetableManager extends EventEmitter {
   constructor (client) {
     super();
+    this.name = 'timetable';
     /**
      * @type {Client}
      */
@@ -12,7 +14,7 @@ export default class TimetableManager extends EventEmitter {
     /**
      * @type {{generatedAt:number,schedules:Schedule[]}}
      */
-    this.cache = {};
+    this.cache = { generatedAt: null, schedules: null };
   }
 
   async runCache () {
@@ -94,14 +96,31 @@ export default class TimetableManager extends EventEmitter {
     }, 20000);
   }
 
-  run () {
+  async run () {
     if (process.env.NODE_ENV !== 'development') {
       this.client.logger.info('Starting Timetable manager');
       this.runCache();
       this.runChecker();
+      const module = (await this.client.remoteControl.getModule(this.name, 'manager'));
+      if (!module.remoteConfig.isDisabled) {
+        this.startListeners();
+      }
     } else {
+      this.runCache();
       this.client.logger.info('Start of timetable manager aborted due to development version!');
     }
+  }
+
+  stopListeners () {
+    this.client.logger.info('Stopping listeners...');
+    this.removeAllListeners('editedSchedule');
+    this.removeAllListeners('newSchedule');
+  }
+
+  startListeners () {
+    this.client.logger.info('Starting listeners...');
+    this.on('editedSchedule', (...args) => editedSchedule(this.client, ...args));
+    this.on('newSchedule', (...args) => newSchedule(this.client, ...args));
   }
 }
 

@@ -5,6 +5,7 @@ import Schedule from '../../parser/Schedule.js';
 
 export default class UserManager {
   constructor (logger) {
+    this.name = 'user';
     /**
      * @type {Consola}
      */

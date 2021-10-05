@@ -11,10 +11,7 @@ export default class SupportAnswer extends Command {
       name: 'supportanswer',
       aliases: [],
       category: 'utils',
-      ownerOnly: true,
       description: 'Ответ на обращение в поддержку.',
-      includeInHelp: false,
-      path: import.meta.url
     });
     this.client = client;
   }

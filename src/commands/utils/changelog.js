@@ -14,11 +14,8 @@ export default class ChangelogCommand extends Command {
       name: 'changelog',
       aliases: ['список-изменений'],
       category: 'utils',
-      ownerOnly: false,
       usage: 'changelog',
-      description: 'Список изменений.',
-      includeInHelp: true,
-      path: import.meta.url
+      description: 'Список изменений.'
     });
     this.client = client;
   }

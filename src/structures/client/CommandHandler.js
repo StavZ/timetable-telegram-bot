@@ -1,7 +1,6 @@
 import { Collection } from "@discordjs/collection";
 import path, { resolve } from "path";
 import { walk } from "walk";
-import { createRequire } from 'module';
 import Client from "./Client.js";
 import Command from "./Command.js";
 
@@ -11,7 +10,13 @@ export default class CommandHandler {
    */
   constructor (client) {
     this.client = client;
+    /**
+     * @type {Collection<string,Command>}
+     */
     this.commands = new Collection();
+    /**
+     * @type {Collection<string,Command>}
+     */
     this.aliases = new Collection();
   }
 
@@ -19,14 +24,19 @@ export default class CommandHandler {
     const walker = walk('./src/commands');
     walker.on('file', async (root, stats, next) => {
       if (!stats.name.endsWith('.js')) return;
-      const Command = await import(`file://${resolve(root)}/${stats.name}`);
+      const path = `file://${resolve(root)}\\${stats.name}`;
+      const Command = await import(path);
       const command = new Command.default(this.client);
+      const module = await this.client.remoteControl.getModule(command.name, 'command');
       command.aliases.forEach((a) => {
         this.aliases.set(a, command.name);
       });
-      this.commands.set(command.name, command);
+      this.commands.set(command.name, Object.assign(command, { path: path, config: module.remoteConfig }));
       next();
     });
+    walker.on('end', () => {
+      this.client.logger.success('All commands loaded!')
+    })
   }
 
   /**
@@ -39,13 +49,13 @@ export default class CommandHandler {
       if (!command) return reject(false);
       var commandCache = command;
       try {
-        this.deleteCache(command);
-        const cmd = new ((await (import(commandCache.path))).default)(this.client)
+        const cmd = new ((await import(commandCache.path)).default)(this.client);
         this.commands.delete(cmd.name);
         this.aliases.forEach((cmda, alias) => {
           if (cmda.name === cmd.name) this.aliases.delete(alias);
         });
-        this.commands.set(cmd.name, cmd);
+        const module = await this.client.remoteControl.getModule(cmd.name, 'command');
+        this.commands.set(cmd.name, Object.assign(cmd, {config: module.remoteConfig}));
         cmd.aliases.forEach((alias) => {
           this.aliases.set(alias, cmd.name);
         });
@@ -58,15 +68,6 @@ export default class CommandHandler {
         reject(e);
       }
     });
-  }
-
-  /**
-   * @param {Command} command
-   */
-  deleteCache (command) {
-    const require = createRequire(import.meta.url);
-    const modulePath = path.resolve(command.path);
-    delete require.cache[modulePath];
   }
 
   /**

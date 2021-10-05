@@ -11,11 +11,8 @@ export default class HelpCommand extends Command {
       name: 'help',
       aliases: ['помощь'],
       category: 'general',
-      ownerOnly: false,
       description: 'Список команд бота.',
-      includeInHelp: true,
-      usage: 'помощь [команда]',
-      path: import.meta.url
+      usage: 'помощь [команда]'
     });
     this.client = client;
   }
@@ -28,7 +25,7 @@ export default class HelpCommand extends Command {
     if (!args.length) {
       const commands = this.client.commandHandler.commands;
       let msg = `Список команд @ppkslavyanovabot\n\n`;
-      commands.filter((c) => c.includeInHelp).forEach((command) => {
+      commands.filter((c) => c.config.includeInHelp).forEach((command) => {
         msg += `- ${this.client.prefix}${command.name} - ${command.description}\n`
       })
       return ctx.replyWithMarkdown(msg);

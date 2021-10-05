@@ -13,11 +13,8 @@ export default class InformationCommand extends Command {
       name: 'information',
       aliases: ['информация', 'инфо', 'info', 'about'],
       category: 'general',
-      ownerOnly: false,
       description: 'Информация и статистика бота.',
-      includeInHelp: true,
-      usage: 'информация',
-      path: import.meta.url
+      usage: 'информация'
     });
     this.client = client;
   }

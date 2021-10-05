@@ -2,9 +2,6 @@ import { Context } from 'telegraf';
 import Client from '../../structures/client/Client.js';
 import Command from '../../structures/client/Command.js';
 import { inspect } from 'util';
-import { config } from 'dotenv';
-import moment from 'moment-timezone';
-import { Worker } from 'worker_threads';
 
 export default class EvalCommand extends Command {
   /**
@@ -15,11 +12,8 @@ export default class EvalCommand extends Command {
       name: 'eval',
       aliases: [],
       category: 'utils',
-      ownerOnly: true,
       description: 'Запускает код JS.',
-      includeInHelp: false,
-      usage: 'eval [код]',
-      path: import.meta.url
+      usage: 'eval [код]'
     });
     this.client = client;
   }
@@ -38,7 +32,6 @@ export default class EvalCommand extends Command {
     } catch (e) {
       result = e;
     }
-
     // eslint-disable-next-line camelcase
     const o_o = RegExp(`${process.env.TOKEN}${process.env.DEV_TOKEN ? `|${process.env.DEV_TOKEN}` : ''}|${process.env.MONGODB_PASS}|${process.env.MONGODB_USER}`, 'gim');
     result = inspect(result, { depth: 1 }).replace(o_o, '[•••]') + '';

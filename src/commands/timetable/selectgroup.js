@@ -11,11 +11,8 @@ export default class SelectgroupCommand extends Command {
       name: 'selectgroup',
       aliases: ['выбрать-группу'],
       category: 'timetable',
-      ownerOnly: false,
-      description: 'Выбор группы колледжа.',
-      usage: 'selectgroup',
-      includeInHelp: true,
-      path: import.meta.url
+      description: 'Выбор группы.',
+      usage: 'selectgroup'
     });
     this.client = client;
   }
@@ -25,21 +22,56 @@ export default class SelectgroupCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    const unchunked = this.parseKeyboard(await this.client.parser.getGroups());
-    const keyboard = unchunked.chunk(4);
+    const groups = this.config.groups;
+    const groupIds = this.flip(this.config.groupIds);
+
+    const keyboard = this.parseKeyboard(Object.keys(groupIds)).chunk(4);
     keyboard.push([{ text: 'Отмена', callback_data: 'cancel-select-group' }]);
 
-    ctx.reply('Выберете свою группу из списка:', { reply_markup: { inline_keyboard: keyboard } });
-    unchunked.forEach((e) => {
-      this.client.action(e.callback_data, (ctx) => {
-        this.client.userManager.setGroup(ctx.from.id, e.text);
-        ctx.editMessageText(`Вы выбрали группу \`${e.text}\`.\n\n\`${this.client.prefix}schedule\` - Раcписание уроков.`, { parse_mode: 'Markdown' });
+    let group;
+
+    ctx.replyWithMarkdown('Для начала выберите свою специальность из списка ниже:', { reply_markup: { inline_keyboard: keyboard } });
+    Object.keys(groupIds).forEach((g) => {
+      this.client.action(g, async (ctx) => {
+        const groupkb = this.parseKeyboard(groups[groupIds[g]]).chunk(4);
+        console.log(groups[groupIds[g]]);
+        groupkb.push([{ text: 'Отмена', callback_data: 'cancel-select-group' }]);
+        ctx.editMessageText(`Вы выбрали специальность \`${groupIds[g]}\`.\nВыберите свою группу из списка ниже:`, { parse_mode: 'Markdown' }).then(() => {
+          ctx.editMessageReplyMarkup({ inline_keyboard: groupkb });
+        });
+        groups[groupIds[g]].forEach((gr) => {
+          this.client.action(gr, (ctx) => {
+            group = gr;
+            ctx.editMessageText(`Вы выбрали специальность \`${groupIds[g]}\`.\nВаша группа: \`${gr}\`.\n\nВерно?`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ callback_data: 'agree', text: 'Да!' }], [{ callback_data: 'disagree', text: 'Нет! Начать с начала' }]] } });
+          });
+        });
       });
     });
+
+    this.client.action('agree', (ctx) => {
+      ctx.editMessageReplyMarkup({});
+      this.client.userManager.setGroup(ctx.from.id, group);
+      ctx.editMessageText('Вы выбрали группу \`' + group + '\`.', { parse_mode: 'Markdown' });
+    });
+
+    this.client.action('disagree', (ctx) => {
+      ctx.deleteMessage(ctx.update.callback_query.message.message_id);
+      group = null;
+      this.exec(ctx, args);
+    });
+
     this.client.action('cancel-select-group', (ctx) => {
       ctx.editMessageReplyMarkup({});
       ctx.editMessageText('Выбор группы был отменен.');
     });
+  }
+
+  flip (json) {
+    var ret = {};
+    for (var key in json) {
+      ret[json[key]] = key;
+    }
+    return ret;
   }
 
   /**
