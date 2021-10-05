@@ -34,7 +34,6 @@ export default class SelectgroupCommand extends Command {
     Object.keys(groupIds).forEach((g) => {
       this.client.action(g, async (ctx) => {
         const groupkb = this.parseKeyboard(groups[groupIds[g]]).chunk(4);
-        console.log(groups[groupIds[g]]);
         groupkb.push([{ text: 'Отмена', callback_data: 'cancel-select-group' }]);
         ctx.editMessageText(`Вы выбрали специальность \`${groupIds[g]}\`.\nВыберите свою группу из списка ниже:`, { parse_mode: 'Markdown' }).then(() => {
           ctx.editMessageReplyMarkup({ inline_keyboard: groupkb });
