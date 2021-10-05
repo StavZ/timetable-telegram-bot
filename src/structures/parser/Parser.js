@@ -19,6 +19,7 @@ export default class Parser {
       const trs = document.getElementsByTagName('tr');
       for (let i = 0; i < trs.length; i++) {
         trs.item(i).classList.replace('R64', 'R8')
+        trs.item(i).classList.replace('R63', 'R8');
       }
       resolve(document);
     });
