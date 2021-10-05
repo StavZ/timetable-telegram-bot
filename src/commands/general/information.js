@@ -26,6 +26,6 @@ export default class InformationCommand extends Command {
   async exec (ctx, args) {
     const version = require('../../../package.json').version;
     const userCount = await this.client.userManager.getUserCount();
-    ctx.replyWithMarkdown(`Версия: \`v${version}\`\nКоличество пользователей: \`${userCount}\`\n\nРазработчик: [VK](https://vk.com/stavzdev) | [TG](https://t.me/stavzdev)\nИсходный код: [GitHub](https://github.com/StavZ/timetable-telegram-bot)`, { disable_web_page_preview: true, reply_markup: { inline_keyboard: [[{ text: 'VK', url: 'https://vk.com/stavzdev' }, { text: 'TG', url: 'https://t.me/stavzdev'}], [{text: 'GitHub', url: 'https://github.com/StavZ/timetable-telegram-bot'}]] } });
+    ctx.replyWithMarkdown(`Версия: \`v${version}\`\nСписок изменений /changelog\nКоличество пользователей: \`${userCount}\`\n\nРазработчик: [VK](https://vk.com/stavzdev) | [TG](https://t.me/stavzdev)\nИсходный код: [GitHub](https://github.com/StavZ/timetable-telegram-bot)`, { disable_web_page_preview: true, reply_markup: { inline_keyboard: [[{ text: 'VK', url: 'https://vk.com/stavzdev' }, { text: 'TG', url: 'https://t.me/stavzdev'}], [{text: 'GitHub', url: 'https://github.com/StavZ/timetable-telegram-bot'}]] } });
   }
 }
