@@ -25,11 +25,10 @@ export default class ScheduleCommand extends Command {
   async exec (ctx, args) {
     if (!this.client.manager.cache) return ctx.reply('В данный момент нет информации о расписании!\nПопробуйте повторить попытку через минуту.')
     this.client.action('cancel-timetable', (ctx) => {
-      ctx.editMessageReplyMarkup({});
+      ctx.editMessageReplyMarkup({inline_keyboard: null});
     });
 
     this.client.action('switch-group', async (ctx) => {
-      ctx.editMessageReplyMarkup({});
       const groups = await this.client.parser.getGroups();
       const keyboard = this.parseGroupsKeyboard(groups).chunk(4);
       keyboard.push([{ text: 'Отмена', callback_data: 'back-to-user-schedule' }]);
@@ -42,7 +41,6 @@ export default class ScheduleCommand extends Command {
     });
 
     this.client.action('back-to-user-schedule', async (ctx) => {
-      ctx.editMessageReplyMarkup({});
       this.showUserSchedule(ctx, this.client.manager.cache.schedules, ctx.update.callback_query.message.message_id);
     });
 

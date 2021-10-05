@@ -29,7 +29,7 @@ export default class ChangelogCommand extends Command {
     const keys = Object.keys(changelogs);
 
     this.client.action('cancel-changelog', (ctx) => {
-      ctx.editMessageReplyMarkup({});
+      ctx.editMessageReplyMarkup({inline_keyboard: null});
     });
 
     keys.forEach((key) => {

@@ -28,6 +28,10 @@ export default class SelectgroupCommand extends Command {
     const keyboard = this.parseKeyboard(Object.keys(groupIds)).chunk(4);
     keyboard.push([{ text: 'Отмена', callback_data: 'cancel-select-group' }]);
 
+    this.client.action('cancel-select-group', (ctx) => {
+      ctx.editMessageText('Выбор группы был отменен.');
+    });
+
     let group;
 
     ctx.replyWithMarkdown('Для начала выберите свою специальность из списка ниже:', { reply_markup: { inline_keyboard: keyboard } });
@@ -48,7 +52,6 @@ export default class SelectgroupCommand extends Command {
     });
 
     this.client.action('agree', (ctx) => {
-      ctx.editMessageReplyMarkup({});
       this.client.userManager.setGroup(ctx.from.id, group);
       ctx.editMessageText('Вы выбрали группу \`' + group + '\`.', { parse_mode: 'Markdown' });
     });
@@ -57,11 +60,6 @@ export default class SelectgroupCommand extends Command {
       ctx.deleteMessage(ctx.update.callback_query.message.message_id);
       group = null;
       this.exec(ctx, args);
-    });
-
-    this.client.action('cancel-select-group', (ctx) => {
-      ctx.editMessageReplyMarkup({});
-      ctx.editMessageText('Выбор группы был отменен.');
     });
   }
 
