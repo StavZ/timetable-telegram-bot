@@ -1,5 +1,5 @@
 import Client from "../Client.js";
-
+import { TelegramError } from 'telegraf';
 /**
  * 
  * @param {Client} client 
