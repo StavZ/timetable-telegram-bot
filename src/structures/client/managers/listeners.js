@@ -23,6 +23,7 @@ export function newSchedule (client, user, schedule) {
   }).catch(e => {
     if (e instanceof TelegramError) {
       if (e.code === 403) {
+        client.logger.log(`${user.id} : 403 Forbidden`)
         client.userManager.setLastSentSchedule(user.id, null);
         client.userManager.updateUser(user.id, 'autoScheduler', false);
       }
@@ -53,7 +54,7 @@ export function editedSchedule (client, user, schedule) {
   }).catch(e => {
     if (e instanceof TelegramError) {
       if (e.code === 403) {
-        client.logger.debug(`${user.id} : 403 Forbidden`)
+        client.logger.log(`${user.id} : 403 Forbidden`)
         client.userManager.setLastSentSchedule(user.id, null);
         client.userManager.updateUser(user.id, 'autoScheduler', false);
       }
