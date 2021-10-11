@@ -25,7 +25,7 @@ export default class SupportCommand extends Command {
   async exec (ctx, args) {
     // 1.8e+6
     if (!args.length) {
-      return ctx.replyWithMarkdown(`Вы не указали тему обращения.\nПожалуйста, указывайте Ваш вопрос полностью!\nИспользование: /${this.name} \`[вопрос]\`.\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
+      return ctx.replyWithMarkdown(`Вы не указали тему обращения.\nПожалуйста, указывайте Ваш вопрос полностью!\nИспользование: /${this.name} \`[вопрос]\`.\n\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
     }
 
     const user = await this.client.userManager.getUser(ctx.from.id);
