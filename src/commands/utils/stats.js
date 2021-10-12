@@ -24,7 +24,7 @@ export default class StatsCommand extends Command {
     const userCount = await this.client.userManager.getUserCount();
     const activeUsers = (await this.client.userManager.getUsers({ autoScheduler: true })).filter(u => u.group !== null);
     const graph = this.sortByGroup(activeUsers);
-    let msg = `Количество пользователей: \`${userCount}\`\nКол-во активных пользователей\`*\`: \`${activeUsers.length}\`\n\n*Таблица пользователей по группам*\n\`\`\`\nГруппа    | Кол-пользователей\n\n`;
+    let msg = `Количество пользователей: \`${userCount}\`\nКол-во активных пользователей\`*\`: \`${activeUsers.length}\`\n\n*Таблица пользователей по группам*\n\`\`\`\nГруппа    | Кол-во пользователей\n\n`;
     for (const group of Object.keys(graph)) {
       const spaces = (9 - group.split(',')[0].trim().length);
       msg += `${group.split(',')[0].trim().length !== 9 ? `${group.split(',')[0].trim()}${' '.repeat(spaces)}` : `${group.split(',')[0].trim()}`} | ${graph[group].users}\n`;
