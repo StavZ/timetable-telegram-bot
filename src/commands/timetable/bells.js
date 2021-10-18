@@ -35,7 +35,7 @@ export default class BellsCommand extends Command {
       const bell = bells[bellN];
       msg += `${bellN} пара | ${bell.start} - ${bell.end}\n`
     }
-    msg += `\`\`\``;
-    ctx.replyWithMarkdownV2(msg);
+    msg += `\`\`\`\n\`*\`Любые изменения в расписании звонков будут рассылаться разработчиком.`;
+    ctx.replyWithMarkdown(msg);
   }
 }

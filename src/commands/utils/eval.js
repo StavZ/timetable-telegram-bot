@@ -13,7 +13,7 @@ export default class EvalCommand extends Command {
       aliases: [],
       category: 'utils',
       description: 'Запускает код JS.',
-      usage: 'eval [код]'
+      usage: 'eval \`[код]\`'
     });
     this.client = client;
   }

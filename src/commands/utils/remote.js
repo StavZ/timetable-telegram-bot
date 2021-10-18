@@ -11,7 +11,8 @@ export default class RemoteControlCommand extends Command {
       name: 'remote',
       aliases: [],
       category: 'utils',
-      description: 'Удаленное управление модулями.'
+      description: 'Удаленное управление модулями.',
+      usage: 'remote \`[module] [type] [setting] [value]\`'
     });
     this.client = client;
   }
@@ -21,7 +22,7 @@ export default class RemoteControlCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    if (!args.length || args.length < 2) return ctx.reply('Использование: /remote [module] [type] [setting] [value]');
+    if (!args.length || args.length < 2) return ctx.reply('Использование: /remote \`[module] [type] [setting] [value]\`');
     const module = args[0];
     const moduleType = args[1].toLowerCase();
     const moduleSchema = await this.client.remoteControl.getModule(module, moduleType, false);

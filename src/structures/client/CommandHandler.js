@@ -1,5 +1,5 @@
 import { Collection } from "@discordjs/collection";
-import path, { resolve } from "path";
+import { resolve } from "path";
 import { walk } from "walk";
 import Client from "./Client.js";
 import Command from "./Command.js";
@@ -20,7 +20,7 @@ export default class CommandHandler {
     this.aliases = new Collection();
   }
 
-  load () {
+  loadAll () {
     const walker = walk('./src/commands');
     walker.on('file', async (root, stats, next) => {
       if (!stats.name.endsWith('.js')) return;
@@ -31,42 +31,11 @@ export default class CommandHandler {
       command.aliases.forEach((a) => {
         this.aliases.set(a, command.name);
       });
-      this.commands.set(command.name, Object.assign(command, { path: path, config: module.remoteConfig }));
+      this.commands.set(command.name, Object.assign(command, { path, config: module.remoteConfig }));
       next();
     });
     walker.on('end', () => {
-      this.client.logger.success('All commands loaded!')
-    })
-  }
-
-  /**
-   * @param {string} command
-   * @returns {Promise<boolean|Command>}
-   */
-  reload (input) {
-    return new Promise(async (resolve, reject) => {
-      const command = this.getCommand(input);
-      if (!command) return reject(false);
-      var commandCache = command;
-      try {
-        const cmd = new ((await import(commandCache.path)).default)(this.client);
-        this.commands.delete(cmd.name);
-        this.aliases.forEach((cmda, alias) => {
-          if (cmda.name === cmd.name) this.aliases.delete(alias);
-        });
-        const module = await this.client.remoteControl.getModule(cmd.name, 'command');
-        this.commands.set(cmd.name, Object.assign(cmd, {config: module.remoteConfig}));
-        cmd.aliases.forEach((alias) => {
-          this.aliases.set(alias, cmd.name);
-        });
-        this.client.logger.success(`Command ${cmd.name} reloaded!`);
-        commandCache = null;
-        resolve(cmd);
-      } catch (e) {
-        this.client.logger.info(`Failed to reload ${commandCache.name}`);
-        this.client.logger.error(e);
-        reject(e);
-      }
+      this.client.logger.success('All commands loaded!');
     });
   }
 

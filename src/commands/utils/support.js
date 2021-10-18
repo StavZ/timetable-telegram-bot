@@ -2,6 +2,7 @@ import { Context } from 'telegraf';
 import Client from '../../structures/client/Client.js';
 import Command from '../../structures/client/Command.js';
 import moment from 'moment-timezone';
+import ms from 'ms';
 
 export default class SupportCommand extends Command {
   /**
@@ -13,7 +14,7 @@ export default class SupportCommand extends Command {
       aliases: ['поддержка'],
       category: 'utils',
       description: 'Обращение в поддержку бота',
-      usage: 'поддержка [вопрос]'
+      usage: 'support \`[тема]\`'
     });
     this.client = client;
   }
@@ -23,9 +24,8 @@ export default class SupportCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
-    // 1.8e+6
     if (!args.length) {
-      return ctx.replyWithMarkdown(`Вы не указали тему обращения.\nПожалуйста, указывайте Ваш вопрос полностью!\nИспользование: /${this.name} \`[вопрос]\`.\n\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
+      return ctx.replyWithMarkdown(`Вы не указали тему обращения.\nПожалуйста, указывайте тему обращения полностью!\nИспользование: /${this.name} \`[тема]\`.\n\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
     }
 
     const user = await this.client.userManager.getUser(ctx.from.id);
@@ -33,8 +33,8 @@ export default class SupportCommand extends Command {
     let messages = user.supportMessages;
     if (user.supportMessages.length) {
       let lastMessage = messages[messages.length - 1];
-      if (Date.now() - lastMessage.date < 1.8e+6) {
-        return ctx.replyWithMarkdown(`Обращение в поддержку доступно каждые 30 минут.\nСледующее обращение \`${moment(lastMessage.date + 1.8e+6).format('DD/MM/YYYY HH:MM')}\`.\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
+      if (Date.now() < (lastMessage.date + 900000)) {
+        return ctx.replyWithMarkdown(`Обращение в поддержку доступно каждые 15 минут.\nСледующее обращение через \`${ms(900000 - (Date.now() - lastMessage.date))}\`.\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
       }
     }
 
@@ -44,9 +44,9 @@ export default class SupportCommand extends Command {
       message: args.join(' ')
     };
 
-    ctx.replyWithMarkdown(`Обращение в поддержку \`#${messages.length + 1}\`.\nВопрос: ${args.join(' ')}\n\nОжидайте ответа от разработчика.`).then((r) => {
+    ctx.replyWithMarkdown(`Обращение в поддержку \`#${messages.length + 1}\`.\nТема: ${args.join(' ')}\n\nОжидайте ответа от разработчика.`).then((r) => {
       this.client.userManager.pushSupportMessage(ctx.from.id, message);
-      this.client.sendToOwner(`Пользователь: \`${ctx.from.id}\`\nВопрос: ${args.join(' ')}\n\nОтветить: /supportanswer \`${ctx.from.id} ${messages.length + 1} [ответ]\`.`, { parse_mode: 'Markdown' });
+      this.client.sendToOwner(`Пользователь: \`${ctx.from.id}\`\nТема: ${args.join(' ')}\n\nОтветить: /supportanswer \`${ctx.from.id} ${messages.length + 1} [ответ]\`.`, { parse_mode: 'Markdown' });
     });
   }
 }

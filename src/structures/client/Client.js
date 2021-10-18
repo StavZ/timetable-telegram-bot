@@ -98,7 +98,7 @@ export default class Client extends Telegraf {
     if (process.env.NODE_ENV === 'development') {
       this.logger.warn('Development Version');
     }
-    this.commandHandler.load();
+    this.commandHandler.loadAll();
     this.manager.run();
 
     this.launch({ allowedUpdates: true }).then(() => {

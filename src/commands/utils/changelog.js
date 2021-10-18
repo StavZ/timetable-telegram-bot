@@ -43,7 +43,7 @@ export default class ChangelogCommand extends Command {
 
   showChangelog (ctx, changelogs, key, edit) {
     const changelog = changelogs[key].changelog;
-    let msg = `Список изменений \`v${key}\`\n`;
+    let msg = `Список изменений \`v${key}\`\nДата обновления \`${changelogs[key].date}\`\n`;
     for (const c of changelog) {
       msg += ` • ${c.important ? `*${c.content}*` : c.content}\n`;
     }

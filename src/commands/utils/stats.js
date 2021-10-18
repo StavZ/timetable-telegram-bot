@@ -10,7 +10,7 @@ export default class StatsCommand extends Command {
     super({
       name: 'stats',
       aliases: ['статистика'],
-      description: 'Статистика бота',
+      description: 'Статистика бота.',
       usage: 'stats',
     });
     this.client = client;

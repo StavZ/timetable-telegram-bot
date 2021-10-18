@@ -12,6 +12,8 @@ import moment from 'moment-timezone';
 moment.tz.setDefault(process.env.TZ);
 
 import Client from './src/structures/client/Client.js';
+import Command from './src/structures/client/Command.js';
+import Module from './src/structures/models/Module.js';
 const client = new Client(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
 client.run();
 client.prefix = '/';
@@ -34,6 +36,9 @@ client.on('message', (ctx) => {
   const args = ctx.message.text.slice(client.prefix.length).trim().split(/ +/g);
   const command = args.shift();
 
+  /**
+   * @type {Command}
+   */
   let cmd;
   if (client.commandHandler.commands.has(command)) {
     cmd = client.commandHandler.commands.get(command);
@@ -51,7 +56,11 @@ client.on('message', (ctx) => {
     if (!cmd.exec) {
       return ctx.replyWithMarkdown(`В данный момент эта команда отключена и не доступна!`);
     }
-    cmd.exec(ctx, args);
+    cmd.exec(ctx, args).then(async () => {
+      const module = await Module.findOne({ name: cmd.name, type: 'command' });
+      module.runs += 1;
+      module.save();
+    });
   } catch (e) {
     client.logger.error(e);
   }

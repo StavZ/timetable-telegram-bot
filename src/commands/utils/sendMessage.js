@@ -12,7 +12,7 @@ export default class SendMessageCommand extends Command {
       aliases: [],
       category: 'utils',
       description: 'Позволяет разработчику отправить сообщение всем пользователям.',
-      usage: 'sendMessage'
+      usage: 'sendMessage \`[message]\`',
     });
     this.client = client;
   }
