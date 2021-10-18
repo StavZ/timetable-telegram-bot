@@ -19,7 +19,7 @@
     "dev": "yarn start"
   },
   "type": "module",
-  "license": "MIT",
+  "license": "GPLV3",
   "name": "timetable-telegram-bot",
   "version": "4.2.0",
   "engines": {
