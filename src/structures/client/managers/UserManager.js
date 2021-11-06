@@ -47,7 +47,7 @@ export default class UserManager {
     new User({
       id,
       group: null,
-      lastSentSchedule: {},
+      sentSchedule: {},
       role: 'student'
     }).save();
   }
