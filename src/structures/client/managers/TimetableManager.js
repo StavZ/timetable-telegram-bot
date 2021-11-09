@@ -29,7 +29,7 @@ export default class TimetableManager extends EventEmitter {
         generatedAt: Date.now(),
         schedules
       };
-    }, 30000);
+    }, 180000);
   }
 
   /**
@@ -93,7 +93,7 @@ export default class TimetableManager extends EventEmitter {
       users.filter(u => u.group !== null).forEach((u) => {
         this.isScheduleNew(u.toObject(), this.cache.schedules[0]);
       });
-    }, 20000);
+    }, 180000);
   }
 
   async run () {
