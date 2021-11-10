@@ -31,27 +31,52 @@ export default class RemoteControlCommand extends Command {
       const keys = Object.keys(moduleSchema.remoteConfig);
       let config = '';
       for (const key of keys) {
-        if (typeof moduleSchema.remoteConfig[key] !== 'boolean') continue;
+        // if (typeof moduleSchema.remoteConfig[key] !== 'boolean') continue;
         config += `• ${key}: \`${moduleSchema.remoteConfig[key]}\`\n`;
       }
       ctx.replyWithMarkdown(`Модуль: \`${moduleSchema.name}\`\nТип: \`${moduleSchema.type}\`\nКонфиг:\n${config}`);
       return;
     }
     const setting = args[2];
-    let value = args[3];
-    switch (value) {
-      case 'true': value = true; break;
-      case 'false': value = false; break;
-    }
+    let value = this.getValue(args.slice(3).join(' '));
 
     let config = moduleSchema.remoteConfig;
-    config[setting] = Boolean(value);
+    config[setting] = value;
     this.client.remoteControl.updateModuleConfig(module, moduleType, config).then(() => {
-      ctx.replyWithMarkdown(`Модуль ${moduleSchema.name} \`[${moduleSchema.type}]\` был обновлен.\nЗначение \`${setting}\` было изменено на \`${value}\`.`).then(() => {
+      ctx.replyWithMarkdown(`Модуль ${moduleSchema.name} \`[${moduleSchema.type}]\` был обновлен.\nЗначение \`${setting}\` было изменено на \`${value} [${typeof value}]\`.`).then(() => {
         this.performChanges(moduleSchema.name, moduleSchema.type, config);
       });
 
     }).catch(this.client.logger.error);
+  }
+
+  /**
+   * @param {string} value
+   * @returns {string|boolean|number}
+   */
+  getValue (value) {
+    const booleanRegex = /^(true|false)$/;
+    const stringRegex = /[a-zа-я]{0,}\D/gi;
+    const numberRegex = /^\d+$/g;
+
+    if (booleanRegex.test(value)) {
+      switch (value) {
+        case 'true': {
+          return true;
+        }
+        case 'false': {
+          return false;
+        }
+      }
+    }
+
+    if (numberRegex.test(value)) {
+      return Number(value);
+    }
+
+    if (stringRegex.test(value)) {
+      return value;
+    }
   }
 
   performChanges (module, moduleType, config) {
@@ -61,6 +86,9 @@ export default class RemoteControlCommand extends Command {
         break;
       }
       case 'manager': {
+        if (config.cacheInterval !== this.client.manager.interval) {
+          this.client.manager.interval = config.cacheInterval;
+        }
         if (config.isDisabled === true) {
           this.client.manager.stopListeners();
         } else {

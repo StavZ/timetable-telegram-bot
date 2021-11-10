@@ -15,9 +15,13 @@ export default class TimetableManager extends EventEmitter {
      * @type {{generatedAt:number,schedules:Schedule[]}}
      */
     this.cache = { generatedAt: null, schedules: null };
+    /**
+     * @type {number}
+     */
+    this.interval = 30000;
   }
 
-  async runCache () {
+  async caching () {
     const schedules = await this.client.parser.getAvailableSchedules();
     this.cache = {
       generatedAt: Date.now(),
@@ -29,7 +33,7 @@ export default class TimetableManager extends EventEmitter {
         generatedAt: Date.now(),
         schedules
       };
-    }, 180000);
+    }, this.interval);
   }
 
   /**
@@ -86,7 +90,7 @@ export default class TimetableManager extends EventEmitter {
     }
   }
 
-  runChecker () {
+  checker () {
     setInterval(async () => {
       if (!this.cache.schedules) return;
       let users = await this.client.userManager.getUsers({ autoScheduler: true });
@@ -99,18 +103,20 @@ export default class TimetableManager extends EventEmitter {
   async run () {
     if (process.env.NODE_ENV !== 'development') {
       this.client.logger.info('Starting Timetable manager');
-      this.runCache();
-      this.runChecker();
-      const module = (await this.client.remoteControl.getModule(this.name, 'manager'));
+      const module = (await this.client.remoteControl.getModule(this.name, 'manager', false));
+      this.interval = module.remoteConfig.cacheInterval;
       if (!module.remoteConfig.isDisabled) {
         this.startListeners();
       }
+      this.caching();
+      this.checker();
     } else {
-      this.runCache();
+      const module = (await this.client.remoteControl.getModule(this.name, 'manager', false));
+      this.interval = module.remoteConfig.cacheInterval;
+      this.caching();
       this.client.logger.info('Start of timetable manager aborted due to development version!');
     }
   }
-
   stopListeners () {
     this.client.logger.info('Stopping listeners...');
     this.removeAllListeners('editedSchedule');

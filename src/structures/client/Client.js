@@ -12,7 +12,6 @@ import moment from 'moment-timezone';
 import TimetableManager from './managers/TimetableManager.js';
 import Lesson from '../parser/Lesson.js';
 import RemoteControlManager from './managers/RemoteControlManager.js';
-import { editedSchedule, newSchedule } from './managers/listeners.js';
 
 export default class Client extends Telegraf {
   constructor (token, ...args) {
@@ -71,7 +70,7 @@ export default class Client extends Telegraf {
    * @param {'all'|'user'} type
    * @param {number|null} user 
    */
-  async sendMessageAsDeveloper (message, type = 'all', user = null) {
+  async sendMessageAsDeveloper (message, type = 'all', userID = null) {
     switch (type) {
       case 'all': {
         const users = await this.userManager.getUsers({ autoScheduler: true });
@@ -87,8 +86,11 @@ export default class Client extends Telegraf {
         break;
       }
       case 'user': {
-        const user = await this.userManager.getUser(user);
+        if (!userID) return false;
+        const user = await this.userManager.getUser(userID);
+        if (!user) return false;
         this.telegram.sendMessage(user.id, message, { parse_mode: 'Markdown', disable_notification: true });
+        return true;
         break;
       }
     }
