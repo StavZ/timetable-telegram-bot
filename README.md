@@ -1,9 +1,9 @@
-# Автоматическая рассылка расписания
+## Автоматическая рассылка расписания
 Телеграм бот, который автоматически отправляет расписание с сайта [колледжа](https://ppkslavyanova.ru/), как только оно там появляется.
 
 **Telegram: [@ppkslavyanovabot](https://t.me/ppkslavyanovabot)**
 
-# Используемые библиотеки
+## Используемые библиотеки
 - [telegraf](https://github.com/telegraf/telegraf) - Telegram Bot API фреймворк.
 - [@discordjs/collections](https://github.com/discordjs/collection) - Структура хранения команд бота.
 - [mongoose](https://github.com/Automattic/mongoose) - Библиотека для работы с базой данных бота.
