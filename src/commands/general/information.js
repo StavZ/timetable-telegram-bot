@@ -13,7 +13,7 @@ export default class InformationCommand extends Command {
       name: 'information',
       aliases: ['информация', 'инфо', 'info', 'about'],
       category: 'general',
-      description: 'Информация и статистика бота.',
+      description: 'Информация о боте.',
       usage: 'info'
     });
     this.client = client;

@@ -13,7 +13,7 @@ export default class SupportCommand extends Command {
       name: 'support',
       aliases: ['поддержка'],
       category: 'utils',
-      description: 'Обращение в поддержку бота',
+      description: 'Служба поддержки бота',
       usage: 'support \`[тема]\`'
     });
     this.client = client;
@@ -25,7 +25,7 @@ export default class SupportCommand extends Command {
    */
   async exec (ctx, args) {
     if (!args.length) {
-      return ctx.replyWithMarkdown(`Вы не указали тему обращения.\nПожалуйста, указывайте тему обращения полностью!\nИспользование: /${this.name} \`[тема]\`.\n\nЕсли Вы хотите обратиться к разработчику напрямую, можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
+      return ctx.replyWithMarkdown(`Вы не указали тему обращения.\nПожалуйста, указывайте тему обращения полностью!\nИспользование: /${this.name} \`[тема]\`.\n\nВы можете обратиться в поддержку раз в 15 минут, если Вас это не устраивает, то Вы можете обратиться к разработчику напрямую. Можете воспользоваться командой /info, там Вы найдете ссылки на Telegram и VK разработчика.`);
     }
 
     const user = await this.client.userManager.getUser(ctx.from.id);

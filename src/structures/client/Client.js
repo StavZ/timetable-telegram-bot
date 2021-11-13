@@ -16,6 +16,7 @@ import RemoteControlManager from './managers/RemoteControlManager.js';
 export default class Client extends Telegraf {
   constructor (token, ...args) {
     super(token, ...args);
+    this.prefix = '/';
     this.owner = 408057291;
     this.logger = consola;
     this.botId = 1645143260;
@@ -91,7 +92,6 @@ export default class Client extends Telegraf {
         if (!user) return false;
         this.telegram.sendMessage(user.id, message, { parse_mode: 'Markdown', disable_notification: true });
         return true;
-        break;
       }
     }
   }

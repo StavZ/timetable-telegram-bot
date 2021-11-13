@@ -13,7 +13,7 @@ export default class ScheduleCommand extends Command {
       aliases: ['расписание', 'timetable'],
       usage: 'timetable',
       category: 'schedule',
-      description: 'Отправляет текущее расписание, размещенное на сайте.'
+      description: 'Текущее расписание, размещенное на сайте.'
     });
     this.client = client;
   }

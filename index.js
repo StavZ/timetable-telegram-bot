@@ -16,15 +16,18 @@ import Command from './src/structures/client/Command.js';
 import Module from './src/structures/models/Module.js';
 const client = new Client(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
 client.run();
-client.prefix = '/';
 
 process.once('SIGINT', () => {
   client.stop('SIGINT');
-  client?.manager.stopListeners();
+  if (!client.manager.isDisabled) {
+    client?.manager.stopListeners();
+  }
 });
 process.once('SIGTERM', () => {
   client.stop('SIGTERM');
-  client?.manager.stopListeners();
+  if (!client.manager.isDisabled) {
+    client?.manager.stopListeners();
+  }
 });
 
 client.on('message', (ctx) => {

@@ -25,11 +25,20 @@ export default class ChangelogCommand extends Command {
    * @param {string[]} args
    */
   async exec (ctx, args) {
+    /**
+     * @type {Object.<string,{changelog:{content:string,important:boolean}[],old:boolean,date:string}>}
+     */
     const changelogs = require('../../../changelogs.json');
     const keys = Object.keys(changelogs);
 
+    keys.forEach((k) => {
+      if (changelogs[k].old) {
+        delete changelogs[k];
+      }
+    });
+
     this.client.action('cancel-changelog', (ctx) => {
-      ctx.editMessageReplyMarkup({inline_keyboard: null});
+      ctx.editMessageReplyMarkup({ inline_keyboard: null });
     });
 
     keys.forEach((key) => {

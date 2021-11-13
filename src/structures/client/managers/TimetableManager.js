@@ -19,6 +19,10 @@ export default class TimetableManager extends EventEmitter {
      * @type {number}
      */
     this.interval = 30000;
+    /**
+     * @type {boolean}
+     */
+    this.isDisabled = false;
   }
 
   async caching () {
@@ -101,17 +105,17 @@ export default class TimetableManager extends EventEmitter {
   }
 
   async run () {
+    const module = (await this.client.remoteControl.getModule(this.name, 'manager', false));
     if (process.env.NODE_ENV !== 'development') {
       this.client.logger.info('Starting Timetable manager');
-      const module = (await this.client.remoteControl.getModule(this.name, 'manager', false));
       this.interval = module.remoteConfig.cacheInterval;
+      this.isDisabled = module.remoteConfig.isDisabled;
       if (!module.remoteConfig.isDisabled) {
         this.startListeners();
       }
       this.caching();
       this.checker();
     } else {
-      const module = (await this.client.remoteControl.getModule(this.name, 'manager', false));
       this.interval = module.remoteConfig.cacheInterval;
       this.caching();
       this.client.logger.info('Start of timetable manager aborted due to development version!');
