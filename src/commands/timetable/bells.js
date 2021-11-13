@@ -11,7 +11,7 @@ export default class BellsCommand extends Command {
       name: 'bells',
       aliases: ['звонки', 'раcписание-звонков'],
       category: 'timetable',
-      description: 'Отправляет расписание звонков.',
+      description: 'Расписание звонков.',
       usage: 'bells'
     });
     this.client = client;
