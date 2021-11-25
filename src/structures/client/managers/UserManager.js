@@ -118,6 +118,7 @@ export default class UserManager {
  * @prop {number} id
  * @prop {string} group
  * @prop {boolean} autoScheduler
+ * @prop {number} course
  */
 /**
  * @typedef {object} supportmessage

@@ -25,7 +25,7 @@ export default class StatsCommand extends Command {
     const activeUsers = (await this.client.userManager.getUsers({ autoScheduler: true })).filter(u => u.group !== null);
     let msg = `Количество пользователей: \`${userCount}\`\nКол-во активных пользователей\`*\`: \`${activeUsers.length}\`\n\n*Таблица пользователей по курсам*\n\`\`\`\n`;
     for (let i = 1; i < 5; i++) {
-      const users = await this.client.userManager.getUsersByCourse(i);
+      const users = (await this.client.userManager.getUsersByCourse(i)).filter(u => u.autoScheduler);
       msg += `${i} курс | ${users.length}\n`;
     }
     msg += `\`\`\`\n\`*\`Активным пользователем считается тот, кто выбрал группу и включил автоматическую рассылку.`;
