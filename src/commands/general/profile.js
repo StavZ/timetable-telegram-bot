@@ -29,9 +29,9 @@ export default class ProfileCommand extends Command {
     if (args.length && this.client.isOwner(ctx)) {
       const user = await this.client.userManager.getUser(args[0]);
       if (!user) return ctx.replyWithMarkdown('Пользователь не найден.')
-      return ctx.replyWithMarkdown(`ID: \`${user.id}\`\nВыбранная группа: \`${user.group ? user.group : 'Не выбрана'}\`\nРоль: \`${this.roles[user.role]}\``);
+      return ctx.replyWithMarkdown(`ID: \`${user.id}\`\nГруппа: \`${user.group ? user.group : 'Не выбрана'}\`${user.group ? `\nКурс: \`${this.client.userManager.calculateCourse(user.group)}\`` : ''}`);
     }
     const user = await this.client.userManager.getUser(ctx.from.id);
-    ctx.replyWithMarkdown(`Профиль @${ctx.from.username ? ctx.from.username : ctx.from.first_name}\n\nID: \`${user.id}\`\nВыбранная группа: \`${user.group ? user.group : 'Не выбрана'}\`\nРоль: \`${this.roles[user.role]}\``);
+    ctx.replyWithMarkdown(`Профиль @${ctx.from.username ? ctx.from.username : ctx.from.first_name}\n\nID: \`${user.id}\`\nГруппа: \`${user.group ? user.group : 'Не выбрана'}\`${user.group ? `\nКурс: \`${this.client.userManager.calculateCourse(user.group)}\`` : ''}`);
   }
 }

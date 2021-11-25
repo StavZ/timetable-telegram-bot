@@ -1,17 +1,17 @@
 // prototypes
-import '../protorypes/Array.js';
+import '../protorypes/Array.js'
 
-import { Context, Telegraf, TelegramError } from "telegraf";
+import { Context, Telegraf, TelegramError } from 'telegraf';
 import mongoose from 'mongoose';
 import consola from 'consola';
-import Parser from "../parser/Parser.js";
-import UserManager from "./managers/UserManager.js";
+import Parser from '../parser/Parser.js';
+import UserManager from './managers/UserManager.js';
 import CommandHandler from './CommandHandler.js';
-import User from '../models/User.js';
 import moment from 'moment-timezone';
 import TimetableManager from './managers/TimetableManager.js';
 import Lesson from '../parser/Lesson.js';
 import RemoteControlManager from './managers/RemoteControlManager.js';
+import constants from '../../constants.js';
 
 export default class Client extends Telegraf {
   constructor (token, ...args) {
@@ -21,21 +21,11 @@ export default class Client extends Telegraf {
     this.logger = consola;
     this.botId = 1645143260;
     this.parser = new Parser();
-    this.userManager = new UserManager(this.logger);
+    this.userManager = new UserManager(this);
     this.commandHandler = new CommandHandler(this);
     this.manager = new TimetableManager(this);
-    this.remoteControl = new RemoteControlManager(this);
-  }
-
-  async fetchBotConstants () {
-    const bot = await User.findOne({ id: this.botId });
-    const constants = bot.toObject().constants;
     this.constants = constants;
-    setInterval(async () => {
-      const bot = await User.findOne({ id: this.botId });
-      const constants = bot.toObject().constants;
-      this.constants = constants;
-    }, 1.8e+6);
+    this.remoteControl = new RemoteControlManager(this);
   }
 
   /**
@@ -105,7 +95,6 @@ export default class Client extends Telegraf {
 
     this.launch({ allowedUpdates: true }).then(() => {
       this.logger.success(`Logged in as @${this.botInfo.username}`);
-      this.fetchBotConstants();
     }).catch(this.logger.error);
 
     mongoose.connect(process.env.MONGOURI).then(() => {

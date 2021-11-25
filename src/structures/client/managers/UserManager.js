@@ -1,15 +1,15 @@
 import consola from 'consola';
-const { Consola } = consola;
-import User from "../../models/User.js";
+import User from '../../models/User.js';
 import Schedule from '../../parser/Schedule.js';
+import Client from '../Client.js';
 
 export default class UserManager {
-  constructor (logger) {
+  constructor (client) {
     this.name = 'user';
     /**
-     * @type {Consola}
+     * @type {Client}
      */
-    this.logger = logger;
+    this.client = client;
   }
 
   /**
@@ -18,7 +18,29 @@ export default class UserManager {
    * @returns {user}
    */
   setGroup (id, group) {
-    return this.updateUser(id, 'group', group);
+    this.updateUser(id, 'group', group);
+    this.updateUser(id, 'course', this.calculateCourse(group));
+  }
+
+  /**
+   * @param {string} group
+   * @return {number} 
+   */
+  calculateCourse (group) {
+    const yearRegex = /\d{2}/;
+    const result = yearRegex.exec(group);
+    if (!result || !result.length) return 1;
+    const course = this.client.constants.courses[result[0]];
+    return course;
+  }
+
+  /**
+   * @param {number} course
+   * @returns {user[]} 
+   */
+  async getUsersByCourse (course) {
+    const users = await this.getUsers({ course });
+    return users;
   }
 
   /**
@@ -47,6 +69,7 @@ export default class UserManager {
     new User({
       id,
       group: null,
+      course: null,
       sentSchedule: {},
       role: 'student'
     }).save();
@@ -86,7 +109,7 @@ export default class UserManager {
    * @returns {number}
    */
   async getUserCount () {
-    const users = await User.find({});
+    const users = (await User.find({})).filter(u => u.group !== 'bot');
     return users.length;
   }
 }

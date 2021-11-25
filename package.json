@@ -21,7 +21,7 @@
   "type": "module",
   "license": "GPL-3.0-only",
   "name": "timetable-telegram-bot",
-  "version": "4.2.1",
+  "version": "4.3.0",
   "engines": {
     "node": "14.x",
     "yarn": "1.x"

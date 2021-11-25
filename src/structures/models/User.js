@@ -8,6 +8,7 @@ const User = new Schema({
   supportMessages: { type: Array, default: null },
   teacher: { type: String, default: null },
   group: { type: String, default: null },
+  course: { type: Number, default: null },
   role: { type: String, default: null },
 });
 export default model('user', User);
