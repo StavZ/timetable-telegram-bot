@@ -26,13 +26,17 @@ export default class TimetableManager extends EventEmitter {
   }
 
   async caching () {
-    const schedules = await this.client.parser.getAvailableSchedules();
+    const schedules = await this.client.parser.getAvailableSchedules().catch((e) => {
+      this.client.logger.error(e);
+    });
     this.cache = {
       generatedAt: Date.now(),
       schedules
     };
     setInterval(async () => {
-      const schedules = await this.client.parser.getAvailableSchedules();
+      const schedules = await this.client.parser.getAvailableSchedules().catch((e) => {
+        this.client.logger.error(e);
+      });
       this.cache = {
         generatedAt: Date.now(),
         schedules

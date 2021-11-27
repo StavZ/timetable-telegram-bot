@@ -3,6 +3,7 @@ import moment from 'moment-timezone';
 import { JSDOM } from 'jsdom';
 import Schedule from './Schedule.js';
 import Lesson from './Lesson.js';
+import logger from 'consola';
 
 export default class Parser {
   /**
@@ -12,8 +13,14 @@ export default class Parser {
    */
   async getDocument (url) {
     return new Promise(async (resolve, reject) => {
-      const page = await fetch(url ? url : 'https://ppkslavyanova.ru/lessonlist', { headers: { 'Content-Type': 'text/html' } }).catch(reject);
-      const html = await page.text();
+      const page = await fetch(url ? url : 'https://ppkslavyanova.ru/lessonlist', { headers: { 'Content-Type': 'text/html' } }).catch((e) => {
+        logger.error(e);
+        reject(e);
+      });
+      const html = await page.text().catch((e) => {
+        logger.error(e);
+        reject(e);
+      });
       const jsdom = new JSDOM(html);
       const document = jsdom.window.document;
       const trs = document.getElementsByTagName('tr');
@@ -31,7 +38,9 @@ export default class Parser {
    * @returns {Schedule[]}
    */
   async getAvailableSchedules () {
-    const document = await this.getDocument();
+    const document = await this.getDocument().catch((e) => {
+      return null;
+    });
     const lessonList = document.getElementsByClassName('lesson_list').item(0).querySelectorAll('a');
     const schedules = [];
     for (const day of lessonList) {
