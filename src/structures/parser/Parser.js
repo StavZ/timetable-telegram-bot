@@ -15,11 +15,11 @@ export default class Parser {
     return new Promise(async (resolve, reject) => {
       const page = await fetch(url ? url : 'https://ppkslavyanova.ru/lessonlist', { headers: { 'Content-Type': 'text/html' } }).catch((e) => {
         logger.error(e);
-        reject(e);
+        return null;
       });
       const html = await page.text().catch((e) => {
         logger.error(e);
-        reject(e);
+        return null;
       });
       const jsdom = new JSDOM(html);
       const document = jsdom.window.document;
@@ -39,8 +39,10 @@ export default class Parser {
    */
   async getAvailableSchedules () {
     const document = await this.getDocument().catch((e) => {
+      logger.error(e);
       return null;
     });
+    if (!document) return null;
     const lessonList = document.getElementsByClassName('lesson_list').item(0).querySelectorAll('a');
     const schedules = [];
     for (const day of lessonList) {

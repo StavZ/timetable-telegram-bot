@@ -23,7 +23,7 @@ export default class ScheduleCommand extends Command {
    * @param {string[]} args 
    */
   async exec (ctx, args) {
-    if (!this.client.manager.cache) return ctx.reply('В данный момент нет информации о расписании!\nПопробуйте повторить попытку через минуту.')
+    if (!this.client.manager.cache.schedules) return ctx.reply('В данный момент нет информации о расписании!\nПопробуйте повторить попытку через минуту.')
     this.client.action('cancel-timetable', (ctx) => {
       ctx.editMessageReplyMarkup({inline_keyboard: null});
     });

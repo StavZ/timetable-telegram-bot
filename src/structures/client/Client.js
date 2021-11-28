@@ -1,5 +1,5 @@
 // prototypes
-import '../protorypes/Array.js'
+import '../protorypes/Array.js';
 
 import { Context, Telegraf, TelegramError } from 'telegraf';
 import mongoose from 'mongoose';
@@ -45,6 +45,15 @@ export default class Client extends Telegraf {
       return moment().set({ hours: 0, minutes: 0, seconds: 0 }).format('x');
     }
     return moment().set({ hours: 0, minutes: 0, seconds: 0 });
+  }
+
+  async manualSetLastSentSchedule () {
+    const schedules = await this.parser.getAvailableSchedules();
+    const users = await this.userManager.getUsers({ autoScheduler: true });
+    users.filter((u) => u.group !== null).forEach((user) => {
+      const userSchedule = schedules[0].getLessonlistByGroup(user.group);
+      this.userManager.setLastSentSchedule(user.id, userSchedule);
+    })
   }
 
   /**

@@ -18,7 +18,7 @@ export default class TimetableManager extends EventEmitter {
     /**
      * @type {number}
      */
-    this.interval = 30000;
+    this.interval = 180000;
     /**
      * @type {boolean}
      */
@@ -103,6 +103,7 @@ export default class TimetableManager extends EventEmitter {
       if (!this.cache.schedules) return;
       let users = await this.client.userManager.getUsers({ autoScheduler: true });
       users.filter(u => u.group !== null).forEach((u) => {
+        if (!this.cache || !this.cache.schedules) return;
         this.isScheduleNew(u.toObject(), this.cache.schedules[0]);
       });
     }, 180000);
@@ -112,7 +113,7 @@ export default class TimetableManager extends EventEmitter {
     const module = (await this.client.remoteControl.getModule(this.name, 'manager', false));
     if (process.env.NODE_ENV !== 'development') {
       this.client.logger.info('Starting Timetable manager');
-      this.interval = module.remoteConfig.cacheInterval;
+      this.interval = module.remoteConfig.cacheInterval ? module.remoteConfig.cacheInterval : 180000;
       this.isDisabled = module.remoteConfig.isDisabled;
       if (!module.remoteConfig.isDisabled) {
         this.startListeners();
@@ -120,7 +121,7 @@ export default class TimetableManager extends EventEmitter {
       this.caching();
       this.checker();
     } else {
-      this.interval = module.remoteConfig.cacheInterval;
+      this.interval = module.remoteConfig.cacheInterval ? module.remoteConfig.cacheInterval : 180000;
       this.caching();
       this.client.logger.info('Start of timetable manager aborted due to development version!');
     }
