@@ -106,7 +106,7 @@ export default class TimetableManager extends EventEmitter {
         if (!this.cache || !this.cache.schedules) return;
         this.isScheduleNew(u.toObject(), this.cache.schedules[0]);
       });
-    }, 180000);
+    }, this.interval);
   }
 
   async run () {
