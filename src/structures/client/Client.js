@@ -53,7 +53,7 @@ export default class Client extends Telegraf {
     users.filter((u) => u.group !== null).forEach((user) => {
       const userSchedule = schedules[0].getLessonlistByGroup(user.group);
       this.userManager.setLastSentSchedule(user.id, userSchedule);
-    })
+    });
   }
 
   /**

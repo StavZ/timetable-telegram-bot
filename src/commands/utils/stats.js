@@ -31,30 +31,4 @@ export default class StatsCommand extends Command {
     msg += `\`\`\`\n\`*\`Активным пользователем считается тот, кто выбрал группу и включил автоматическую рассылку.`;
     ctx.replyWithMarkdown(msg);
   }
-
-  /**
-   * @deprecated
-   */
-
-  // /**
-  //  * @param {import("../../structures/client/managers/UserManager.js").user[]} users 
-  //  */
-  // sortByGroup (users) {
-  //   /**
-  //    * @type {Object<string, {users: number}>}
-  //    */
-  //   let _ = {};
-  //   for (const u of users) {
-  //     if (!u.group) continue;
-  //     if (!_[u.group]) {
-  //       _[u.group] = { users: 0 };
-  //     }
-  //     _[u.group].users += 1;
-  //   }
-  //   let sortedByKeys;
-  //   sortedByKeys = Object.keys(_).sort((a, b) => { return _[b].users - _[a].users; });
-  //   let sorted = {};
-  //   sortedByKeys.forEach((k) => { return sorted[k] = { users: _[k].users }; });
-  //   return sorted;
-  // }
 }

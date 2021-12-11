@@ -1,6 +1,6 @@
-import {Context} from 'telegraf';
-import Client from '../../structures/client/Client.js'
-import Command from '../../structures/client/Command.js'
+import { Context } from 'telegraf';
+import Client from '../../structures/client/Client.js';
+import Command from '../../structures/client/Command.js';
 
 export default class BellsCommand extends Command {
   /**
@@ -33,7 +33,7 @@ export default class BellsCommand extends Command {
     let msg = `Раcписание звонков\n\n\`\`\`\n`;
     for (const bellN in bells) {
       const bell = bells[bellN];
-      msg += `${bellN} пара | ${bell.start} - ${bell.end}\n`
+      msg += `${bellN} пара | ${bell.start} - ${bell.end}\n`;
     }
     msg += `\`\`\`\n\`*\`Любые изменения в расписании звонков будут рассылаться разработчиком.`;
     ctx.replyWithMarkdown(msg);

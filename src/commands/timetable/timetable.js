@@ -23,9 +23,9 @@ export default class ScheduleCommand extends Command {
    * @param {string[]} args 
    */
   async exec (ctx, args) {
-    if (!this.client.manager.cache.schedules) return ctx.reply('В данный момент нет информации о расписании!\nПопробуйте повторить попытку через минуту.')
+    if (!this.client.manager.cache.schedules) return ctx.reply('В данный момент нет информации о расписании!\nПопробуйте повторить попытку через минуту.');
     this.client.action('cancel-timetable', (ctx) => {
-      ctx.editMessageReplyMarkup({inline_keyboard: null});
+      ctx.editMessageReplyMarkup({ inline_keyboard: null });
     });
 
     this.client.action('switch-group', async (ctx) => {
@@ -75,7 +75,7 @@ export default class ScheduleCommand extends Command {
       }
       msg += `\`\`\`${this.client.generateBells(userSchedule) ? `\n${this.client.generateBells(userSchedule)}` : ''}\n\n[Ссылка на сайт](${userSchedule.url})`;
     } else {
-      msg += `Расписание не найдено*\n\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`
+      msg += `Расписание не найдено*\n\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
     const keyboard = this.parseKeyboard(schedules, key ? key : userSchedule.date.regular, null, 2);
     keyboard.push([{ text: 'Расписание другой группы', callback_data: 'switch-group' }]);
@@ -118,7 +118,7 @@ export default class ScheduleCommand extends Command {
       }
       msg += `\`\`\`${this.client.generateBells(groupSchedule) ? `\n${this.client.generateBells(groupSchedule)}` : ''}\n\n[Ссылка на сайт](${groupSchedule.url})`;
     } else {
-      msg += `Расписание не найдено*\n\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`
+      msg += `Расписание не найдено*\n\`\`\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
 
     const keyboard = this.parseKeyboard(schedules, key ? key : groupSchedule.date.regular, `-${group}`, 2);

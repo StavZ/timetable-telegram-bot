@@ -1,4 +1,3 @@
-import consola from 'consola';
 import User from '../../models/User.js';
 import Schedule from '../../parser/Schedule.js';
 import Client from '../Client.js';

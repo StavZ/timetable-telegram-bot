@@ -28,7 +28,7 @@ export default class ProfileCommand extends Command {
   async exec (ctx, args) {
     if (args.length && this.client.isOwner(ctx)) {
       const user = await this.client.userManager.getUser(args[0]);
-      if (!user) return ctx.replyWithMarkdown('Пользователь не найден.')
+      if (!user) return ctx.replyWithMarkdown('Пользователь не найден.');
       return ctx.replyWithMarkdown(`ID: \`${user.id}\`\nГруппа: \`${user.group ? user.group : 'Не выбрана'}\`${user.group ? `\nКурс: \`${this.client.userManager.calculateCourse(user.group)}\`` : ''}`);
     }
     const user = await this.client.userManager.getUser(ctx.from.id);

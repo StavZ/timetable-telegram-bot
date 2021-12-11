@@ -1,6 +1,6 @@
-import {Context} from 'telegraf';
-import Client from '../../structures/client/Client.js'
-import Command from '../../structures/client/Command.js'
+import { Context } from 'telegraf';
+import Client from '../../structures/client/Client.js';
+import Command from '../../structures/client/Command.js';
 
 export default class AutoschedulerCommand extends Command {
   /**
