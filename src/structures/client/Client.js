@@ -1,5 +1,6 @@
 // prototypes
 import '../protorypes/Array.js';
+import '../protorypes/String.js';
 
 import { Context, Telegraf, TelegramError } from 'telegraf';
 import mongoose from 'mongoose';
@@ -26,6 +27,7 @@ export default class Client extends Telegraf {
     this.manager = new TimetableManager(this);
     this.constants = constants;
     this.remoteControl = new RemoteControlManager(this);
+    this.moment = moment;
   }
 
   /**
@@ -41,9 +43,7 @@ export default class Client extends Telegraf {
   }
 
   getCurrentDate (unix = false) {
-    if (unix) {
-      return moment().set({ hours: 0, minutes: 0, seconds: 0 }).format('x');
-    }
+    if (unix) return moment().set({ hours: 0, minutes: 0, seconds: 0 }).format('x');
     return moment().set({ hours: 0, minutes: 0, seconds: 0 });
   }
 

@@ -7,7 +7,7 @@ import { TelegramError } from 'telegraf';
  * @param {import("../../parser/Schedule.js").schedule} schedule 
  */
 export function newSchedule (client, user, schedule) {
-  let msg = `Новое расписание на ${schedule.date.toString()}\nГруппа: ${schedule.group}\n\`\`\`\n`;
+  let msg = `Новое расписание на ${schedule.date.toString()} (${schedule.date.day.toProperCase()})\nГруппа: ${schedule.group}\n\`\`\`\n`;
   if (schedule.lessons.length) {
     for (const lesson of schedule.lessons) {
       msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;
@@ -38,7 +38,7 @@ export function newSchedule (client, user, schedule) {
  * @param {import("../../parser/Schedule.js").schedule} schedule 
  */
 export function editedSchedule (client, user, schedule) {
-  let msg = `Изменения в расписании на ${schedule.date.toString()}\nГруппа: ${schedule.group}\n\`\`\`\n`;
+  let msg = `Изменения в расписании на ${schedule.date.toString()} (${schedule.date.day.toProperCase()})\nГруппа: ${schedule.group}\n\`\`\`\n`;
   if (schedule.lessons.length) {
     for (const lesson of schedule.lessons) {
       msg += `${lesson.error ? `${lesson.error}\n` : `${lesson.number} пара - ${lesson.title}${lesson.teacher ? ` у ${lesson.teacher}` : ''}${lesson.classroom && lesson.address ? ` • ${lesson.classroom} | ${lesson.address}` : (lesson.classroom && !lesson.address ? ` • ${lesson.classroom}` : (!lesson.classroom && lesson.address ? ` • ${lesson.address}` : ''))}\n`}`;

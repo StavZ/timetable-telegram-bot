@@ -4,6 +4,7 @@ import { JSDOM } from 'jsdom';
 import Schedule from './Schedule.js';
 import Lesson from './Lesson.js';
 import logger from 'consola';
+import constants from '../../constants.js';
 
 export default class Parser {
   /**
@@ -68,7 +69,7 @@ export default class Parser {
 
   /**
    * @param {string} string 
-   * @returns {{toString():string,regular:string}}
+   * @returns {{toString():string,regular:string,day:string}}
    */
   parseDate (string) {
     const months = {
@@ -90,7 +91,8 @@ export default class Parser {
     const date = moment(`${moment().year()}-${months[res[2]]}-${res[1].length === 1 ? `0${res[1]}` : res[1]}`);
     return {
       regular: date.format('DD/MM/YYYY'),
-      toString: () => { return `${string} ${moment().year()}`; }
+      toString: () => { return `${string} ${moment().year()}`; },
+      day: constants.days[date.day()]
     };
   }
 

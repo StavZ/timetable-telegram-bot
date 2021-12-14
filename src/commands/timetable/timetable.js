@@ -67,7 +67,7 @@ export default class ScheduleCommand extends Command {
       return ctx.replyWithMarkdown('Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.');
     }
     const userSchedule = schedule.getLessonlistByGroup(user.group);
-    let msg = `Расписание на ${userSchedule.date.toString()}\nГруппа: ${user.group}\n\`\`\`\n${this.config.message ? `${this.config.message}\n` : ''}`;
+    let msg = `Расписание на ${userSchedule.date.toString()} (${userSchedule.date.day.toProperCase()})\nГруппа: ${user.group}\n\`\`\`\n${this.config.message ? `${this.config.message}\n` : ''}`;
     if (userSchedule.lessons.length) {
       for (const l of userSchedule.lessons) {
         msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;
@@ -110,7 +110,7 @@ export default class ScheduleCommand extends Command {
     }
 
     const groupSchedule = schedule.getLessonlistByGroup(group);
-    let msg = `Расписание на ${groupSchedule.date.toString()}\nГруппа: ${group}\n\`\`\`\n${this.config.message ? `${this.config.message}\n` : ''}`;
+    let msg = `Расписание на ${groupSchedule.date.toString()} (${groupSchedule.date.day.toProperCase()})\nГруппа: ${group}\n\`\`\`\n${this.config.message ? `${this.config.message}\n` : ''}`;
     if (groupSchedule.lessons.length) {
       for (const l of groupSchedule.lessons) {
         msg += `${l.error ? `${l.error}\n` : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : (l.classroom && !l.address ? ` • ${l.classroom}` : (!l.classroom && l.address ? ` • ${l.address}` : ''))}\n`}`;

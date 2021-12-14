@@ -3,7 +3,7 @@ import Lesson from './Lesson.js';
 export default class Schedule {
   constructor (data) {
     /**
-     * @type {{regular:string,toString():string}}
+     * @type {{regular:string,toString():string,day:string}}
      */
     this.date = data.date;
     /**
@@ -45,7 +45,7 @@ export default class Schedule {
  * @typedef {Object} schedule
  * @prop {Lesson[]} lessons
  * @prop {string} url
- * @prop {{toString():string,regular:string}} date
+ * @prop {{toString():string,regular:string,day:string}} date
  * @prop {string} group
  * @prop {number} id
  */
