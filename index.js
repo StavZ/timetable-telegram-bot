@@ -75,13 +75,7 @@ client.on('message', (ctx) => {
   }
 });
 
-process.on('unhandledRejection', (result, error) => {
-  if (error instanceof TelegramError) {
-    if (error.code === 409) {
-      client.logger.warn('Detected TelegramError code 409!');
-      process.exit(1);
-    }
-  }
+process.on('unhandledRejection', async (result, error) => {
   client.logger.error('[unhandledRejection]', error);
 });
 
