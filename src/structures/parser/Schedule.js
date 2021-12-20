@@ -15,7 +15,7 @@ export default class Schedule {
      */
     this.id = data.id;
     /**
-     * @type {{group:string,timetable:Lesson[]}[]}
+     * @type {{group:string,lessonlist:Lesson[]}[]}
      */
     this.lessonlists = data.lessonlists;
   }

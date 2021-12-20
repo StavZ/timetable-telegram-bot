@@ -14,10 +14,11 @@ export default class Parser {
    */
   async getDocument (url) {
     return new Promise(async (resolve, reject) => {
-      const page = await fetch(url ? url : 'https://ppkslavyanova.ru/lessonlist', { headers: { 'Content-Type': 'text/html' } }).catch((e) => {
+      const page = await fetch(url ? url : 'https://ppkslavyanova.ru/lessonlist', { headers: { 'Content-Type': 'text/html', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0' } }).catch((e) => {
         logger.error(e);
         return null;
       });
+      if (page.status !== 200) return null;
       const html = await page.text().catch((e) => {
         logger.error(e);
         return null;
@@ -52,7 +53,36 @@ export default class Parser {
       const date = this.parseDate(day.textContent);
       schedules.push(new Schedule({ date: date, url, id: Number(id), lessonlists: await this.generateLessonlist(url) }));
     }
+    if (this.isSchedulesEmpty(schedules)) {
+      return null;
+    }
     return schedules;
+  }
+
+  /**
+   * @param {Schedule[]} schedules 
+   */
+  isSchedulesEmpty (schedules) {
+    let results = [];
+    for (let i = 0; i < schedules.length; i++) {
+      const schedule = schedules[i];
+      if (!schedule.lessonlists.length) {
+        results.push(true);
+      }
+      let empty = 0;
+      for (const s of schedule.lessonlists) {
+        if (!s.lessonlist.length) {
+          empty++;
+        }
+      }
+      if (empty !== 0) {
+        results.push(true);
+      }
+    }
+    if (results.includes(true)) {
+      return true;
+    }
+    return false;
   }
 
   /**
