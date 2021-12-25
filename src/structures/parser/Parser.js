@@ -51,7 +51,9 @@ export default class Parser {
       const url = `https://ppkslavyanova.ru/lessonlist${day.href}`;
       const id = /^\?day=([0-9]{4})$/.exec(day.href)[1];
       const date = this.parseDate(day.textContent);
-      schedules.push(new Schedule({ date: date, url, id: Number(id), lessonlists: await this.generateLessonlist(url) }));
+      const lessonlists = await this.generateLessonlist(url);
+      if (!lessonlists) return null;
+      schedules.push(new Schedule({ date: date, url, id: Number(id), lessonlists }));
     }
     if (this.isSchedulesEmpty(schedules)) {
       return null;
@@ -150,8 +152,10 @@ export default class Parser {
     const document = await this.getDocument(url);
     const timetable = [];
     const rows = document.getElementsByClassName('R8');
+    const groupRegex = /(([А-Яа-я])?)-(\d{2})/;
     for (let i = 0; i < rows.length; i++) {
       if (rows.item(i).childElementCount === 3) {
+        if (!groupRegex.test(rows.item(i).textContent.replace(/\n/g, ''))) return null;
         // group
         timetable.push({ group: rows.item(i).textContent.replace(/\n/g, ''), lessonlist: [] });
         continue;
