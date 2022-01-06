@@ -1,5 +1,5 @@
 export default class Lesson {
-  constructor (data) {
+  constructor(data) {
     /**
      * @type {string|null}
      */

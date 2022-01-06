@@ -6,7 +6,7 @@ export default class SupportAnswer extends Command {
   /**
    * @param {Client} client
    */
-  constructor (client) {
+  constructor(client) {
     super({
       name: 'supportanswer',
       aliases: [],
@@ -20,7 +20,7 @@ export default class SupportAnswer extends Command {
    * @param {Context} ctx
    * @param {string[]} args
    */
-  async exec (ctx, args) {
+  async exec(ctx, args) {
     if (!args.length) {
       return ctx.reply('Укажите ID пользователя, номер обращения и ответ.');
     }
@@ -36,9 +36,15 @@ export default class SupportAnswer extends Command {
 
     const message = user.supportMessages[messageID - 1];
 
-    this.client.telegram.sendMessage(user.id, `Ответ разработчика на ваше обращение \`#${messageID}\`.\n\nВаш вопрос: ${message.message}\n\nОтвет разработчика: ${answer}`, { parse_mode: 'Markdown' }).then((r) => {
-      ctx.reply(`Ответ отправлен пользователю ${user.id}.`);
-    }).catch(this.client.logger.error);
-
+    this.client.telegram
+      .sendMessage(
+        user.id,
+        `Ответ разработчика на ваше обращение \`#${messageID}\`.\n\nВаш вопрос: ${message.message}\n\nОтвет разработчика: ${answer}`,
+        { parse_mode: 'Markdown' }
+      )
+      .then((r) => {
+        ctx.reply(`Ответ отправлен пользователю ${user.id}.`);
+      })
+      .catch(this.client.logger.error);
   }
 }

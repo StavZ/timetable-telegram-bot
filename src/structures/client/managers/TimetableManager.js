@@ -1,10 +1,10 @@
-import EventEmitter from "events";
-import Schedule from "../../parser/Schedule.js";
-import Client from "../Client.js";
-import { editedSchedule, newSchedule } from "./listeners.js";
+import EventEmitter from 'events';
+import Schedule from '../../parser/Schedule.js';
+import Client from '../Client.js';
+import { editedSchedule, newSchedule } from './listeners.js';
 
 export default class TimetableManager extends EventEmitter {
-  constructor (client) {
+  constructor(client) {
     super();
     this.name = 'timetable';
     /**
@@ -25,34 +25,45 @@ export default class TimetableManager extends EventEmitter {
     this.isDisabled = false;
   }
 
-  async caching () {
-    const schedules = await this.client.parser.getAvailableSchedules().catch((e) => {
-      this.client.logger.error(e);
-    });
-    this.cache = {
-      generatedAt: Date.now(),
-      schedules
-    };
-    setInterval(async () => {
-      const schedules = await this.client.parser.getAvailableSchedules().catch((e) => {
+  async caching() {
+    const schedules = await this.client.parser
+      .getAvailableSchedules()
+      .catch((e) => {
         this.client.logger.error(e);
       });
+    this.cache = {
+      generatedAt: Date.now(),
+      schedules,
+    };
+    setInterval(async () => {
+      const schedules = await this.client.parser
+        .getAvailableSchedules()
+        .catch((e) => {
+          this.client.logger.error(e);
+        });
       this.cache = {
         generatedAt: Date.now(),
-        schedules
+        schedules,
       };
     }, this.interval);
   }
 
   /**
-   * 
-   * @param {user} user 
-   * @param {schedule} userSchedule 
-   * @param {schedule} lastSentSchedule 
+   *
+   * @param {user} user
+   * @param {schedule} userSchedule
+   * @param {schedule} lastSentSchedule
    */
-  isScheduleEdited (user, userSchedule, lastSentSchedule) {
+  isScheduleEdited(user, userSchedule, lastSentSchedule) {
     const result = [];
-    const keys = ['title', 'subgroup', 'teacher', 'number', 'address', 'classroom'];
+    const keys = [
+      'title',
+      'subgroup',
+      'teacher',
+      'number',
+      'address',
+      'classroom',
+    ];
     const lessonsN = userSchedule.lessons;
     const lessonsL = lastSentSchedule.lessons;
 
@@ -78,11 +89,11 @@ export default class TimetableManager extends EventEmitter {
   }
 
   /**
-   * 
-   * @param {Schedule} schedule 
-   * @param {user} user 
+   *
+   * @param {Schedule} schedule
+   * @param {user} user
    */
-  isScheduleNew (user, schedule) {
+  isScheduleNew(user, schedule) {
     /**
      * @type {schedule|null}
      */
@@ -98,22 +109,32 @@ export default class TimetableManager extends EventEmitter {
     }
   }
 
-  checker () {
+  checker() {
     setInterval(async () => {
       if (!this.cache.schedules) return;
-      let users = await this.client.userManager.getUsers({ autoScheduler: true });
-      users.filter(u => u.group !== null).forEach((u) => {
-        if (!this.cache || !this.cache.schedules) return;
-        this.isScheduleNew(u.toObject(), this.cache.schedules[0]);
+      let users = await this.client.userManager.getUsers({
+        autoScheduler: true,
       });
+      users
+        .filter((u) => u.group !== null)
+        .forEach((u) => {
+          if (!this.cache || !this.cache.schedules) return;
+          this.isScheduleNew(u.toObject(), this.cache.schedules[0]);
+        });
     }, this.interval);
   }
 
-  async run () {
-    const module = (await this.client.remoteControl.getModule(this.name, 'manager', false));
+  async run() {
+    const module = await this.client.remoteControl.getModule(
+      this.name,
+      'manager',
+      false
+    );
     if (process.env.NODE_ENV !== 'development') {
       this.client.logger.info('Starting Timetable manager');
-      this.interval = module.remoteConfig.cacheInterval ? module.remoteConfig.cacheInterval : 180000;
+      this.interval = module.remoteConfig.cacheInterval
+        ? module.remoteConfig.cacheInterval
+        : 180000;
       this.isDisabled = module.remoteConfig.isDisabled;
       if (!module.remoteConfig.isDisabled) {
         this.startListeners();
@@ -121,20 +142,26 @@ export default class TimetableManager extends EventEmitter {
       this.caching();
       this.checker();
     } else {
-      this.interval = module.remoteConfig.cacheInterval ? module.remoteConfig.cacheInterval : 180000;
+      this.interval = module.remoteConfig.cacheInterval
+        ? module.remoteConfig.cacheInterval
+        : 180000;
       this.caching();
-      this.client.logger.info('Start of timetable manager aborted due to development version!');
+      this.client.logger.info(
+        'Start of timetable manager aborted due to development version!'
+      );
     }
   }
-  stopListeners () {
+  stopListeners() {
     this.client.logger.info('Stopping listeners...');
     this.removeAllListeners('editedSchedule');
     this.removeAllListeners('newSchedule');
   }
 
-  startListeners () {
+  startListeners() {
     this.client.logger.info('Starting listeners...');
-    this.on('editedSchedule', (...args) => editedSchedule(this.client, ...args));
+    this.on('editedSchedule', (...args) =>
+      editedSchedule(this.client, ...args)
+    );
     this.on('newSchedule', (...args) => newSchedule(this.client, ...args));
   }
 }

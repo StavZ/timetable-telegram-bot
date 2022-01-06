@@ -4,12 +4,13 @@ Object.defineProperty(Array.prototype, 'chunk', {
   value: function (chunkSize) {
     // eslint-disable-next-line no-var
     var array = this;
-    return [].concat.apply([],
+    return [].concat.apply(
+      [],
       array.map(function (elem, i) {
         return i % chunkSize ? [] : [array.slice(i, i + chunkSize)];
       })
     );
-  }
+  },
 });
 Object.defineProperty(Array.prototype, 'removeItem', {
   value: function (item) {
@@ -20,5 +21,5 @@ Object.defineProperty(Array.prototype, 'removeItem', {
       array.splice(index, 1);
     }
     return array;
-  }
+  },
 });

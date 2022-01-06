@@ -1,14 +1,14 @@
-import { Collection } from "@discordjs/collection";
-import { resolve } from "path";
-import { walk } from "walk";
-import Client from "./Client.js";
-import Command from "./Command.js";
+import { Collection } from '@discordjs/collection';
+import { resolve } from 'path';
+import { walk } from 'walk';
+import Client from './Client.js';
+import Command from './Command.js';
 
 export default class CommandHandler {
   /**
-   * @param {Client} client 
+   * @param {Client} client
    */
-  constructor (client) {
+  constructor(client) {
     this.client = client;
     /**
      * @type {Collection<string,Command>}
@@ -20,18 +20,25 @@ export default class CommandHandler {
     this.aliases = new Collection();
   }
 
-  loadAll () {
+  loadAll() {
     const walker = walk('./src/commands');
     walker.on('file', async (root, stats, next) => {
       if (!stats.name.endsWith('.js')) return;
       const path = `file://${resolve(root)}\\${stats.name}`;
       const Command = await import(path);
       const command = new Command.default(this.client);
-      const module = await this.client.remoteControl.getModule(command.name, 'command', true);
+      const module = await this.client.remoteControl.getModule(
+        command.name,
+        'command',
+        true
+      );
       command.aliases.forEach((a) => {
         this.aliases.set(a, command.name);
       });
-      this.commands.set(command.name, Object.assign(command, { path, config: module.remoteConfig }));
+      this.commands.set(
+        command.name,
+        Object.assign(command, { path, config: module.remoteConfig })
+      );
       next();
     });
     walker.on('end', () => {
@@ -40,12 +47,16 @@ export default class CommandHandler {
   }
 
   /**
-   * @param {string} query 
+   * @param {string} query
    */
-  async reload (query) {
+  async reload(query) {
     const command = this.getCommand(query);
     if (!command) return false;
-    const module = await this.client.remoteControl.getModule(command.name, 'command', false);
+    const module = await this.client.remoteControl.getModule(
+      command.name,
+      'command',
+      false
+    );
     command.config = module.remoteConfig;
   }
 
@@ -53,7 +64,7 @@ export default class CommandHandler {
    * @param {string} command
    * @returns {Command}
    */
-  getCommand (command) {
+  getCommand(command) {
     if (this.commands.has(command)) {
       return this.commands.get(command);
     } else if (this.aliases.has(command)) {
@@ -67,7 +78,7 @@ export default class CommandHandler {
    * @param {string} command
    * @returns {boolean}
    */
-  hasCommand (command) {
+  hasCommand(command) {
     return this.commands.has(command) || this.aliases.has(command);
   }
 }

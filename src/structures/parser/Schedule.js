@@ -1,7 +1,7 @@
 import Lesson from './Lesson.js';
 
 export default class Schedule {
-  constructor (data) {
+  constructor(data) {
     /**
      * @type {{regular:string,toString():string,day:string}}
      */
@@ -21,23 +21,24 @@ export default class Schedule {
   }
   /**
    * @param {string} group
-   * @return {schedule} 
+   * @return {schedule}
    */
-  getLessonlistByGroup (group) {
-    const groupLessonlist = this.lessonlists.find(l => l.group === group);
-    if (!groupLessonlist) return {
-      id: this.id,
-      group: group,
-      url: this.url,
-      date: this.date,
-      lessons: []
-    };
+  getLessonlistByGroup(group) {
+    const groupLessonlist = this.lessonlists.find((l) => l.group === group);
+    if (!groupLessonlist)
+      return {
+        id: this.id,
+        group: group,
+        url: this.url,
+        date: this.date,
+        lessons: [],
+      };
     return {
       id: this.id,
       group: groupLessonlist.group,
       url: this.url,
       date: this.date,
-      lessons: groupLessonlist.lessonlist
+      lessons: groupLessonlist.lessonlist,
     };
   }
 }

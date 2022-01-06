@@ -3,7 +3,7 @@ import Schedule from '../../parser/Schedule.js';
 import Client from '../Client.js';
 
 export default class UserManager {
-  constructor (client) {
+  constructor(client) {
     this.name = 'user';
     /**
      * @type {Client}
@@ -16,16 +16,16 @@ export default class UserManager {
    * @param {string} group
    * @returns {user}
    */
-  setGroup (id, group) {
+  setGroup(id, group) {
     this.updateUser(id, 'group', group);
     this.updateUser(id, 'course', this.calculateCourse(group));
   }
 
   /**
    * @param {string} group
-   * @return {number} 
+   * @return {number}
    */
-  calculateCourse (group) {
+  calculateCourse(group) {
     const yearRegex = /\d{2}/;
     const result = yearRegex.exec(group);
     if (!result || !result.length) return 1;
@@ -35,9 +35,9 @@ export default class UserManager {
 
   /**
    * @param {number} course
-   * @returns {user[]} 
+   * @returns {user[]}
    */
-  async getUsersByCourse (course) {
+  async getUsersByCourse(course) {
     const users = await this.getUsers({ course });
     return users;
   }
@@ -47,15 +47,15 @@ export default class UserManager {
    * @param {Schedule} schedule
    * @returns {user}
    */
-  setLastSentSchedule (id, schedule) {
+  setLastSentSchedule(id, schedule) {
     return this.updateUser(id, 'sentSchedule', schedule);
   }
 
   /**
    * @param {number} id
-   * @param {supportmessage} message 
+   * @param {supportmessage} message
    */
-  async pushSupportMessage (id, message) {
+  async pushSupportMessage(id, message) {
     const user = await User.findOne({ id });
     user.supportMessages.push(message);
     return user.save();
@@ -64,13 +64,13 @@ export default class UserManager {
   /**
    * @param {number} id
    */
-  createUser (id) {
+  createUser(id) {
     new User({
       id,
       group: null,
       course: null,
       sentSchedule: {},
-      role: 'student'
+      role: 'student',
     }).save();
   }
 
@@ -80,7 +80,7 @@ export default class UserManager {
    * @param {any} value
    * @returns {user}
    */
-  async updateUser (id, name, value) {
+  async updateUser(id, name, value) {
     // const schema = await User.updateOne({ id }, { [name]: value });
     return User.updateOne({ id }, { [name]: value });
   }
@@ -89,17 +89,17 @@ export default class UserManager {
    * @param {number} id
    * @returns {Promise<user>}
    */
-  async getUser (id) {
+  async getUser(id) {
     const schema = await User.findOne({ id });
     if (!schema) return null;
     return schema;
   }
 
   /**
-   * @param {any} options 
+   * @param {any} options
    * @returns {Promise<user[]>}
    */
-  async getUsers (options) {
+  async getUsers(options) {
     const users = await User.find(options);
     return users;
   }
@@ -107,8 +107,8 @@ export default class UserManager {
   /**
    * @returns {number}
    */
-  async getUserCount () {
-    const users = (await User.find({})).filter(u => u.group !== 'bot');
+  async getUserCount() {
+    const users = (await User.find({})).filter((u) => u.group !== 'bot');
     return users.length;
   }
 }

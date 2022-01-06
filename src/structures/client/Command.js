@@ -2,16 +2,18 @@ export default class Command {
   /**
    * @param {CommandOptions} options
    */
-  constructor (options = {
-    name: '',
-    aliases: [],
-    category: '',
-    description: '',
-    ownerOnly: false,
-    path: '',
-    usage: '',
-    includeInHelp: true
-  }) {
+  constructor(
+    options = {
+      name: '',
+      aliases: [],
+      category: '',
+      description: '',
+      ownerOnly: false,
+      path: '',
+      usage: '',
+      includeInHelp: true,
+    }
+  ) {
     this.name = options.name;
     this.aliases = options.aliases;
     this.category = options.category;

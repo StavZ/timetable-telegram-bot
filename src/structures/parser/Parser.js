@@ -8,13 +8,22 @@ import constants from '../../constants.js';
 
 export default class Parser {
   /**
-   * 
-   * @param {string|null} url 
+   *
+   * @param {string|null} url
    * @returns {Document}
    */
-  async getDocument (url) {
+  async getDocument(url) {
     return new Promise(async (resolve, reject) => {
-      const page = await fetch(url ? url : 'https://ppkslavyanova.ru/lessonlist', { headers: { 'Content-Type': 'text/html', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0' } }).catch((e) => {
+      const page = await fetch(
+        url ? url : 'https://ppkslavyanova.ru/lessonlist',
+        {
+          headers: {
+            'Content-Type': 'text/html',
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0',
+          },
+        }
+      ).catch((e) => {
         logger.error(e);
         return null;
       });
@@ -27,7 +36,8 @@ export default class Parser {
       const document = jsdom.window.document;
       const trs = document.getElementsByTagName('tr');
       for (let i = 0; i < trs.length; i++) {
-        if (trs.item(i).className === 'R7' || trs.item(i).className === 'R3') continue;
+        if (trs.item(i).className === 'R7' || trs.item(i).className === 'R3')
+          continue;
         if (trs.item(i).className !== 'R8') {
           trs.item(i).classList.replace(trs.item(i).className, 'R8');
         }
@@ -39,13 +49,16 @@ export default class Parser {
   /**
    * @returns {Schedule[]}
    */
-  async getAvailableSchedules () {
+  async getAvailableSchedules() {
     const document = await this.getDocument().catch((e) => {
       logger.error(e);
       return null;
     });
     if (!document) return null;
-    const lessonList = document.getElementsByClassName('lesson_list').item(0).querySelectorAll('a');
+    const lessonList = document
+      .getElementsByClassName('lesson_list')
+      .item(0)
+      .querySelectorAll('a');
     const schedules = [];
     for (const day of lessonList) {
       const url = `https://ppkslavyanova.ru/lessonlist${day.href}`;
@@ -53,7 +66,9 @@ export default class Parser {
       const date = this.parseDate(day.textContent);
       const lessonlists = await this.generateLessonlist(url);
       if (!lessonlists) return null;
-      schedules.push(new Schedule({ date: date, url, id: Number(id), lessonlists }));
+      schedules.push(
+        new Schedule({ date: date, url, id: Number(id), lessonlists })
+      );
     }
     if (this.isSchedulesEmpty(schedules)) {
       return null;
@@ -62,9 +77,9 @@ export default class Parser {
   }
 
   /**
-   * @param {Schedule[]} schedules 
+   * @param {Schedule[]} schedules
    */
-  isSchedulesEmpty (schedules) {
+  isSchedulesEmpty(schedules) {
     let results = [];
     for (let i = 0; i < schedules.length; i++) {
       const schedule = schedules[i];
@@ -91,7 +106,7 @@ export default class Parser {
    * @param {Schedule[]} schedules
    * @returns {Map<string,Schedule>}
    */
-  getSchedulesKeys (schedules) {
+  getSchedulesKeys(schedules) {
     const output = {};
     for (const schedule in schedules) {
       output[schedules[schedule].date.regular] = schedules[schedule];
@@ -100,31 +115,37 @@ export default class Parser {
   }
 
   /**
-   * @param {string} string 
+   * @param {string} string
    * @returns {{toString():string,regular:string,day:string}}
    */
-  parseDate (string) {
+  parseDate(string) {
     const months = {
-      'января': '01',
-      'февраля': '02',
-      'марта': '03',
-      'апреля': '04',
-      'мая': '05',
-      'июня': '06',
-      'июля': '07',
-      'августа': '08',
-      'сентября': '09',
-      'октября': '10',
-      'ноября': '11',
-      'декабря': '12'
+      января: '01',
+      февраля: '02',
+      марта: '03',
+      апреля: '04',
+      мая: '05',
+      июня: '06',
+      июля: '07',
+      августа: '08',
+      сентября: '09',
+      октября: '10',
+      ноября: '11',
+      декабря: '12',
     };
     const regex = /([0-9]{1,2})? ?([а-я]+)?/gim;
     const res = regex.exec(string);
-    const date = moment(`${moment().year()}-${months[res[2]]}-${res[1].length === 1 ? `0${res[1]}` : res[1]}`);
+    const date = moment(
+      `${moment().year() - 1}-${months[res[2]]}-${
+        res[1].length === 1 ? `0${res[1]}` : res[1]
+      }`
+    );
     return {
       regular: date.format('DD/MM/YYYY'),
-      toString: () => { return `${string} ${moment().year()}`; },
-      day: constants.days[date.day()]
+      toString: () => {
+        return `${string} ${date.year()}`;
+      },
+      day: constants.days[date.day()],
     };
   }
 
@@ -132,7 +153,7 @@ export default class Parser {
    * Get groups
    * @returns {string[]}
    */
-  async getGroups () {
+  async getGroups() {
     const document = await this.getDocument();
     const groupsArray = Array.from(document.getElementsByClassName('R8C0'));
     const groups = [];
@@ -148,32 +169,41 @@ export default class Parser {
    * @param {number} id
    * @returns {{group:string,lessonlist:Lesson[]}}
    */
-  async generateLessonlist (url) {
+  async generateLessonlist(url) {
     const document = await this.getDocument(url);
     const timetable = [];
     const rows = document.getElementsByClassName('R8');
     const groupRegex = /(([А-Яа-я])?)-(\d{2})/;
     for (let i = 0; i < rows.length; i++) {
       if (rows.item(i).childElementCount === 3) {
-        if (!groupRegex.test(rows.item(i).textContent.replace(/\n/g, ''))) return null;
+        if (!groupRegex.test(rows.item(i).textContent.replace(/\n/g, '')))
+          return null;
         // group
-        timetable.push({ group: rows.item(i).textContent.replace(/\n/g, ''), lessonlist: [] });
+        timetable.push({
+          group: rows.item(i).textContent.replace(/\n/g, ''),
+          lessonlist: [],
+        });
         continue;
       } else {
         // lesson
-        timetable[timetable.length - 1].lessonlist.push(await this.parseLesson(rows.item(i).textContent.trim()));
+        timetable[timetable.length - 1].lessonlist.push(
+          await this.parseLesson(rows.item(i).textContent.trim())
+        );
       }
     }
     return timetable;
   }
 
-  parseLesson (string) {
+  parseLesson(string) {
     return new Promise((resolve, reject) => {
       const fullRegex = /^(.*)\n(.*)\n(.*)\n(.*)\n?(.*)$/gm;
       const parsed = fullRegex.exec(string);
       const result = {};
       try {
-        if (!parsed) resolve(new Lesson({ error: 'Произошла ошибка во время обработки.' }));
+        if (!parsed)
+          resolve(
+            new Lesson({ error: 'Произошла ошибка во время обработки.' })
+          );
         result.lessonNumber = parseInt(parsed[1], 10);
         result.subgroup = parsed[2] ? parsed[2] : null;
         result.lesson = parsed[3].trim();
@@ -189,7 +219,7 @@ export default class Parser {
        * @param {string} str
        * @returns {{classroom:string|null,address:string|null}}
        */
-      function parseClassroomAddress (str) {
+      function parseClassroomAddress(str) {
         if (str) {
           str = str.replace(/\n/g, '');
         }
@@ -198,7 +228,9 @@ export default class Parser {
         const result = { classroom: null, address: null };
         if (str && str.match(/^\d/)) {
           const parsedClassroom = classroomRegex.exec(str);
-          result.classroom = parsedClassroom[1] ? parsedClassroom[1].trim() : null;
+          result.classroom = parsedClassroom[1]
+            ? parsedClassroom[1].trim()
+            : null;
           result.address = parsedClassroom[4];
         } else if (str && str.match(remoteRegex)) {
           result.classroom = 'Дистанционное обучение';
