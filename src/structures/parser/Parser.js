@@ -63,7 +63,7 @@ export default class Parser {
     for (const day of lessonList) {
       const url = `https://ppkslavyanova.ru/lessonlist${day.href}`;
       const id = /^\?day=([0-9]{4})$/.exec(day.href)[1];
-      const date = this.parseDate(day.textContent);
+      const date = this.parseDate(day.textContent, Number(id));
       const lessonlists = await this.generateLessonlist(url);
       if (!lessonlists) return null;
       schedules.push(
@@ -116,9 +116,10 @@ export default class Parser {
 
   /**
    * @param {string} string
+   * @param {number} id
    * @returns {{toString():string,regular:string,day:string}}
    */
-  parseDate(string) {
+  parseDate(string, id) {
     const months = {
       января: '01',
       февраля: '02',
@@ -136,7 +137,7 @@ export default class Parser {
     const regex = /([0-9]{1,2})? ?([а-я]+)?/gim;
     const res = regex.exec(string);
     const date = moment(
-      `${moment().year()}-${months[res[2]]}-${
+      `${id === 2621 ? '2021' : '2022'}-${months[res[2]]}-${
         res[1].length === 1 ? `0${res[1]}` : res[1]
       }`
     );
