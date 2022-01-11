@@ -137,7 +137,7 @@ export default class Parser {
     const regex = /([0-9]{1,2})? ?([а-я]+)?/gim;
     const res = regex.exec(string);
     const date = moment(
-      `${id === 2621 ? '2021' : '2022'}-${months[res[2]]}-${
+      `${id <= 2621 ? '2021' : '2022'}-${months[res[2]]}-${
         res[1].length === 1 ? `0${res[1]}` : res[1]
       }`
     );
