@@ -144,7 +144,7 @@ export default class Parser {
     return {
       regular: date.format('DD/MM/YYYY'),
       toString: () => {
-        return `${string} ${date.year()}`;
+        return `${string}${date.year()}`;
       },
       day: constants.days[date.day()],
     };
