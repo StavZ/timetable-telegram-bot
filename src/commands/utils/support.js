@@ -13,7 +13,7 @@ export default class SupportCommand extends Command {
       name: 'support',
       aliases: ['поддержка'],
       category: 'utils',
-      description: 'Служба поддержки бота',
+      description: 'Служба поддержки бота.',
       usage: 'support `[тема]`',
     });
     this.client = client;
