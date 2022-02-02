@@ -162,7 +162,7 @@ export default class RemoteWorksParser {
    * @param {string} group
    */
   getGroupPrefix(group) {
-    return group.match(/([А-Я]{1,2})/g)[0].toUpperCase();
+    return group.match(/([А-Яа-я]{1,2})/g)[0].toUpperCase();
   }
 
   getGroupId(group) {
