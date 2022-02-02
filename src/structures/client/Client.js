@@ -13,6 +13,7 @@ import TimetableManager from './managers/TimetableManager.js';
 import Lesson from '../parser/Lesson.js';
 import RemoteControlManager from './managers/RemoteControlManager.js';
 import constants from '../../constants.js';
+import RemoteWorksParser from '../parser/RWParser.js';
 
 export default class Client extends Telegraf {
   constructor(token, ...args) {
@@ -22,6 +23,7 @@ export default class Client extends Telegraf {
     this.logger = consola;
     this.botId = 1645143260;
     this.parser = new Parser();
+    this.remoteWorks = new RemoteWorksParser(this);
     this.userManager = new UserManager(this);
     this.commandHandler = new CommandHandler(this);
     this.manager = new TimetableManager(this);

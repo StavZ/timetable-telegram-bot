@@ -10,5 +10,6 @@ const User = new Schema({
   group: { type: String, default: null },
   course: { type: Number, default: null },
   role: { type: String, default: null },
+  regDate: { type: Number, default: null },
 });
 export default model('user', User);

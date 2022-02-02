@@ -5,3 +5,7 @@ String.prototype.toProperCase = function () {
     return $1.toUpperCase();
   });
 };
+
+String.prototype.replaceSpaces = function () {
+  return this.replace(/  +/g, ' ');
+}
