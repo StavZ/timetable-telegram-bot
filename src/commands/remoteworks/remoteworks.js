@@ -121,6 +121,7 @@ export default class StartCommand extends Command {
    * @param {import('../../structures/parser/RWParser.js').task[]} rw
    */
   showByDate(ctx, user, rw) {
+    console.log(rw);
     if (!rw.length) {
       ctx.replyWithMarkdown('Задания не найдены на эту дату.');
     } else {
@@ -141,7 +142,7 @@ export default class StartCommand extends Command {
               }\`\nДата: \`${task.date.toString()} ${
                 task.date.day ? `(${task.date.day})` : ''
               }\`\nТема задания: ${task.taskSubject}\nЗадание: ${
-                task.taskContent ?? 'Задание не указано'
+                task.taskContent?.replace(/(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g, (x) => `\`\`\`${x}\`\`\``) ?? 'Задание не указано'
               }${
                 task.links.length
                   ? `\n${task.links
