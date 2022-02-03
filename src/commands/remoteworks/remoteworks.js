@@ -121,7 +121,6 @@ export default class StartCommand extends Command {
    * @param {import('../../structures/parser/RWParser.js').task[]} rw
    */
   showByDate(ctx, user, rw) {
-    console.log(rw);
     if (!rw.length) {
       ctx.replyWithMarkdown('Задания не найдены на эту дату.');
     } else {
