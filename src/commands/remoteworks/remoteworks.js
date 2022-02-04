@@ -79,7 +79,7 @@ export default class StartCommand extends Command {
       );
     } else {
       const date = args[0];
-      const rwd = this.findByDate(ctx.from.id, this.validateDate(date));
+      const rwd = await this.findByDate(ctx.from.id, this.validateDate(date));
       this.showByDate(ctx, rwd);
     }
   }
@@ -141,6 +141,7 @@ export default class StartCommand extends Command {
    */
   async showByDate(ctx, rw, edit = false) {
     const user = await this.client.userManager.getUser(ctx.from.id);
+    // console.log(rw);
     // console.log(rw);
     if (!rw.length) {
       if (edit) {
