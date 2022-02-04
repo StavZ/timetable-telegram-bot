@@ -23,8 +23,6 @@ export default class StartCommand extends Command {
    */
   async exec(ctx, args) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    // console.log(user);
-    // console.log(user);
     if (!user.group)
       return ctx.replyWithMarkdown(
         'Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.'
@@ -52,7 +50,6 @@ export default class StartCommand extends Command {
     this.client.action('todays-tasks', async (ctxts) => {
       const todayDate = this.client.moment().format('DD-MM-YY');
       const rwdtoday = await this.findByDate(ctxts.from.id, todayDate);
-      // console.log(rwdtoday);
       return this.showByDate(ctxts, rwdtoday, true);
     });
 
@@ -141,8 +138,6 @@ export default class StartCommand extends Command {
    */
   async showByDate(ctx, rw, edit = false) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    // console.log(rw);
-    // console.log(rw);
     if (!rw.length) {
       if (edit) {
         ctx.editMessageText('Задания не найдены на эту дату.', {
