@@ -30,6 +30,7 @@ export default class Client extends Telegraf {
     this.constants = constants;
     this.remoteControl = new RemoteControlManager(this);
     this.moment = moment;
+    this.mongoose = mongoose;
   }
 
   /**

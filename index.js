@@ -26,12 +26,14 @@ const loggerBlacklist = [1705065791];
 
 process.once('SIGINT', () => {
   client.stop('SIGINT');
+  client.mongoose.disconnect()
   if (!client.manager.isDisabled) {
     client?.manager.stopListeners();
   }
 });
 process.once('SIGTERM', () => {
   client.stop('SIGTERM');
+  client.mongoose.disconnect()
   if (!client.manager.isDisabled) {
     client?.manager.stopListeners();
   }
