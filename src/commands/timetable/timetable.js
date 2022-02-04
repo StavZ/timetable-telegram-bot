@@ -108,13 +108,13 @@ export default class ScheduleCommand extends Command {
         }`;
         if (l.error && msg.includes(l.error)) break;
       }
-      msg += `\`${
+      msg += `\`\`\`${
         this.client.generateBells(userSchedule)
-          ? ```\n${this.client.generateBells(userSchedule)}`
+          ? `\n${this.client.generateBells(userSchedule)}`
           : ''
       }\n\n[Ссылка на сайт](${userSchedule.url})`;
     } else {
-      msg += ```Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
+      msg += `\`\`\`Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
     const keyboard = this.parseKeyboard(
       schedules,
@@ -192,13 +192,13 @@ export default class ScheduleCommand extends Command {
         }`;
         if (l.error && msg.includes(l.error)) break;
       }
-      msg += `\`${
+      msg += `\`\`\`${
         this.client.generateBells(groupSchedule)
           ? ```\n${this.client.generateBells(groupSchedule)}`
           : ''
       }\n\n[Ссылка на сайт](${groupSchedule.url})`;
     } else {
-      msg += ```Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
+      msg += `\`\`\`Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
 
     const keyboard = this.parseKeyboard(
