@@ -191,7 +191,7 @@ export default class StartCommand extends Command {
   showByTitle(ctx, user, tasks, stitle, mid, key) {
     const task = key ? tasks.find((t) => t.date.regular === key) : tasks[0];
     tasks.forEach((ta) => {
-      this.client.action(`${stitle}-${ta.date.regular}`, (c) => {
+      this.client.action(`${user.group}${stitle}-${ta.date.regular}`, (c) => {
         this.showByTitle(
           c,
           user,
@@ -204,7 +204,7 @@ export default class StartCommand extends Command {
     });
     let keyboard = [];
     if (tasks.length > 1) {
-      keyboard = this.parseKeyboard(tasks, task, stitle, 4);
+      keyboard = this.parseKeyboard(tasks, task, `${user.group}${stitle}`, 4);
     }
     keyboard.push([{ text: 'Назад', callback_data: 'back-to-titles' }]);
     const msg = `Найдено \`${tasks.length}\` задани${
