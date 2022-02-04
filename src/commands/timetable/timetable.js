@@ -170,11 +170,9 @@ export default class ScheduleCommand extends Command {
     }
 
     const groupSchedule = schedule.getLessonlistByGroup(group);
-    console.log(groupSchedule);
     let msg = `Расписание на ${groupSchedule.date.toString()} (${groupSchedule.date.day.toProperCase()})\nГруппа: ${group}\n\`\`\`\n${
       this.config.message ? `${this.config.message}\n` : ''
     }`;
-    console.log(msg);
     if (groupSchedule.lessons.length) {
       for (const l of groupSchedule.lessons) {
         msg += `${
@@ -203,7 +201,6 @@ export default class ScheduleCommand extends Command {
       msg += ```Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
 
-    console.log(msg);
     const keyboard = this.parseKeyboard(
       schedules,
       key ? key : groupSchedule.date.regular,
