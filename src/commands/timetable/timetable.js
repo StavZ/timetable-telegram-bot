@@ -110,11 +110,11 @@ export default class ScheduleCommand extends Command {
       }
       msg += `\`${
         this.client.generateBells(userSchedule)
-          ? `\n${this.client.generateBells(userSchedule)}`
+          ? ```\n${this.client.generateBells(userSchedule)}`
           : ''
       }\n\n[Ссылка на сайт](${userSchedule.url})`;
     } else {
-      msg += `Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
+      msg += ```Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
     const keyboard = this.parseKeyboard(
       schedules,
@@ -170,9 +170,11 @@ export default class ScheduleCommand extends Command {
     }
 
     const groupSchedule = schedule.getLessonlistByGroup(group);
+    console.log(groupSchedule);
     let msg = `Расписание на ${groupSchedule.date.toString()} (${groupSchedule.date.day.toProperCase()})\nГруппа: ${group}\n\`\`\`\n${
       this.config.message ? `${this.config.message}\n` : ''
     }`;
+    console.log(msg);
     if (groupSchedule.lessons.length) {
       for (const l of groupSchedule.lessons) {
         msg += `${
@@ -194,13 +196,14 @@ export default class ScheduleCommand extends Command {
       }
       msg += `\`${
         this.client.generateBells(groupSchedule)
-          ? `\n${this.client.generateBells(groupSchedule)}`
+          ? ```\n${this.client.generateBells(groupSchedule)}`
           : ''
       }\n\n[Ссылка на сайт](${groupSchedule.url})`;
     } else {
-      msg += `Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
+      msg += ```Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
 
+    console.log(msg);
     const keyboard = this.parseKeyboard(
       schedules,
       key ? key : groupSchedule.date.regular,
