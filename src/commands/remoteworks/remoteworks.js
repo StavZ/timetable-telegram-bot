@@ -23,37 +23,40 @@ export default class StartCommand extends Command {
    */
   async exec(ctx, args) {
     const user = await this.client.userManager.getUser(ctx.from.id);
+    // console.log(user);
+    // console.log(user);
     if (!user.group)
       return ctx.replyWithMarkdown(
         'Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.'
       );
+
+    this.client.action('by-title', async (ctxt) => {
+      return await this.startByTitle(ctxt, user);
+    });
+
     const rw = (
       await this.client.remoteWorks.getRemoteWorks(user.group)
     )?.reverse();
-
-    this.start(ctx, rw, user, args);
-
-    this.client.action('by-title', (ctxt) => {
-      this.startByTitle(ctxt, user, rw);
-    });
-
     const titles = this.shortTitles(rw);
     titles.forEach((t) => {
       this.client.action(t.short, (ctt) => {
         const tasks = rw.filter((r) => r.title === t.title);
-        this.showByTitle(ctt, user, tasks, t.short);
+        return this.showByTitle(ctt, tasks, t.short);
       });
     });
 
     this.client.action('back-to-titles', (ctxs) => {
-      this.startByTitle(ctxs, user, rw);
+      return this.startByTitle(ctxs, user);
     });
 
-    this.client.action('todays-tasks', (ctxts) => {
+    this.client.action('todays-tasks', async (ctxts) => {
       const todayDate = this.client.moment().format('DD-MM-YY');
-      const rwdtoday = this.findByDate(rw, todayDate);
-      this.showByDate(ctxts, user, rwdtoday, true);
+      const rwdtoday = await this.findByDate(ctxts.from.id, todayDate);
+      // console.log(rwdtoday);
+      return this.showByDate(ctxts, rwdtoday, true);
     });
+
+    this.start(ctx, args);
   }
 
   /**
@@ -61,7 +64,7 @@ export default class StartCommand extends Command {
    * @param {import('../../structures/parser/RWParser.js').task[]} rw
    * @param {string[]} args
    */
-  start(ctx, rw, user, args) {
+  async start(ctx, args) {
     if (!args.length || (args[0] ? !this.validateDate(args[0]) : false)) {
       ctx.replyWithMarkdown(
         `Данная функция находится в стадии тестирования!\nЛюбые ошибки, пожалуйста, отправляйте в поддержку /support.\n\nФильтр \`'По дисциплине'\` - поиск по дисциплине из доступных заданий на сайте.\nФильтр \`'Задания на сегодня'\` - задания на сегодняшний день.\n\nФильтр показывает только опубликованные задания, если нет нужной Вам дисциплины - задания не опубликованы.\n\nЕсли Вы хотите указать свою дату при поиске заданий используйте такой формат команды:\n/remoteworks день-месяц-год\nПример: \`/remoteworks 31-1-22\` (без пробелов между тире).`,
@@ -76,8 +79,8 @@ export default class StartCommand extends Command {
       );
     } else {
       const date = args[0];
-      const rwd = this.findByDate(rw, this.validateDate(date));
-      this.showByDate(ctx, user, rwd);
+      const rwd = this.findByDate(ctx.from.id, this.validateDate(date));
+      this.showByDate(ctx, rwd);
     }
   }
 
@@ -102,7 +105,11 @@ export default class StartCommand extends Command {
    * @param {import('../../structures/client/managers/UserManager.js').user} user
    * @param {import('../../structures/parser/RWParser.js').task[]} rw
    */
-  startByTitle(ctx, user, rw) {
+  async startByTitle(ctx) {
+    const user = await this.client.userManager.getUser(ctx.from.id);
+    const rw = (
+      await this.client.remoteWorks.getRemoteWorks(user.group)
+    )?.reverse();
     const titles = this.shortTitles(rw);
     const keyboard = this.parseFullKeyboard(titles, 3);
     ctx.editMessageText(
@@ -115,8 +122,12 @@ export default class StartCommand extends Command {
    * @param {import('../../structures/parser/RWParser.js').task[]} rw
    * @param {string} date
    */
-  findByDate(rw, date) {
+  async findByDate(userid, date) {
     if (!date) return [];
+    const user = await this.client.userManager.getUser(userid);
+    const rw = (
+      await this.client.remoteWorks.getRemoteWorks(user.group)
+    )?.reverse();
     const found = rw.filter((t) => t.date?.regular === date);
     return found;
   }
@@ -128,7 +139,9 @@ export default class StartCommand extends Command {
    * @param {import('../../structures/client/managers/UserManager.js').user} user
    * @param {import('../../structures/parser/RWParser.js').task[]} rw
    */
-  showByDate(ctx, user, rw, edit = false) {
+  async showByDate(ctx, rw, edit = false) {
+    const user = await this.client.userManager.getUser(ctx.from.id);
+    // console.log(rw);
     if (!rw.length) {
       if (edit) {
         ctx.editMessageText('Задания не найдены на эту дату.', {
@@ -175,7 +188,7 @@ export default class StartCommand extends Command {
         {
           disable_web_page_preview: true,
           reply_markup: { inline_keyboard: null },
-          parse_mode: 'Markdown'
+          parse_mode: 'Markdown',
         }
       );
     }
@@ -188,13 +201,13 @@ export default class StartCommand extends Command {
    * @param {number} mid
    * @param {string} key
    */
-  showByTitle(ctx, user, tasks, stitle, mid, key) {
+  async showByTitle(ctx, tasks, stitle, mid, key) {
+    const user = await this.client.userManager.getUser(ctx.from.id);
     const task = key ? tasks.find((t) => t.date.regular === key) : tasks[0];
     tasks.forEach((ta) => {
       this.client.action(`${user.group}${stitle}-${ta.date.regular}`, (c) => {
         this.showByTitle(
           c,
-          user,
           tasks,
           stitle,
           c.update.callback_query.message.message_id,

@@ -45,9 +45,7 @@ export default class ProfileCommand extends Command {
     }
     const user = await this.client.userManager.getUser(ctx.from.id);
     ctx.replyWithMarkdown(
-      `Профиль @${
-        ctx.from.username ? ctx.from.username.replace(/\S/g, '') : ctx.from.first_name
-      }\n\nID: \`${user.id}\`\nГруппа: \`${
+      `Ваш профиль\n\nID: \`${user.id}\`\nГруппа: \`${
         user.group ? user.group : 'Не выбрана'
       }\`${
         user.group

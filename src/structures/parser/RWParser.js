@@ -12,6 +12,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const groups = require('./groups.json');
 import constants from '../../constants.js';
+import { log } from 'console';
 
 const dateRegex =
   /(\d+)\s(января|февраля|марта|апреля|мая|июня|сентября|октября|ноября|декабря)\s(\d{2,4})/;
@@ -36,6 +37,7 @@ export default class RemoteWorksParser {
     form.append('group_id', `${id}`);
     form.append('edu_edit', '1');
     form.append('get_remote_work', '1');
+    // log(form)
     await axios
       .post(URL, form, {
         headers: {
