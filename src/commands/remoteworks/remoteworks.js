@@ -48,6 +48,12 @@ export default class StartCommand extends Command {
     this.client.action('back-to-titles', (ctxs) => {
       this.startByTitle(ctxs, user, rw);
     });
+
+    this.client.action('todays-tasks', (ctxts) => {
+      const todayDate = this.client.moment().format('DD-MM-YY');
+      const rwdtoday = this.findByDate(rw, todayDate);
+      this.showByDate(ctxts, user, rwdtoday, true);
+    });
   }
 
   /**
@@ -58,11 +64,12 @@ export default class StartCommand extends Command {
   start(ctx, rw, user, args) {
     if (!args.length || (args[0] ? !this.validateDate(args[0]) : false)) {
       ctx.replyWithMarkdown(
-        `Данная функция находится в стадии тестирования!\nЛюбые ошибки, пожалуйста, отправляйте в поддержку /support.\n\nФильтр \`'По дисциплине'\` - поиск по дисциплине из доступных заданий на сайте.\n\nФильтр показывает только опубликованные задания, если нет нужной Вам дисциплины - задания не опубликованы.\n\nЕсли Вы хотите указать свою дату при поиске заданий используйте такой формат команды:\n/remoteworks день-месяц-год\nПример: \`/remoteworks 31-1-22\` (без пробелов между тире).`,
+        `Данная функция находится в стадии тестирования!\nЛюбые ошибки, пожалуйста, отправляйте в поддержку /support.\n\nФильтр \`'По дисциплине'\` - поиск по дисциплине из доступных заданий на сайте.\nФильтр \`'Задания на сегодня'\` - задания на сегодняшний день.\n\nФильтр показывает только опубликованные задания, если нет нужной Вам дисциплины - задания не опубликованы.\n\nЕсли Вы хотите указать свою дату при поиске заданий используйте такой формат команды:\n/remoteworks день-месяц-год\nПример: \`/remoteworks 31-1-22\` (без пробелов между тире).`,
         {
           reply_markup: {
             inline_keyboard: [
               [{ text: 'По дисциплине', callback_data: 'by-title' }],
+              [{ text: 'Задания на сегодня', callback_data: 'todays-tasks' }],
             ],
           },
         }
@@ -109,6 +116,7 @@ export default class StartCommand extends Command {
    * @param {string} date
    */
   findByDate(rw, date) {
+    if (!date) return [];
     const found = rw.filter((t) => t.date?.regular === date);
     return found;
   }
@@ -120,11 +128,17 @@ export default class StartCommand extends Command {
    * @param {import('../../structures/client/managers/UserManager.js').user} user
    * @param {import('../../structures/parser/RWParser.js').task[]} rw
    */
-  showByDate(ctx, user, rw) {
+  showByDate(ctx, user, rw, edit = false) {
     if (!rw.length) {
-      ctx.replyWithMarkdown('Задания не найдены на эту дату.');
+      if (edit) {
+        ctx.editMessageText('Задания не найдены на эту дату.', {
+          reply_markup: { inline_keyboard: null },
+        });
+      } else {
+        ctx.replyWithMarkdown('Задания не найдены на эту дату.');
+      }
     } else {
-      ctx.replyWithMarkdown(
+      ctx[edit ? 'editMessageText' : 'replyWithMarkdown'](
         `Найдено \`${rw.length}\` задани${
           rw.length === 1
             ? 'е'
@@ -141,7 +155,10 @@ export default class StartCommand extends Command {
               }\`\nДата: \`${task.date.toString()} ${
                 task.date.day ? `(${task.date.day})` : ''
               }\`\nТема задания: ${task.taskSubject}\nЗадание: ${
-                task.taskContent?.replace(/(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g, (x) => `\`\`\`${x}\`\`\``) ?? 'Задание не указано'
+                task.taskContent?.replace(
+                  /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g,
+                  (x) => `\`\`\`${x}\`\`\``
+                ) ?? 'Задание не указано'
               }${
                 task.links.length
                   ? `\n${task.links
@@ -157,6 +174,8 @@ export default class StartCommand extends Command {
           .join(`\n${'—'.repeat(20)}\n`)}`,
         {
           disable_web_page_preview: true,
+          reply_markup: { inline_keyboard: null },
+          parse_mode: 'Markdown'
         }
       );
     }
