@@ -69,7 +69,7 @@ export default class StartCommand extends Command {
           reply_markup: {
             inline_keyboard: [
               [{ text: 'По дисциплине', callback_data: 'by-title' }],
-              [{ text: 'Задания на сегодня', callback_data: 'todays-tasks' }],
+              [{ text: `Задания на сегодня ${this.client.moment().format('DD-MM-YY')}`, callback_data: 'todays-tasks' }],
             ],
           },
         }
