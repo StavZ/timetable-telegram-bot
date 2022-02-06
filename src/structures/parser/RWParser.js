@@ -12,7 +12,6 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const groups = require('./groups.json');
 import constants from '../../constants.js';
-import { log } from 'console';
 
 const dateRegex =
   /(\d+)\s(января|февраля|марта|апреля|мая|июня|сентября|октября|ноября|декабря)\s(\d{2,4})/;
@@ -79,7 +78,9 @@ export default class RemoteWorksParser {
           const remoteTaskText = li
             .getElementsByClassName('remote_task_text')
             .item(0)
-            .textContent.trim();
+            .textContent.trim()
+            .replace(/http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g, (x) => `[${x}](${x}) `)
+            .replace(/\_/g, '');
           const linkDiv = li
             ?.getElementsByClassName('links')
             .item(0)
