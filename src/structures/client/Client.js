@@ -14,6 +14,9 @@ import Lesson from '../parser/Lesson.js';
 import RemoteControlManager from './managers/RemoteControlManager.js';
 import constants from '../../constants.js';
 import RemoteWorksParser from '../parser/RWParser.js';
+import TimeManager from './managers/TimeManager.js';
+import axios from 'axios';
+import Telegraph from 'telegra.ph';
 
 export default class Client extends Telegraf {
   constructor(token, ...args) {
@@ -23,6 +26,7 @@ export default class Client extends Telegraf {
     this.logger = consola;
     this.botId = 1645143260;
     this.parser = new Parser();
+    this.time = new TimeManager();
     this.remoteWorks = new RemoteWorksParser(this);
     this.userManager = new UserManager(this);
     this.commandHandler = new CommandHandler(this);
@@ -31,6 +35,8 @@ export default class Client extends Telegraf {
     this.remoteControl = new RemoteControlManager(this);
     this.moment = moment;
     this.mongoose = mongoose;
+    this.telegraph = new Telegraph(process.env.TELEGRAPH);
+    this.axios = axios;
   }
 
   /**
@@ -46,8 +52,7 @@ export default class Client extends Telegraf {
   }
 
   getCurrentDate(unix = false) {
-    if (unix)
-      return moment().set({ hours: 0, minutes: 0, seconds: 0 }).format('x');
+    if (unix) return moment().set({ hours: 0, minutes: 0, seconds: 0 }).format('x');
     return moment().set({ hours: 0, minutes: 0, seconds: 0 });
   }
 
@@ -70,14 +75,8 @@ export default class Client extends Telegraf {
       return s.classroom !== 'Дистанционное обучение';
     });
     if (!lessons.length) return null;
-    return `Начало: \`${
-      this.constants.bells[lessons[0].number]
-        ? this.constants.bells[lessons[0].number].start
-        : 'нет данных'
-    }\`\nКонец: \`${
-      this.constants.bells[lessons[lessons.length - 1].number]
-        ? this.constants.bells[lessons[lessons.length - 1].number].end
-        : 'нет данных'
+    return `Начало: \`${this.constants.bells[lessons[0].number] ? this.constants.bells[lessons[0].number].start : 'нет данных'}\`\nКонец: \`${
+      this.constants.bells[lessons[lessons.length - 1].number] ? this.constants.bells[lessons[lessons.length - 1].number].end : 'нет данных'
     }\``;
   }
 
@@ -89,16 +88,13 @@ export default class Client extends Telegraf {
   async sendMessageAsDeveloper(message, type = 'all', userID = null) {
     switch (type) {
       case 'all': {
-        const users = (
-          await this.userManager.getUsers({ autoScheduler: true })
-        ).filter((u) => u.group !== null);
+        const users = (await this.userManager.getUsers({ autoScheduler: true })).filter((u) => u.group !== null);
         users.forEach((u) => {
           this.telegram
-            .sendMessage(
-              u.id,
-              `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`,
-              { parse_mode: 'Markdown', disable_notification: true }
-            )
+            .sendMessage(u.id, `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`, {
+              parse_mode: 'Markdown',
+              disable_notification: true,
+            })
             .catch((e) => {
               if (e instanceof TelegramError) {
                 if (e.code === 403) {

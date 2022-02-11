@@ -8,4 +8,4 @@ String.prototype.toProperCase = function () {
 
 String.prototype.replaceSpaces = function () {
   return this.replace(/  +/g, ' ');
-}
+};

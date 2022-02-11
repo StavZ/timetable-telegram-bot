@@ -11,8 +11,7 @@ export default class SendMessageCommand extends Command {
       name: 'sendMessage',
       aliases: [],
       category: 'utils',
-      description:
-        'Позволяет разработчику отправить сообщение всем пользователям.',
+      description: 'Позволяет разработчику отправить сообщение всем пользователям.',
       usage: 'sendMessage `[message]`',
     });
     this.client = client;
@@ -28,27 +27,17 @@ export default class SendMessageCommand extends Command {
     if (isNaN(userID)) {
       let msg = args.join(' ');
 
-      const users = (
-        await this.client.userManager.getUsers({ autoScheduler: true })
-      ).filter((u) => u.group !== null);
+      const users = (await this.client.userManager.getUsers({ autoScheduler: true })).filter((u) => u.group !== null);
 
-      ctx.replyWithMarkdown(
-        `Предпросмотр сообщения:\n\n${msg}\n\nДанное сообщение будет отправлено \`${users.length}\` пользователям.`,
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [{ callback_data: 'agree-sendmessage-all', text: 'Отправить!' }],
-              [{ callback_data: 'disagree-sendmessage-all', text: 'Отмена' }],
-            ],
-          },
-        }
-      );
+      ctx.replyWithMarkdown(`Предпросмотр сообщения:\n\n${msg}\n\nДанное сообщение будет отправлено \`${users.length}\` пользователям.`, {
+        reply_markup: {
+          inline_keyboard: [[{ callback_data: 'agree-sendmessage-all', text: 'Отправить!' }], [{ callback_data: 'disagree-sendmessage-all', text: 'Отмена' }]],
+        },
+      });
 
       this.client.action('agree-sendmessage-all', (ctx) => {
         this.client.sendMessageAsDeveloper(msg, 'all');
-        ctx.editMessageText(
-          `${msg}\n\nСообщение было отправлено ${users.length} пользователям.`
-        );
+        ctx.editMessageText(`${msg}\n\nСообщение было отправлено ${users.length} пользователям.`);
       });
       this.client.action('disagree-sendmessage-all', (ctx) => {
         ctx.editMessageText('Отправка сообщения была отменена.');
@@ -56,25 +45,16 @@ export default class SendMessageCommand extends Command {
     } else {
       let msg = args.slice(1).join(' ');
 
-      ctx.replyWithMarkdown(
-        `Предпросмотр сообщения:\n\n${msg}\n\nСообщение будет отправлено пользователю \`#${userID}\`.`,
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [{ callback_data: 'agree-sendmessage-user', text: 'Отправить!' }],
-              [{ callback_data: 'disagree-sendmessage-user', text: 'Отмена' }],
-            ],
-          },
-        }
-      );
+      ctx.replyWithMarkdown(`Предпросмотр сообщения:\n\n${msg}\n\nСообщение будет отправлено пользователю \`#${userID}\`.`, {
+        reply_markup: {
+          inline_keyboard: [[{ callback_data: 'agree-sendmessage-user', text: 'Отправить!' }], [{ callback_data: 'disagree-sendmessage-user', text: 'Отмена' }]],
+        },
+      });
 
       this.client.action('agree-sendmessage-user', (ctx) => {
         this.client.sendMessageAsDeveloper(msg, 'user', userID).then((r) => {
           if (r) {
-            ctx.editMessageText(
-              `${msg}\n\nСообщение было отправлен пользователю \`#${userID}\`.`,
-              { parse_mode: 'Markdown' }
-            );
+            ctx.editMessageText(`${msg}\n\nСообщение было отправлен пользователю \`#${userID}\`.`, { parse_mode: 'Markdown' });
           } else {
             ctx.editMessageText(`Пользователь \`#${userID}\` не найден.`, {
               parse_mode: 'Markdown',

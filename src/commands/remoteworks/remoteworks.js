@@ -1,6 +1,7 @@
 import { Context } from 'telegraf';
 import Client from '../../structures/client/Client.js';
 import Command from '../../structures/client/Command.js';
+import md from 'telegraph.md';
 
 export default class StartCommand extends Command {
   /**
@@ -23,18 +24,13 @@ export default class StartCommand extends Command {
    */
   async exec(ctx, args) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    if (!user.group)
-      return ctx.replyWithMarkdown(
-        'Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.'
-      );
+    if (!user.group) return ctx.replyWithMarkdown('Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.');
 
     this.client.action('by-title', async (ctxt) => {
       return await this.startByTitle(ctxt, user);
     });
 
-    const rw = (
-      await this.client.remoteWorks.getRemoteWorks(user.group)
-    )?.reverse();
+    const rw = (await this.client.remoteWorks.getRemoteWorks(user.group))?.reverse();
     const titles = this.shortTitles(rw);
     titles.forEach((t) => {
       this.client.action(t.short, (ctt) => {
@@ -69,7 +65,12 @@ export default class StartCommand extends Command {
           reply_markup: {
             inline_keyboard: [
               [{ text: 'По дисциплине', callback_data: 'by-title' }],
-              [{ text: `Задания на сегодня ${this.client.moment().format('DD-MM-YY')}`, callback_data: 'todays-tasks' }],
+              [
+                {
+                  text: `Задания на сегодня ${this.client.moment().format('DD-MM-YY')}`,
+                  callback_data: 'todays-tasks',
+                },
+              ],
             ],
           },
         }
@@ -104,15 +105,10 @@ export default class StartCommand extends Command {
    */
   async startByTitle(ctx) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    const rw = (
-      await this.client.remoteWorks.getRemoteWorks(user.group)
-    )?.reverse();
+    const rw = (await this.client.remoteWorks.getRemoteWorks(user.group))?.reverse();
     const titles = this.shortTitles(rw);
     const keyboard = this.parseFullKeyboard(titles, 3);
-    ctx.editMessageText(
-      'Выберите дисциплину из списка ниже для просмотра дистанционных заданий:',
-      { reply_markup: { inline_keyboard: keyboard } }
-    );
+    ctx.editMessageText('Выберите дисциплину из списка ниже для просмотра дистанционных заданий:', { reply_markup: { inline_keyboard: keyboard } });
   }
 
   /**
@@ -122,9 +118,7 @@ export default class StartCommand extends Command {
   async findByDate(userid, date) {
     if (!date) return [];
     const user = await this.client.userManager.getUser(userid);
-    const rw = (
-      await this.client.remoteWorks.getRemoteWorks(user.group)
-    )?.reverse();
+    const rw = (await this.client.remoteWorks.getRemoteWorks(user.group))?.reverse();
     const found = rw.filter((t) => t.date?.regular === date);
     return found;
   }
@@ -147,46 +141,32 @@ export default class StartCommand extends Command {
         ctx.replyWithMarkdown('Задания не найдены на эту дату.');
       }
     } else {
-      ctx[edit ? 'editMessageText' : 'replyWithMarkdown'](
-        `Найдено \`${rw.length}\` задани${
-          rw.length === 1
-            ? 'е'
-            : rw.length > 1 && rw.length < 5
-            ? 'я'
-            : rw.length >= 5
-            ? 'й'
-            : 'я'
-        }.\n\n${rw
-          .map(
-            (task) =>
-              `Дисциплина: \`${task.title}\`\nГруппа: \`${
-                user.group
-              }\`\nДата: \`${task.date.toString()} ${
-                task.date.day ? `(${task.date.day})` : ''
-              }\`\nТема задания: ${task.taskSubject}\nЗадание: ${
-                task.taskContent?.replace(
-                  /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g,
-                  (x) => `\`\`\`${x}\`\`\``
-                ) ?? 'Задание не указано'
-              }${
-                task.links.length
-                  ? `\n${task.links
-                      .map((l, i) => `[Ссылка ${i + 1}](${l})`)
-                      .join('\n')}`
-                  : ''
-              }${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${
-                task.email
-                  ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)`
-                  : ''
-              }`
-          )
-          .join(`\n${'—'.repeat(20)}\n`)}`,
-        {
-          disable_web_page_preview: true,
-          reply_markup: { inline_keyboard: null },
-          parse_mode: 'Markdown',
-        }
-      );
+      let msg = `Найдено \`${rw.length}\` задани${rw.length === 1 ? 'е' : rw.length > 1 && rw.length < 5 ? 'я' : rw.length >= 5 ? 'й' : 'я'}.\n\n`;
+      for (let i = 0; i < rw.length; i++) {
+        const task = rw[i];
+        const telegraph = await this.createTelegraph(
+          task.title,
+          user.group,
+          task.date.regular,
+          task.teacher,
+          `Тема задания: ${task.taskSubject}\n\n${task.taskContent ?? 'Задание не указано.'}${task.links.length ? `\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''}\n\nПочта преподавателя: [${
+            task.email
+          }](mailto:${task.email}?subject=${encodeURI(
+            user.group
+          )})\n*(При нажатии на почту, Вас переадресует на почтовый клиент по умолчанию.\nТакже, указанная Вами группа сразу появляется в теме сообщения, пожалуйста проверьте её правильность)*`
+        );
+
+        msg += `Дисциплина: \`${task.title}\`\nГруппа: \`${user.group}\`\nДата: \`${task.date.toString()} ${task.date.day ? `(${task.date.day})` : ''}\`\nТема задания: ${
+          task.taskSubject
+        }\nЗадание:\n${telegraph}${task.links.length ? `\nФайлы:\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''}${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${task.email ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)` : ''}`;
+
+        if (i + 1 !== rw.length) msg += `\n${'—'.repeat(20)}\n`;
+      }
+      ctx[edit ? 'editMessageText' : 'replyWithMarkdown'](msg, {
+        disable_web_page_preview: true,
+        reply_markup: { inline_keyboard: null },
+        parse_mode: 'Markdown',
+      });
     }
   }
 
@@ -202,13 +182,7 @@ export default class StartCommand extends Command {
     const task = key ? tasks.find((t) => t.date.regular === key) : tasks[0];
     tasks.forEach((ta) => {
       this.client.action(`${user.group}${stitle}-${ta.date.regular}`, (c) => {
-        this.showByTitle(
-          c,
-          tasks,
-          stitle,
-          c.update.callback_query.message.message_id,
-          ta.date.regular
-        );
+        this.showByTitle(c, tasks, stitle, c.update.callback_query.message.message_id, ta.date.regular);
       });
     });
     let keyboard = [];
@@ -216,29 +190,19 @@ export default class StartCommand extends Command {
       keyboard = this.parseKeyboard(tasks, task, `${user.group}${stitle}`, 4);
     }
     keyboard.push([{ text: 'Назад', callback_data: 'back-to-titles' }]);
-    const msg = `Найдено \`${tasks.length}\` задани${
-      tasks.length === 1
-        ? 'е'
-        : tasks.length > 1 && tasks.length < 5
-        ? 'я'
-        : tasks.length >= 5
-        ? 'й'
-        : 'я'
-    }.\n\nДисциплина: \`${task.title}\`\nГруппа: \`${
-      user.group
-    }\`\nДата: \`${task.date.toString()} ${
-      task.date.day ? `(${task.date.day})` : ''
-    }\`\nТема задания: ${task.taskSubject}\nЗадание: ${
-      task.taskContent ?? 'Задание не указано'
-    }${
-      task.links.length
-        ? `\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}`
-        : ''
-    }${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${
-      task.email
-        ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)`
-        : ''
-    }`;
+    const msg = `Найдено \`${tasks.length}\` задани${tasks.length === 1 ? 'е' : tasks.length > 1 && tasks.length < 5 ? 'я' : tasks.length >= 5 ? 'й' : 'я'}.\n\nДисциплина: \`${
+      task.title
+    }\`\nГруппа: \`${user.group}\`\nДата: \`${task.date.toString()}${task.date.day ? ` (${task.date.day})` : ''}\`\nТема задания: ${task.taskSubject}\nЗадание:\n${await this.createTelegraph(
+      task.title,
+      user.group,
+      task.date.regular,
+      task.teacher,
+      `Тема задания: ${task.taskSubject}\n\n${task.taskContent ?? 'Задание не указано.'}${
+        task.links.length ? `\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''
+      }\n\nПочта преподавателя: [${task.email}](mailto:${task.email}?subject=${encodeURI(
+        user.group
+      )})\n*(При нажатии на почту Вас переадресует на вашу почту по умолчанию. Пожалуйста проверьте правильность Вашей группы в теме сообщения)*`
+    )}${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${task.email ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)` : ''}`;
     if (mid) {
       this.client.telegram.editMessageText(ctx.chat.id, mid, mid, msg, {
         reply_markup: { inline_keyboard: keyboard },
@@ -254,6 +218,11 @@ export default class StartCommand extends Command {
     }
   }
 
+  async createTelegraph(title, group, dateRegular, teacher, content) {
+    const page = await this.client.telegraph.createPage(`${title} ${group} (${dateRegular})`, md(content), `${teacher}`, 'https://t.me/ppkslavyanovabot', true);
+    return page.url;
+  }
+
   /**
    * @param {import('../../structures/parser/RWParser.js').task[]} rw
    */
@@ -266,9 +235,7 @@ export default class StartCommand extends Command {
     const data = [];
     for (const title of titles) {
       data.push({
-        short: title
-          .split(/\s/)
-          .reduce((response, word) => (response += word.slice(0, 2)), ''),
+        short: title.split(/\s/).reduce((response, word) => (response += word.slice(0, 2)), ''),
         title: title,
       });
     }

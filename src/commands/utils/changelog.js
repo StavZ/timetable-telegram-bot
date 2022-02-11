@@ -59,17 +59,9 @@ export default class ChangelogCommand extends Command {
       msg += ` • ${c.important ? `*${c.content}*` : c.content}\n`;
     }
     const keyboard = this.parseKeyboard(changelogs, key);
-    keyboard.push([
-      { text: 'Убрать кнопки', callback_data: 'cancel-changelog' },
-    ]);
+    keyboard.push([{ text: 'Убрать кнопки', callback_data: 'cancel-changelog' }]);
     if (edit) {
-      this.client.telegram.editMessageText(
-        ctx.chat.id,
-        edit.message_id,
-        edit.message_id,
-        msg,
-        { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' }
-      );
+      this.client.telegram.editMessageText(ctx.chat.id, edit.message_id, edit.message_id, msg, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
     } else {
       ctx.replyWithMarkdown(msg, {
         reply_markup: { inline_keyboard: keyboard },

@@ -34,44 +34,31 @@ export default class SelectgroupCommand extends Command {
 
     let group;
 
-    ctx.replyWithMarkdown(
-      'Для начала выберите свою специальность из списка ниже:',
-      { reply_markup: { inline_keyboard: keyboard } }
-    );
+    ctx.replyWithMarkdown('Для начала выберите свою специальность из списка ниже:', { reply_markup: { inline_keyboard: keyboard } });
     Object.keys(groupIds).forEach((g) => {
       this.client.action(g, async (ctx) => {
         const groupkb = this.parseKeyboard(groups[groupIds[g]]).chunk(4);
-        groupkb.push([
-          { text: 'Отмена', callback_data: 'cancel-select-group' },
-        ]);
-        ctx
-          .editMessageText(
-            `Вы выбрали специальность \`${groupIds[g]}\`.\nВыберите свою группу из списка ниже:`,
-            { parse_mode: 'Markdown' }
-          )
-          .then(() => {
-            ctx.editMessageReplyMarkup({ inline_keyboard: groupkb });
-          });
+        groupkb.push([{ text: 'Отмена', callback_data: 'cancel-select-group' }]);
+        ctx.editMessageText(`Вы выбрали специальность \`${groupIds[g]}\`.\nВыберите свою группу из списка ниже:`, { parse_mode: 'Markdown' }).then(() => {
+          ctx.editMessageReplyMarkup({ inline_keyboard: groupkb });
+        });
         groups[groupIds[g]].forEach((gr) => {
           this.client.action(gr, (ctx) => {
             group = gr;
-            ctx.editMessageText(
-              `Вы выбрали специальность \`${groupIds[g]}\`.\nВаша группа: \`${gr}\`.\n\nВерно?`,
-              {
-                parse_mode: 'Markdown',
-                reply_markup: {
-                  inline_keyboard: [
-                    [{ callback_data: 'agree', text: 'Да!' }],
-                    [
-                      {
-                        callback_data: 'disagree',
-                        text: 'Нет! Начать с начала',
-                      },
-                    ],
+            ctx.editMessageText(`Вы выбрали специальность \`${groupIds[g]}\`.\nВаша группа: \`${gr}\`.\n\nВерно?`, {
+              parse_mode: 'Markdown',
+              reply_markup: {
+                inline_keyboard: [
+                  [{ callback_data: 'agree', text: 'Да!' }],
+                  [
+                    {
+                      callback_data: 'disagree',
+                      text: 'Нет! Начать с начала',
+                    },
                   ],
-                },
-              }
-            );
+                ],
+              },
+            });
           });
         });
       });

@@ -68,10 +68,7 @@ export default class RemoteControlManager {
    * @param {object} newConfig
    */
   async updateModuleConfig(module, moduleType, newConfig) {
-    return Module.updateOne(
-      { name: module, type: moduleType },
-      { remoteConfig: newConfig }
-    );
+    return Module.updateOne({ name: module, type: moduleType }, { remoteConfig: newConfig });
   }
 }
 

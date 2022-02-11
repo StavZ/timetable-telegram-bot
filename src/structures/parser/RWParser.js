@@ -1,6 +1,5 @@
 const URL = 'https://ppkslavyanova.ru/no_html_index.php';
-const USER_AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0';
+const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0';
 
 import FormData from 'form-data';
 import axios from 'axios';
@@ -13,8 +12,7 @@ const require = createRequire(import.meta.url);
 const groups = require('./groups.json');
 import constants from '../../constants.js';
 
-const dateRegex =
-  /(\d+)\s(января|февраля|марта|апреля|мая|июня|сентября|октября|ноября|декабря)\s(\d{2,4})/;
+const dateRegex = /(\d+)\s(января|февраля|марта|апреля|мая|июня|сентября|октября|ноября|декабря)\s(\d{2,4})/;
 
 export default class RemoteWorksParser {
   /**
@@ -36,7 +34,6 @@ export default class RemoteWorksParser {
     form.append('group_id', `${id}`);
     form.append('edu_edit', '1');
     form.append('get_remote_work', '1');
-    // log(form)
     await axios
       .post(URL, form, {
         headers: {
@@ -64,27 +61,18 @@ export default class RemoteWorksParser {
               .item(0)
               .textContent.split(/(?=[А-Я])/g);
 
-            shouldBeContentButNot = matches
-              .slice(1)
-              .join('\n')
-              .replaceSpaces()
-              .replace(date(), '');
+            shouldBeContentButNot = matches.slice(1).join('\n').replaceSpaces().replace(date(), '');
             return matches[0].replaceSpaces().replace(date(), '').trim();
           };
-          const taskSubject = li
-            .getElementsByClassName('subtitle')
-            .item(0)
-            .textContent.trim();
-          const remoteTaskText = li
-            .getElementsByClassName('remote_task_text')
-            .item(0)
-            .textContent.trim()
-            .replace(/http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g, (x) => `[${x}](${x}) `)
-            .replace(/\_/g, '');
-          const linkDiv = li
-            ?.getElementsByClassName('links')
-            .item(0)
-            ?.getElementsByTagName('a');
+          const taskSubject = li.getElementsByClassName('subtitle').item(0).textContent.trim();
+          const remoteTaskText = this.removeRandomUnderscores(
+            li
+              .getElementsByClassName('remote_task_text')
+              .item(0)
+              .textContent.trim()
+              .replace(/http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g, (x) => `[${x}](${x}) `)
+          );
+          const linkDiv = li?.getElementsByClassName('links').item(0)?.getElementsByTagName('a');
           const links = [];
           if (linkDiv) {
             for (let x = 0; x < linkDiv.length; x++) {
@@ -92,19 +80,12 @@ export default class RemoteWorksParser {
               links.push(link.href);
             }
           }
-          const teacher = li
-            .getElementsByClassName('prepod')
-            .item(0)
-            .textContent.replaceSpaces()
-            .toProperCase();
+          const teacher = li.getElementsByClassName('prepod').item(0).textContent.replaceSpaces().toProperCase();
           let email;
           for (let y = 0; y < li.getElementsByTagName('div').length; y++) {
             const div = li.getElementsByTagName('div').item(y);
             if (div?.textContent.startsWith('Почта преподавателя')) {
-              const text = div.textContent.replace(
-                /(Почта преподавателя)/gm,
-                ''
-              );
+              const text = div.textContent.replace(/(Почта преподавателя)/gm, '');
               email = text.trim();
             }
           }
@@ -112,9 +93,7 @@ export default class RemoteWorksParser {
             title: title(),
             date: this.parseDate(date()),
             taskSubject,
-            taskContent: `${
-              shouldBeContentButNot ? `${shouldBeContentButNot}\n` : ''
-            }${remoteTaskText}`,
+            taskContent: `${shouldBeContentButNot ? `${shouldBeContentButNot}\n` : ''}${remoteTaskText}`,
             links,
             teacher,
             email,
@@ -122,6 +101,16 @@ export default class RemoteWorksParser {
         }
       });
     return data;
+  }
+
+  /**
+   * @param {string} content
+   * @returns {string}
+   */
+  removeRandomUnderscores(content) {
+    return content.replace(/(\_+)([А-Яа-я]|\s|\d)/g, (x) => {
+      return x.replace(/\_/g, ' ');
+    });
   }
 
   /**
@@ -147,11 +136,7 @@ export default class RemoteWorksParser {
     };
     const regex = /^([0-9]{1,2})? ?([а-я]+)? (\d+)?/gim;
     const res = regex.exec(string);
-    const date = moment(
-      `${res[3]}-${months[res[2]]}-${
-        res[1].length === 1 ? `0${res[1]}` : res[1]
-      }`
-    );
+    const date = moment(`${res[3]}-${months[res[2]]}-${res[1].length === 1 ? `0${res[1]}` : res[1]}`);
     return {
       regular: date.format('DD-MM-YY'),
       toString: () => {

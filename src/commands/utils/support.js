@@ -50,22 +50,9 @@ export default class SupportCommand extends Command {
       message: args.join(' '),
     };
 
-    ctx
-      .replyWithMarkdown(
-        `Обращение в поддержку \`#${messages.length + 1}\`.\nТема: ${args.join(
-          ' '
-        )}\n\nОжидайте ответа от разработчика.`
-      )
-      .then((r) => {
-        this.client.userManager.pushSupportMessage(ctx.from.id, message);
-        this.client.sendToOwner(
-          `Пользователь: \`${ctx.from.id}\`\nТема: ${args.join(
-            ' '
-          )}\n\nОтветить: /supportanswer \`${ctx.from.id} ${
-            messages.length + 1
-          } [ответ]\`.`,
-          { parse_mode: 'Markdown' }
-        );
-      });
+    ctx.replyWithMarkdown(`Обращение в поддержку \`#${messages.length + 1}\`.\nТема: ${args.join(' ')}\n\nОжидайте ответа от разработчика.`).then((r) => {
+      this.client.userManager.pushSupportMessage(ctx.from.id, message);
+      this.client.sendToOwner(`Пользователь: \`${ctx.from.id}\`\nТема: ${args.join(' ')}\n\nОтветить: /supportanswer \`${ctx.from.id} ${messages.length + 1} [ответ]\`.`, { parse_mode: 'Markdown' });
+    });
   }
 }

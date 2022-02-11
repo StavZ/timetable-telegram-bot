@@ -27,18 +27,11 @@ export default class CommandHandler {
       const path = `file://${resolve(root)}\\${stats.name}`;
       const Command = await import(path);
       const command = new Command.default(this.client);
-      const module = await this.client.remoteControl.getModule(
-        command.name,
-        'command',
-        true
-      );
+      const module = await this.client.remoteControl.getModule(command.name, 'command', true);
       command.aliases.forEach((a) => {
         this.aliases.set(a, command.name);
       });
-      this.commands.set(
-        command.name,
-        Object.assign(command, { path, config: module.remoteConfig })
-      );
+      this.commands.set(command.name, Object.assign(command, { path, config: module.remoteConfig }));
       next();
     });
     walker.on('end', () => {
@@ -52,11 +45,7 @@ export default class CommandHandler {
   async reload(query) {
     const command = this.getCommand(query);
     if (!command) return false;
-    const module = await this.client.remoteControl.getModule(
-      command.name,
-      'command',
-      false
-    );
+    const module = await this.client.remoteControl.getModule(command.name, 'command', false);
     command.config = module.remoteConfig;
   }
 

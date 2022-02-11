@@ -94,7 +94,7 @@ export default {
       prefix: 'СА',
       maxCourses: 4,
     },
-    Сварщик: {
+    'Сварщик': {
       prefix: 'Св',
       maxCourses: 3,
     },
@@ -114,7 +114,7 @@ export default {
       prefix: 'УП',
       maxCourses: 4,
     },
-    Электромонтер: {
+    'Электромонтер': {
       prefix: 'Эл',
       maxCourses: 3,
     },

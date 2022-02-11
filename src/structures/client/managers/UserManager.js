@@ -28,9 +28,7 @@ export default class UserManager {
   calculateCourse(group) {
     const yearRegex = /\d{2}/;
     const result = yearRegex.exec(group);
-    if (!result || !result.length) return 1;
-    const course = this.client.constants.courses[result[0]];
-    return course;
+    return this.client.time.getCourse(result[0]);
   }
 
   /**
@@ -71,7 +69,7 @@ export default class UserManager {
       course: null,
       sentSchedule: {},
       role: 'student',
-      regDate: this.client.getCurrentDate(true)
+      regDate: this.client.time.getCurrentTime(true),
     }).save();
   }
 
@@ -82,7 +80,6 @@ export default class UserManager {
    * @returns {user}
    */
   async updateUser(id, name, value) {
-    // const schema = await User.updateOne({ id }, { [name]: value });
     return User.updateOne({ id }, { [name]: value });
   }
 
@@ -109,7 +106,7 @@ export default class UserManager {
    * @returns {number}
    */
   async getUserCount() {
-    const users = (await User.find({})).filter((u) => u.group !== 'bot');
+    const users = (await User.find({})).filter((u) => u.role !== 'bot');
     return users.length;
   }
 }

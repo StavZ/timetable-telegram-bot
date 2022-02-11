@@ -22,17 +22,10 @@ export default class RemoteControlCommand extends Command {
    * @param {string[]} args
    */
   async exec(ctx, args) {
-    if (!args.length || args.length < 2)
-      return ctx.reply(
-        'Использование: /remote `[module] [type] [setting] [value]`'
-      );
+    if (!args.length || args.length < 2) return ctx.reply('Использование: /remote `[module] [type] [setting] [value]`');
     const module = args[0];
     const moduleType = args[1].toLowerCase();
-    const moduleSchema = await this.client.remoteControl.getModule(
-      module,
-      moduleType,
-      false
-    );
+    const moduleSchema = await this.client.remoteControl.getModule(module, moduleType, false);
     if (!moduleSchema) return ctx.reply('Модуль не найден.');
     if (args.length === 2) {
       const keys = Object.keys(moduleSchema.remoteConfig);
@@ -41,9 +34,7 @@ export default class RemoteControlCommand extends Command {
         // if (typeof moduleSchema.remoteConfig[key] !== 'boolean') continue;
         config += `• ${key}: \`${moduleSchema.remoteConfig[key]}\`\n`;
       }
-      ctx.replyWithMarkdown(
-        `Модуль: \`${moduleSchema.name}\`\nТип: \`${moduleSchema.type}\`\nКонфиг:\n${config}`
-      );
+      ctx.replyWithMarkdown(`Модуль: \`${moduleSchema.name}\`\nТип: \`${moduleSchema.type}\`\nКонфиг:\n${config}`);
       return;
     }
     const setting = args[2];
@@ -54,15 +45,9 @@ export default class RemoteControlCommand extends Command {
     this.client.remoteControl
       .updateModuleConfig(module, moduleType, config)
       .then(() => {
-        ctx
-          .replyWithMarkdown(
-            `Модуль ${moduleSchema.name} \`[${
-              moduleSchema.type
-            }]\` был обновлен.\nЗначение \`${setting}\` было изменено на \`${value} [${typeof value}]\`.`
-          )
-          .then(() => {
-            this.performChanges(moduleSchema.name, moduleSchema.type, config);
-          });
+        ctx.replyWithMarkdown(`Модуль ${moduleSchema.name} \`[${moduleSchema.type}]\` был обновлен.\nЗначение \`${setting}\` было изменено на \`${value} [${typeof value}]\`.`).then(() => {
+          this.performChanges(moduleSchema.name, moduleSchema.type, config);
+        });
       })
       .catch(this.client.logger.error);
   }
@@ -99,9 +84,7 @@ export default class RemoteControlCommand extends Command {
   performChanges(module, moduleType, config) {
     switch (moduleType) {
       case 'command': {
-        this.client.commandHandler
-          .reload(module)
-          .catch(this.client.logger.error);
+        this.client.commandHandler.reload(module).catch(this.client.logger.error);
         break;
       }
       case 'manager': {

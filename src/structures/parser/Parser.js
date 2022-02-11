@@ -14,16 +14,12 @@ export default class Parser {
    */
   async getDocument(url) {
     return new Promise(async (resolve, reject) => {
-      const page = await fetch(
-        url ? url : 'https://ppkslavyanova.ru/lessonlist',
-        {
-          headers: {
-            'Content-Type': 'text/html',
-            'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0',
-          },
-        }
-      ).catch((e) => {
+      const page = await fetch(url ? url : 'https://ppkslavyanova.ru/lessonlist', {
+        headers: {
+          'Content-Type': 'text/html',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0',
+        },
+      }).catch((e) => {
         logger.error(e);
         return null;
       });
@@ -36,8 +32,7 @@ export default class Parser {
       const document = jsdom.window.document;
       const trs = document.getElementsByTagName('tr');
       for (let i = 0; i < trs.length; i++) {
-        if (trs.item(i).className === 'R7' || trs.item(i).className === 'R3')
-          continue;
+        if (trs.item(i).className === 'R7' || trs.item(i).className === 'R3') continue;
         if (trs.item(i).className !== 'R8') {
           trs.item(i).classList.replace(trs.item(i).className, 'R8');
         }
@@ -55,10 +50,7 @@ export default class Parser {
       return null;
     });
     if (!document) return null;
-    const lessonList = document
-      .getElementsByClassName('lesson_list')
-      .item(0)
-      .querySelectorAll('a');
+    const lessonList = document.getElementsByClassName('lesson_list').item(0).querySelectorAll('a');
     const schedules = [];
     for (const day of lessonList) {
       const url = `https://ppkslavyanova.ru/lessonlist${day.href}`;
@@ -66,9 +58,7 @@ export default class Parser {
       const date = this.parseDate(day.textContent, Number(id));
       const lessonlists = await this.generateLessonlist(url);
       if (!lessonlists) return null;
-      schedules.push(
-        new Schedule({ date: date, url, id: Number(id), lessonlists })
-      );
+      schedules.push(new Schedule({ date: date, url, id: Number(id), lessonlists }));
     }
     if (this.isSchedulesEmpty(schedules)) {
       return null;
@@ -136,11 +126,7 @@ export default class Parser {
     };
     const regex = /([0-9]{1,2})? ?([а-я]+)?/gim;
     const res = regex.exec(string);
-    const date = moment(
-      `${id <= 2621 ? '2021' : '2022'}-${months[res[2]]}-${
-        res[1].length === 1 ? `0${res[1]}` : res[1]
-      }`
-    );
+    const date = moment(`${id <= 2621 ? '2021' : '2022'}-${months[res[2]]}-${res[1].length === 1 ? `0${res[1]}` : res[1]}`);
     return {
       regular: date.format('DD/MM/YYYY'),
       toString: () => {
@@ -177,8 +163,7 @@ export default class Parser {
     const groupRegex = /(([А-Яа-я])?)-(\d{2})/;
     for (let i = 0; i < rows.length; i++) {
       if (rows.item(i).childElementCount === 3) {
-        if (!groupRegex.test(rows.item(i).textContent.replace(/\n/g, '')))
-          return null;
+        if (!groupRegex.test(rows.item(i).textContent.replace(/\n/g, ''))) return null;
         // group
         timetable.push({
           group: rows.item(i).textContent.replace(/\n/g, ''),
@@ -187,9 +172,7 @@ export default class Parser {
         continue;
       } else {
         // lesson
-        timetable[timetable.length - 1].lessonlist.push(
-          await this.parseLesson(rows.item(i).textContent.trim())
-        );
+        timetable[timetable.length - 1].lessonlist.push(await this.parseLesson(rows.item(i).textContent.trim()));
       }
     }
     return timetable;
@@ -201,10 +184,7 @@ export default class Parser {
       const parsed = fullRegex.exec(string);
       const result = {};
       try {
-        if (!parsed)
-          resolve(
-            new Lesson({ error: 'Произошла ошибка во время обработки.' })
-          );
+        if (!parsed) resolve(new Lesson({ error: 'Произошла ошибка во время обработки.' }));
         result.lessonNumber = parseInt(parsed[1], 10);
         result.subgroup = parsed[2] ? parsed[2] : null;
         result.lesson = parsed[3].trim();
@@ -229,9 +209,7 @@ export default class Parser {
         const result = { classroom: null, address: null };
         if (str && str.match(/^\d/)) {
           const parsedClassroom = classroomRegex.exec(str);
-          result.classroom = parsedClassroom[1]
-            ? parsedClassroom[1].trim()
-            : null;
+          result.classroom = parsedClassroom[1] ? parsedClassroom[1].trim() : null;
           result.address = parsedClassroom[4];
         } else if (str && str.match(remoteRegex)) {
           result.classroom = 'Дистанционное обучение';

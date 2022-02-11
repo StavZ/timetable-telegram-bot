@@ -23,10 +23,7 @@ export default class ScheduleCommand extends Command {
    * @param {string[]} args
    */
   async exec(ctx, args) {
-    if (!this.client.manager.cache.schedules)
-      return ctx.reply(
-        'В данный момент нет информации о расписании!\nПопробуйте повторить попытку через минуту.'
-      );
+    if (!this.client.manager.cache.schedules) return ctx.reply('В данный момент нет информации о расписании!\nПопробуйте повторить попытку через минуту.');
     this.client.action('cancel-timetable', (ctx) => {
       ctx.editMessageReplyMarkup({ inline_keyboard: null });
     });
@@ -34,31 +31,20 @@ export default class ScheduleCommand extends Command {
     this.client.action('switch-group', async (ctx) => {
       const groups = await this.client.parser.getGroups();
       const keyboard = this.parseGroupsKeyboard(groups).chunk(4);
-      keyboard.push([
-        { text: 'Отмена', callback_data: 'back-to-user-schedule' },
-      ]);
-      ctx.editMessageText(
-        'Выберете группу из списка ниже, чтобы посмотреть расписание.\n_Это не поменяет Вашу группу для получения расписания по умолчанию._',
-        { parse_mode: 'Markdown', reply_markup: { inline_keyboard: keyboard } }
-      );
+      keyboard.push([{ text: 'Отмена', callback_data: 'back-to-user-schedule' }]);
+      ctx.editMessageText('Выберете группу из списка ниже, чтобы посмотреть расписание.\n_Это не поменяет Вашу группу для получения расписания по умолчанию._', {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: keyboard },
+      });
       groups.forEach((group) => {
         this.client.action(`${group}-schedule`, async (ctx) => {
-          this.execGroup(
-            ctx,
-            this.client.manager.cache.schedules,
-            group,
-            ctx.update.callback_query.message.message_id
-          );
+          this.execGroup(ctx, this.client.manager.cache.schedules, group, ctx.update.callback_query.message.message_id);
         });
       });
     });
 
     this.client.action('back-to-user-schedule', async (ctx) => {
-      this.showUserSchedule(
-        ctx,
-        this.client.manager.cache.schedules,
-        ctx.update.callback_query.message.message_id
-      );
+      this.showUserSchedule(ctx, this.client.manager.cache.schedules, ctx.update.callback_query.message.message_id);
     });
 
     this.showUserSchedule(ctx, this.client.manager.cache.schedules);
@@ -81,53 +67,28 @@ export default class ScheduleCommand extends Command {
       schedule = schedules[0];
     }
     if (!user.group) {
-      return ctx.replyWithMarkdown(
-        'Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.'
-      );
+      return ctx.replyWithMarkdown('Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.');
     }
     const userSchedule = schedule.getLessonlistByGroup(user.group);
-    let msg = `Расписание на ${userSchedule.date.toString()} (${userSchedule.date.day.toProperCase()})\nГруппа: ${
-      user.group
-    }\n\`\n${this.config.message ? `${this.config.message}\n` : ''}`;
+    let msg = `Расписание на ${userSchedule.date.toString()} (${userSchedule.date.day.toProperCase()})\nГруппа: ${user.group}\n\`\n${this.config.message ? `${this.config.message}\n` : ''}`;
     if (userSchedule.lessons.length) {
       for (const l of userSchedule.lessons) {
         msg += `${
           l.error
             ? `${l.error}\n`
-            : `${l.number} пара - ${l.title}${
-                l.teacher ? ` у ${l.teacher}` : ''
-              }${
-                l.classroom && l.address
-                  ? ` • ${l.classroom} | ${l.address}`
-                  : l.classroom && !l.address
-                  ? ` • ${l.classroom}`
-                  : !l.classroom && l.address
-                  ? ` • ${l.address}`
-                  : ''
+            : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${
+                l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : l.classroom && !l.address ? ` • ${l.classroom}` : !l.classroom && l.address ? ` • ${l.address}` : ''
               }\n`
         }`;
         if (l.error && msg.includes(l.error)) break;
       }
-      msg += `\`\`\`${
-        this.client.generateBells(userSchedule)
-          ? `\n${this.client.generateBells(userSchedule)}`
-          : ''
-      }\n\n[Ссылка на сайт](${userSchedule.url})`;
+      msg += `\`\`\`${this.client.generateBells(userSchedule) ? `\n${this.client.generateBells(userSchedule)}` : ''}\n\n[Ссылка на сайт](${userSchedule.url})`;
     } else {
       msg += `\`\`\`Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
-    const keyboard = this.parseKeyboard(
-      schedules,
-      key ? key : userSchedule.date.regular,
-      null,
-      2
-    );
-    keyboard.push([
-      { text: 'Расписание другой группы', callback_data: 'switch-group' },
-    ]);
-    keyboard.push([
-      { text: 'Убрать кнопки', callback_data: 'cancel-timetable' },
-    ]);
+    const keyboard = this.parseKeyboard(schedules, key ? key : userSchedule.date.regular, null, 2);
+    keyboard.push([{ text: 'Расписание другой группы', callback_data: 'switch-group' }]);
+    keyboard.push([{ text: 'Убрать кнопки', callback_data: 'cancel-timetable' }]);
     if (message_id) {
       this.client.telegram
         .editMessageText(ctx.chat.id, message_id, message_id, msg, {
@@ -136,19 +97,12 @@ export default class ScheduleCommand extends Command {
         })
         .catch(this.client.logger.error);
     } else {
-      ctx
-        .replyWithMarkdown(msg, { reply_markup: { inline_keyboard: keyboard } })
-        .catch(this.client.logger.error);
+      ctx.replyWithMarkdown(msg, { reply_markup: { inline_keyboard: keyboard } }).catch(this.client.logger.error);
     }
 
     for (const key in keys) {
       this.client.action(key, (ctx) => {
-        this.showUserSchedule(
-          ctx,
-          schedules,
-          ctx.update.callback_query.message.message_id,
-          key
-        );
+        this.showUserSchedule(ctx, schedules, ctx.update.callback_query.message.message_id, key);
       });
     }
   }
@@ -170,49 +124,26 @@ export default class ScheduleCommand extends Command {
     }
 
     const groupSchedule = schedule.getLessonlistByGroup(group);
-    let msg = `Расписание на ${groupSchedule.date.toString()} (${groupSchedule.date.day.toProperCase()})\nГруппа: ${group}\n\`\`\`\n${
-      this.config.message ? `${this.config.message}\n` : ''
-    }`;
+    let msg = `Расписание на ${groupSchedule.date.toString()} (${groupSchedule.date.day.toProperCase()})\nГруппа: ${group}\n\`\`\`\n${this.config.message ? `${this.config.message}\n` : ''}`;
     if (groupSchedule.lessons.length) {
       for (const l of groupSchedule.lessons) {
         msg += `${
           l.error
             ? `${l.error}\n`
-            : `${l.number} пара - ${l.title}${
-                l.teacher ? ` у ${l.teacher}` : ''
-              }${
-                l.classroom && l.address
-                  ? ` • ${l.classroom} | ${l.address}`
-                  : l.classroom && !l.address
-                  ? ` • ${l.classroom}`
-                  : !l.classroom && l.address
-                  ? ` • ${l.address}`
-                  : ''
+            : `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${
+                l.classroom && l.address ? ` • ${l.classroom} | ${l.address}` : l.classroom && !l.address ? ` • ${l.classroom}` : !l.classroom && l.address ? ` • ${l.address}` : ''
               }\n`
         }`;
         if (l.error && msg.includes(l.error)) break;
       }
-      msg += `\`\`\`${
-        this.client.generateBells(groupSchedule)
-          ? ```\n${this.client.generateBells(groupSchedule)}`
-          : ''
-      }\n\n[Ссылка на сайт](${groupSchedule.url})`;
+      msg += `\`\`\`${this.client.generateBells(groupSchedule) ? ```\n${this.client.generateBells(groupSchedule)}` : ''}\n\n[Ссылка на сайт](${groupSchedule.url})`;
     } else {
       msg += `\`\`\`Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
 
-    const keyboard = this.parseKeyboard(
-      schedules,
-      key ? key : groupSchedule.date.regular,
-      `-${group}`,
-      2
-    );
-    keyboard.push([
-      { text: 'Расписание другой группы', callback_data: 'switch-group' },
-    ]);
-    keyboard.push([
-      { text: 'Убрать кнопки', callback_data: 'cancel-timetable' },
-    ]);
+    const keyboard = this.parseKeyboard(schedules, key ? key : groupSchedule.date.regular, `-${group}`, 2);
+    keyboard.push([{ text: 'Расписание другой группы', callback_data: 'switch-group' }]);
+    keyboard.push([{ text: 'Убрать кнопки', callback_data: 'cancel-timetable' }]);
     keyboard.push([{ text: 'Назад', callback_data: 'back-to-user-schedule' }]);
     if (message_id) {
       this.client.telegram
@@ -222,20 +153,12 @@ export default class ScheduleCommand extends Command {
         })
         .catch(this.client.logger.error);
     } else {
-      ctx
-        .replyWithMarkdown(msg, { reply_markup: { inline_keyboard: keyboard } })
-        .catch(this.client.logger.error);
+      ctx.replyWithMarkdown(msg, { reply_markup: { inline_keyboard: keyboard } }).catch(this.client.logger.error);
     }
 
     for (const key in keys) {
       this.client.action(`${key}-${group}`, (ctx) => {
-        this.execGroup(
-          ctx,
-          schedules,
-          group,
-          ctx.update.callback_query.message.message_id,
-          key
-        );
+        this.execGroup(ctx, schedules, group, ctx.update.callback_query.message.message_id, key);
       });
     }
   }
