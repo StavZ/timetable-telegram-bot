@@ -136,7 +136,7 @@ export default class ScheduleCommand extends Command {
         }`;
         if (l.error && msg.includes(l.error)) break;
       }
-      msg += `\`\`\`${this.client.generateBells(groupSchedule) ? ```\n${this.client.generateBells(groupSchedule)}` : ''}\n\n[Ссылка на сайт](${groupSchedule.url})`;
+      msg += `\`\`\`${this.client.generateBells(groupSchedule) ? `\n${this.client.generateBells(groupSchedule)}` : ''}\n\n[Ссылка на сайт](${groupSchedule.url})`;
     } else {
       msg += `\`\`\`Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
