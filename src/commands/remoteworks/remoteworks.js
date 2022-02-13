@@ -149,16 +149,18 @@ export default class StartCommand extends Command {
           user.group,
           task.date.regular,
           task.teacher,
-          `Тема задания: ${task.taskSubject}\n\n${task.taskContent ?? 'Задание не указано.'}${task.links.length ? `\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''}\n\nПочта преподавателя: [${
-            task.email
-          }](mailto:${task.email}?subject=${encodeURI(
+          `Тема задания: ${task.taskSubject}\n\n${task.taskContent ?? 'Задание не указано.'}${
+            task.links.length ? `\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''
+          }\n\nПочта преподавателя: [${task.email}](mailto:${task.email}?subject=${encodeURI(
             user.group
           )})\n*(При нажатии на почту, Вас переадресует на почтовый клиент по умолчанию.\nТакже, указанная Вами группа сразу появляется в теме сообщения, пожалуйста проверьте её правильность)*`
         );
 
         msg += `Дисциплина: \`${task.title}\`\nГруппа: \`${user.group}\`\nДата: \`${task.date.toString()} ${task.date.day ? `(${task.date.day})` : ''}\`\nТема задания: ${
           task.taskSubject
-        }\nЗадание:\n${telegraph}${task.links.length ? `\nФайлы:\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''}${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${task.email ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)` : ''}`;
+        }\nЗадание:\n${telegraph}${task.links.length ? `\nФайлы:\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''}${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${
+          task.email ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)` : ''
+        }`;
 
         if (i + 1 !== rw.length) msg += `\n${'—'.repeat(20)}\n`;
       }
@@ -196,12 +198,12 @@ export default class StartCommand extends Command {
       task.title,
       user.group,
       task.date.regular,
-      task.teacher,
+      (task.teacher ? task.teacher : ''),
       `Тема задания: ${task.taskSubject}\n\n${task.taskContent ?? 'Задание не указано.'}${
         task.links.length ? `\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''
-      }\n\nПочта преподавателя: [${task.email}](mailto:${task.email}?subject=${encodeURI(
+      }\n\n${task.email ? `Почта преподавателя: [${task.email}](mailto:${task.email}?subject=${encodeURI(
         user.group
-      )})\n*(При нажатии на почту Вас переадресует на вашу почту по умолчанию. Пожалуйста проверьте правильность Вашей группы в теме сообщения)*`
+      )})\n*(При нажатии на почту Вас переадресует на Вашу почту по умолчанию. Пожалуйста проверьте правильность Вашей группы в теме сообщения)*` : ''}`
     )}${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${task.email ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)` : ''}`;
     if (mid) {
       this.client.telegram.editMessageText(ctx.chat.id, mid, mid, msg, {
