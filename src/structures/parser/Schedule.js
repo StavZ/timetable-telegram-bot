@@ -15,7 +15,7 @@ export default class Schedule {
      */
     this.id = data.id;
     /**
-     * @type {{group:string,lessonlist:Lesson[]}[]}
+     * @type {{id:string,group:string,lessonlist:Lesson[]}[]}
      */
     this.lessonlists = data.lessonlists;
   }
@@ -28,6 +28,7 @@ export default class Schedule {
     if (!groupLessonlist)
       return {
         id: this.id,
+        cartId: null,
         group: group,
         url: this.url,
         date: this.date,
@@ -35,6 +36,7 @@ export default class Schedule {
       };
     return {
       id: this.id,
+      cartId: groupLessonlist.id,
       group: groupLessonlist.group,
       url: this.url,
       date: this.date,
@@ -49,4 +51,5 @@ export default class Schedule {
  * @prop {{toString():string,regular:string,day:string}} date
  * @prop {string} group
  * @prop {number} id
+ * @prop {string} cartId
  */

@@ -7,11 +7,7 @@ export default class Lesson {
     /**
      * @type {string}
      */
-    this.title = data.lesson;
-    /**
-     * @type {number}
-     */
-    this.subgroup = data.subgroup;
+    this.title = data.title;
     /**
      * @type {string}
      */
@@ -19,7 +15,7 @@ export default class Lesson {
     /**
      * @type {number}
      */
-    this.number = data.lessonNumber;
+    this.number = data.number;
     /**
      * @type {string|null}
      */

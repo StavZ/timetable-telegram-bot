@@ -10,7 +10,7 @@ export default class Parser {
   /**
    *
    * @param {string|null} url
-   * @returns {Document}
+   * @returns {Promise<Document>}
    */
   async getDocument(url) {
     return new Promise(async (resolve, reject) => {
@@ -30,13 +30,6 @@ export default class Parser {
       });
       const jsdom = new JSDOM(html);
       const document = jsdom.window.document;
-      const trs = document.getElementsByTagName('tr');
-      for (let i = 0; i < trs.length; i++) {
-        if (trs.item(i).className === 'R7' || trs.item(i).className === 'R3') continue;
-        if (trs.item(i).className !== 'R8') {
-          trs.item(i).classList.replace(trs.item(i).className, 'R8');
-        }
-      }
       resolve(document);
     });
   }
@@ -47,14 +40,14 @@ export default class Parser {
   async getAvailableSchedules() {
     const document = await this.getDocument().catch((e) => {
       logger.error(e);
-      return null;
     });
     if (!document) return null;
-    const lessonList = document.getElementsByClassName('lesson_list').item(0).querySelectorAll('a');
+    const lessonList = document.getElementsByClassName('lesson_list').item(0).children;
     const schedules = [];
     for (const day of lessonList) {
+      if (day.tagName === 'UL') continue;
       const url = `https://ppkslavyanova.ru/lessonlist${day.href}`;
-      const id = /^\?day=([0-9]{4})$/.exec(day.href)[1];
+      const id = /^\?day=([0-9]{4})$/.exec(day.href);
       const date = this.parseDate(day.textContent, Number(id));
       const lessonlists = await this.generateLessonlist(url);
       if (!lessonlists) return null;
@@ -142,11 +135,12 @@ export default class Parser {
    */
   async getGroups() {
     const document = await this.getDocument();
-    const groupsArray = Array.from(document.getElementsByClassName('R8C0'));
+    const carts = document.getElementsByClassName('lesson_on_group').item(0).children;
     const groups = [];
-    groupsArray.forEach((c) => {
-      groups.push(c.textContent);
-    });
+    for (const cart of carts) {
+      const group = cart.getElementsByClassName('title').item(0).textContent;
+      groups.push(group)
+    }
     return groups;
   }
 
@@ -159,68 +153,46 @@ export default class Parser {
   async generateLessonlist(url) {
     const document = await this.getDocument(url);
     const timetable = [];
-    const rows = document.getElementsByClassName('R8');
+    const carts = document.getElementsByClassName('lesson_on_group').item(0).children;
     const groupRegex = /(([А-Яа-я])?)-(\d{2})/;
-    for (let i = 0; i < rows.length; i++) {
-      if (rows.item(i).childElementCount === 3) {
-        if (!groupRegex.test(rows.item(i).textContent.replace(/\n/g, ''))) return null;
-        // group
-        timetable.push({
-          group: rows.item(i).textContent.replace(/\n/g, ''),
-          lessonlist: [],
-        });
-        continue;
-      } else {
-        // lesson
-        timetable[timetable.length - 1].lessonlist.push(await this.parseLesson(rows.item(i).textContent.trim()));
+    for (const cart of carts) {
+      const id = cart.id;
+      const group = cart.getElementsByClassName('title').item(0).textContent;
+      if (!groupRegex.test(group)) return null;
+      timetable.push({
+        id,
+        group,
+        lessonlist: [],
+      });
+      const dlist = cart.getElementsByClassName('discepline_list').item(0).children;
+      for (const lesson of dlist) {
+        const number = Number(lesson.getElementsByClassName('index').item(0).textContent);
+        const title = lesson.getElementsByClassName('discipline_name').item(0).textContent;
+        const teacher = lesson.getElementsByClassName('teacher').item(0).textContent === '-' ? null : lesson.getElementsByClassName('teacher').item(0).textContent.trimEnd();
+        const location = this.parseLocation(
+          lesson.getElementsByClassName('location').item(0) ? lesson.getElementsByClassName('location').item(0).textContent.trimEnd() : null,
+          lesson.getElementsByClassName('classroom').item(0) ? lesson.getElementsByClassName('classroom').item(0).textContent.trimEnd() : null
+        );
+        timetable.find((t) => t.group === group).lessonlist.push(new Lesson({ title: title, teacher: teacher, number: number, address: location.address, classroom: location.classroom }));
       }
     }
     return timetable;
   }
 
-  parseLesson(string) {
-    return new Promise((resolve, reject) => {
-      const fullRegex = /^(.*)\n(.*)\n(.*)\n(.*)\n?(.*)$/gm;
-      const parsed = fullRegex.exec(string);
-      const result = {};
-      try {
-        if (!parsed) resolve(new Lesson({ error: 'Произошла ошибка во время обработки.' }));
-        result.lessonNumber = parseInt(parsed[1], 10);
-        result.subgroup = parsed[2] ? parsed[2] : null;
-        result.lesson = parsed[3].trim();
-        result.teacher = parsed[4] ? parsed[4].replace(/\-/g, '').trim() : null;
-        const parsedClassroomAdress = parseClassroomAddress(parsed[5]);
-        result.classroom = parsedClassroomAdress.classroom;
-        result.address = parsedClassroomAdress.address;
-      } catch (e) {
-        reject(e);
-      }
-
-      /**
-       * @param {string} str
-       * @returns {{classroom:string|null,address:string|null}}
-       */
-      function parseClassroomAddress(str) {
-        if (str) {
-          str = str.replace(/\n/g, '');
-        }
-        const classroomRegex = /(([0-9]{1,3}([а-я]{1})?)\s)?([ЁёА-я0-9_" ]*)/gm;
-        const remoteRegex = /Дистанционное обучение/;
-        const result = { classroom: null, address: null };
-        if (str && str.match(/^\d/)) {
-          const parsedClassroom = classroomRegex.exec(str);
-          result.classroom = parsedClassroom[1] ? parsedClassroom[1].trim() : null;
-          result.address = parsedClassroom[4];
-        } else if (str && str.match(remoteRegex)) {
-          result.classroom = 'Дистанционное обучение';
-          result.address = null;
-        } else if (str && str !== undefined) {
-          result.classroom = null;
-          result.address = classroomRegex.exec(str)[4];
-        }
-        return result;
-      }
-      resolve(new Lesson(result));
-    });
+  parseLocation(location, classroom) {
+    if (!location && !classroom)
+      return {
+        address: null,
+        classroom: null,
+      };
+    if (classroom === 'Дистанционное' && location === 'обучение')
+      return {
+        address: 'Дистанционное обучение',
+        classroom: null,
+      };
+    return {
+      address: location,
+      classroom: isNaN(classroom) ? classroom : Number(classroom),
+    };
   }
 }

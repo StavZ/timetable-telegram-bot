@@ -38,9 +38,11 @@ export default class SendMessageCommand extends Command {
       this.client.action('agree-sendmessage-all', (ctx) => {
         this.client.sendMessageAsDeveloper(msg, 'all');
         ctx.editMessageText(`${msg}\n\nСообщение было отправлено ${users.length} пользователям.`);
+        msg = null;
       });
       this.client.action('disagree-sendmessage-all', (ctx) => {
         ctx.editMessageText('Отправка сообщения была отменена.');
+        msg = null;
       });
     } else {
       let msg = args.slice(1).join(' ');
@@ -55,10 +57,12 @@ export default class SendMessageCommand extends Command {
         this.client.sendMessageAsDeveloper(msg, 'user', userID).then((r) => {
           if (r) {
             ctx.editMessageText(`${msg}\n\nСообщение было отправлен пользователю \`#${userID}\`.`, { parse_mode: 'Markdown' });
+            msg = null;
           } else {
             ctx.editMessageText(`Пользователь \`#${userID}\` не найден.`, {
               parse_mode: 'Markdown',
             });
+            msg = null;
           }
         });
       });
