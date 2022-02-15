@@ -47,7 +47,7 @@ export default class Parser {
     for (const day of lessonList) {
       if (day.tagName === 'UL') continue;
       const url = `https://ppkslavyanova.ru/lessonlist${day.href}`;
-      const id = /^\?day=([0-9]{4})$/.exec(day.href);
+      const id = /^\?day=([0-9]{4})$/.exec(day.href)[1];
       const date = this.parseDate(day.textContent, Number(id));
       const lessonlists = await this.generateLessonlist(url);
       if (!lessonlists) return null;
