@@ -9,7 +9,6 @@ if (!process.env.NODE_ENV) {
  * Timezone
  */
 import moment from 'moment-timezone';
-import { TelegramError } from 'telegraf';
 moment.tz.setDefault(process.env.TZ);
 
 import Client from './src/structures/client/Client.js';
@@ -68,9 +67,11 @@ client.on('message', (ctx) => {
       return ctx.replyWithMarkdown(`В данный момент эта команда отключена и не доступна!`);
     }
     cmd.exec(ctx, args).then(async () => {
-      const module = await Module.findOne({ name: cmd.name, type: 'command' });
-      module.runs += 1;
-      module.save();
+      if (process.env.NODE_ENV === 'production') {
+        const module = await Module.findOne({ name: cmd.name, type: 'command' });
+        module.runs += 1;
+        module.save();
+      }
     });
   } catch (e) {
     client.logger.error(e);
