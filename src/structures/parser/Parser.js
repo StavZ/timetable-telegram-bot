@@ -170,7 +170,7 @@ export default class Parser {
         const number = Number(lesson.getElementsByClassName('index').length ? lesson.getElementsByClassName('index').item(0).textContent : 1);
         const title = lesson.getElementsByClassName('discipline_name').item(0).textContent;
         const teacher = lesson.getElementsByClassName('teacher').length ? lesson.getElementsByClassName('teacher').item(0).textContent.trimEnd() : null;
-        const isRemote = lesson.getElementsByClassName('location_string').item(0).textContent?.startsWith('Дистанционное') ? true : false;
+        const isRemote = lesson.getElementsByClassName('location_string').item(0)?.textContent?.startsWith('Дистанционное') ? true : false;
         let location;
         if (!isRemote) {
           location = this.parseLocation(
