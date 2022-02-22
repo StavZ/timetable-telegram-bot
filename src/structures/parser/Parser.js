@@ -139,7 +139,7 @@ export default class Parser {
     const groups = [];
     for (const cart of carts) {
       const group = cart.getElementsByClassName('title').item(0).textContent;
-      groups.push(group)
+      groups.push(group);
     }
     return groups;
   }
@@ -170,11 +170,15 @@ export default class Parser {
         const number = Number(lesson.getElementsByClassName('index').length ? lesson.getElementsByClassName('index').item(0).textContent : 1);
         const title = lesson.getElementsByClassName('discipline_name').item(0).textContent;
         const teacher = lesson.getElementsByClassName('teacher').length ? lesson.getElementsByClassName('teacher').item(0).textContent.trimEnd() : null;
-        const location = this.parseLocation(
-          lesson.getElementsByClassName('location').item(0) ? lesson.getElementsByClassName('location').item(0).textContent.trimEnd() : null,
-          lesson.getElementsByClassName('classroom').item(0) ? lesson.getElementsByClassName('classroom').item(0).textContent.trimEnd() : null
-        );
-        timetable.find((t) => t.group === group).lessonlist.push(new Lesson({ title: title, teacher: teacher, number: number, address: location.address, classroom: location.classroom }));
+        const isRemote = lesson.getElementsByClassName('location_string').item(0) ? true : false;
+        let location;
+        if (!isRemote) {
+          location = this.parseLocation(
+            lesson.getElementsByClassName('location').item(0) ? lesson.getElementsByClassName('location').item(0).textContent.trimEnd() : null,
+            lesson.getElementsByClassName('classroom').item(0) ? lesson.getElementsByClassName('classroom').item(0).textContent.trimEnd() : null
+          );
+        }
+        timetable.find((t) => t.group === group).lessonlist.push(new Lesson({ title: title, teacher: teacher, number: number, address: (isRemote ? 'Дистанционное обучение' : location.address), classroom: (isRemote ? null : location.classroom) }));
       }
     }
     return timetable;

@@ -68,7 +68,6 @@ export default class UserManager {
       group: null,
       course: null,
       sentSchedule: {},
-      role: 'student',
       regDate: this.client.time.getCurrentTime(true),
     }).save();
   }
