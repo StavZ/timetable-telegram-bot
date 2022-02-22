@@ -170,11 +170,12 @@ export default class Parser {
         const number = Number(lesson.getElementsByClassName('index').length ? lesson.getElementsByClassName('index').item(0).textContent : 1);
         const title = lesson.getElementsByClassName('discipline_name').item(0).textContent;
         const teacher = lesson.getElementsByClassName('teacher').length ? lesson.getElementsByClassName('teacher').item(0).textContent.trimEnd() : null;
-        const isRemote = lesson.getElementsByClassName('location_string').item(0)?.textContent?.startsWith('Дистанционное') ? true : false;
+        const locationString = lesson.getElementsByClassName('location_string').item(0) ? lesson.getElementsByClassName('location_string').item(0).textContent : null;
+        const isRemote = locationString ? locationString?.startsWith('Дистанционное') : null;
         let location;
         if (!isRemote) {
           location = this.parseLocation(
-            lesson.getElementsByClassName('location').item(0) ? lesson.getElementsByClassName('location').item(0).textContent.trimEnd() : null,
+            lesson.getElementsByClassName('location').item(0) ? lesson.getElementsByClassName('location').item(0).textContent.trimEnd() : (locationString ? locationString : null),
             lesson.getElementsByClassName('classroom').item(0) ? lesson.getElementsByClassName('classroom').item(0).textContent.trimEnd() : null
           );
         }
