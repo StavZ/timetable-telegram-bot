@@ -88,7 +88,7 @@ export default class Client extends Telegraf {
   async sendMessageAsDeveloper(message, type = 'all', userID = null) {
     switch (type) {
       case 'all': {
-        const users = (await this.userManager.getUsers({ id: this.owner })).filter((u) => u.group !== null);
+        const users = (await this.userManager.getUsers({ autoScheduler: true })).filter((u) => u.group !== null);
         users.forEach((u) => {
           this.telegram
             .sendMessage(u.id, `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`, {
