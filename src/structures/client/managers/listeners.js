@@ -10,7 +10,7 @@ export function newSchedule(client, user, schedule) {
   const message = client.commandHandler.getCommand('timetable').config.message;
   let msg = `Новое расписание на ${schedule.date.toString()} (${schedule.date.day.toProperCase()})\nГруппа: ${
     schedule.group
-  }\n\`\`\`\n${message ? `${message}\n` : ''}`;
+  }\n\`\`\`\n${message ? `${message}\n\n` : ''}`;
   if (schedule.lessons.length) {
     for (const lesson of schedule.lessons) {
       msg += `${
