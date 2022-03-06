@@ -72,12 +72,14 @@ export default class RemoteWorksParser {
               .textContent.trim()
               .replace(/http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g, (x) => `[${x}](${x}) `)
           );
-          const linkDiv = li?.getElementsByClassName('links').item(0)?.getElementsByTagName('a');
+          const linkDiv = li?.getElementsByClassName('links');
           const links = [];
           if (linkDiv) {
             for (let x = 0; x < linkDiv.length; x++) {
-              const link = linkDiv.item(x);
-              links.push(link.href);
+              const linksa = linkDiv.item(x).getElementsByTagName('a');
+              for (let y = 0; y < linksa.length; y++) {
+                links.push(linksa.item(y).href)
+              }
             }
           }
           const teacher = li.getElementsByClassName('prepod').item(0).textContent.replaceSpaces().toProperCase();
