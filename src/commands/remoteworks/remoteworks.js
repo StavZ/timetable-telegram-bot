@@ -24,13 +24,13 @@ export default class StartCommand extends Command {
    */
   async exec(ctx, args) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    if (!user.group) return ctx.replyWithMarkdown('Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.');
+    if (!user.usergroup) return ctx.replyWithMarkdown('Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.');
 
     this.client.action('by-title', async (ctxt) => {
       return await this.startByTitle(ctxt, user);
     });
 
-    const rw = (await this.client.remoteWorks.getRemoteWorks(user.group))?.reverse();
+    const rw = (await this.client.remoteWorks.getRemoteWorks(user.usergroup))?.reverse();
     const titles = this.shortTitles(rw);
     titles.forEach((t) => {
       this.client.action(t.short, (ctt) => {
@@ -105,7 +105,7 @@ export default class StartCommand extends Command {
    */
   async startByTitle(ctx) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    const rw = (await this.client.remoteWorks.getRemoteWorks(user.group))?.reverse();
+    const rw = (await this.client.remoteWorks.getRemoteWorks(user.usergroup))?.reverse();
     const titles = this.shortTitles(rw);
     const keyboard = this.parseFullKeyboard(titles, 3);
     ctx.editMessageText('Выберите дисциплину из списка ниже для просмотра дистанционных заданий:', { reply_markup: { inline_keyboard: keyboard } });
@@ -118,7 +118,7 @@ export default class StartCommand extends Command {
   async findByDate(userid, date) {
     if (!date) return [];
     const user = await this.client.userManager.getUser(userid);
-    const rw = (await this.client.remoteWorks.getRemoteWorks(user.group))?.reverse();
+    const rw = (await this.client.remoteWorks.getRemoteWorks(user.usergroup))?.reverse();
     const found = rw.filter((t) => t.date?.regular === date);
     return found;
   }
@@ -146,17 +146,17 @@ export default class StartCommand extends Command {
         const task = rw[i];
         const telegraph = await this.createTelegraph(
           task.title,
-          user.group,
+          user.usergroup,
           task.date.regular,
           task.teacher,
           `Тема задания: ${task.taskSubject}\n\n${task.taskContent ?? 'Задание не указано.'}${
             task.links.length ? `\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''
           }\n\nПочта преподавателя: [${task.email}](mailto:${task.email}?subject=${encodeURI(
-            user.group
+            user.usergroup
           )})\n*(При нажатии на почту, Вас переадресует на почтовый клиент по умолчанию.\nТакже, указанная Вами группа сразу появляется в теме сообщения, пожалуйста проверьте её правильность)*`
         );
 
-        msg += `Дисциплина: \`${task.title}\`\nГруппа: \`${user.group}\`\nДата: \`${task.date.toString()} ${task.date.day ? `(${task.date.day})` : ''}\`\nТема задания: ${
+        msg += `Дисциплина: \`${task.title}\`\nГруппа: \`${user.usergroup}\`\nДата: \`${task.date.toString()} ${task.date.day ? `(${task.date.day})` : ''}\`\nТема задания: ${
           task.taskSubject
         }\nЗадание:\n${telegraph}${task.links.length ? `\nФайлы:\n${task.links.map((l, i) => `[Ссылка ${i + 1}](${l})`).join('\n')}` : ''}${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${
           task.email ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)` : ''
@@ -183,20 +183,20 @@ export default class StartCommand extends Command {
     const user = await this.client.userManager.getUser(ctx.from.id);
     const task = key ? tasks.find((t) => t.date.regular === key) : tasks[0];
     tasks.forEach((ta) => {
-      this.client.action(`${user.group}${stitle}-${ta.date.regular}`, (c) => {
+      this.client.action(`${user.usergroup}${stitle}-${ta.date.regular}`, (c) => {
         this.showByTitle(c, tasks, stitle, c.update.callback_query.message.message_id, ta.date.regular);
       });
     });
     let keyboard = [];
     if (tasks.length > 1) {
-      keyboard = this.parseKeyboard(tasks, task, `${user.group}${stitle}`, 4);
+      keyboard = this.parseKeyboard(tasks, task, `${user.usergroup}${stitle}`, 4);
     }
     keyboard.push([{ text: 'Назад', callback_data: 'back-to-titles' }]);
     const msg = `Найдено \`${tasks.length}\` задани${tasks.length === 1 ? 'е' : tasks.length > 1 && tasks.length < 5 ? 'я' : tasks.length >= 5 ? 'й' : 'я'}.\n\nДисциплина: \`${
       task.title
-    }\`\nГруппа: \`${user.group}\`\nДата: \`${task.date.toString()}${task.date.day ? ` (${task.date.day})` : ''}\`\nТема задания: ${task.taskSubject}\nЗадание:\n${await this.createTelegraph(
+    }\`\nГруппа: \`${user.usergroup}\`\nДата: \`${task.date.toString()}${task.date.day ? ` (${task.date.day})` : ''}\`\nТема задания: ${task.taskSubject}\nЗадание:\n${await this.createTelegraph(
       task.title,
-      user.group,
+      user.usergroup,
       task.date.regular,
       (task.teacher ? task.teacher : ''),
       `Тема задания: ${task.taskSubject}\n\n${task.taskContent ?? 'Задание не указано.'}${
