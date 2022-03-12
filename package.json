@@ -28,7 +28,7 @@
   "name": "timetable-telegram-bot",
   "version": "5.2.1",
   "engines": {
-    "node": "17.x",
+    "node": "17.x"
   },
   "cjs": {
     "cache": true
