@@ -28,26 +28,24 @@ export default class RemoteControlCommand extends Command {
     const moduleSchema = await this.client.remoteControl.getModule(module, moduleType, false);
     if (!moduleSchema) return ctx.reply('Модуль не найден.');
     if (args.length === 2) {
-      const keys = Object.keys(moduleSchema.remoteConfig);
+      const keys = Object.keys(moduleSchema.config);
       let config = '';
       for (const key of keys) {
-        // if (typeof moduleSchema.remoteConfig[key] !== 'boolean') continue;
-        config += `• ${key}: \`${moduleSchema.remoteConfig[key]}\`\n`;
+        config += `• ${key}: \`${moduleSchema.config[key]}\`\n`;
       }
-      ctx.replyWithMarkdown(`Модуль: \`${moduleSchema.name}\`\nТип: \`${moduleSchema.type}\`\nКонфиг:\n${config}`);
+      ctx.replyWithMarkdown(`Модуль: \`${moduleSchema.modulename}\`\nТип: \`${moduleSchema.moduletype}\`\nКонфиг:\n${config}`);
       return;
     }
     const setting = args[2];
     let value = this.getValue(args.slice(3).join(' '));
 
-    let config = moduleSchema.remoteConfig;
+    let config = moduleSchema.config;
     config[setting] = value;
     this.client.remoteControl
       .updateModuleConfig(module, moduleType, config)
       .then(() => {
-        ctx.replyWithMarkdown(`Модуль ${moduleSchema.name} \`[${moduleSchema.type}]\` был обновлен.\nЗначение \`${setting}\` было изменено на \`${value} [${typeof value}]\`.`).then(() => {
-          this.performChanges(moduleSchema.name, moduleSchema.type, config);
-        });
+        ctx.replyWithMarkdown(`Модуль ${moduleSchema.modulename} \`[${moduleSchema.moduletype}]\` был обновлен.\nЗначение \`${setting}\` было изменено на \`${value} [${typeof value}]\`.`);
+        this.performChanges(moduleSchema.modulename, moduleSchema.moduletype, config);
       })
       .catch(this.client.logger.error);
   }
@@ -81,15 +79,15 @@ export default class RemoteControlCommand extends Command {
     }
   }
 
-  performChanges(module, moduleType, config) {
+  async performChanges(module, moduleType, config) {
     switch (moduleType) {
       case 'command': {
-        this.client.commandHandler.reload(module).catch(this.client.logger.error);
+        await this.client.commandHandler.reload(module).catch(this.client.logger.error);
         break;
       }
       case 'manager': {
         if (config.cacheInterval !== this.client.manager.interval) {
-          this.client.manager.interval = config.cacheInterval;
+          this.client.manager.interval = config.interval;
         }
         if (config.isDisabled === true) {
           this.client.manager.stopListeners();

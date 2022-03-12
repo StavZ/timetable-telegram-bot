@@ -18,7 +18,7 @@ export default class TimetableManager extends EventEmitter {
     /**
      * @type {number}
      */
-    this.interval = 180000;
+    this.interval = 30000;
     /**
      * @type {boolean}
      */
@@ -26,21 +26,17 @@ export default class TimetableManager extends EventEmitter {
   }
 
   async caching() {
-    const schedules = await this.client.parser
-      .getAvailableSchedules()
-      .catch((e) => {
-        this.client.logger.error(e);
-      });
+    const schedules = await this.client.parser.getAvailableSchedules().catch((e) => {
+      this.client.logger.error(e);
+    });
     this.cache = {
       generatedAt: Date.now(),
       schedules,
     };
     setInterval(async () => {
-      const schedules = await this.client.parser
-        .getAvailableSchedules()
-        .catch((e) => {
-          this.client.logger.error(e);
-        });
+      const schedules = await this.client.parser.getAvailableSchedules().catch((e) => {
+        this.client.logger.error(e);
+      });
       this.cache = {
         generatedAt: Date.now(),
         schedules,
@@ -56,14 +52,7 @@ export default class TimetableManager extends EventEmitter {
    */
   isScheduleEdited(user, userSchedule, lastSentSchedule) {
     const result = [];
-    const keys = [
-      'title',
-      'subgroup',
-      'teacher',
-      'number',
-      'address',
-      'classroom',
-    ];
+    const keys = ['title', 'subgroup', 'teacher', 'number', 'address', 'classroom'];
     const lessonsN = userSchedule.lessons;
     const lessonsL = lastSentSchedule.lessons;
 
@@ -97,11 +86,11 @@ export default class TimetableManager extends EventEmitter {
     /**
      * @type {schedule|null}
      */
-    const userSchedule = schedule.getLessonlistByGroup(user.group);
+    const userSchedule = schedule.getLessonlistByGroup(user.usergroup);
     /**
      * @type {schedule|null}
      */
-    const lastSentSchedule = user.sentSchedule;
+    const lastSentSchedule = user.sentschedule;
     if (userSchedule.id > (lastSentSchedule ? lastSentSchedule.id : 0)) {
       return this.emit('newSchedule', user, userSchedule);
     } else if (userSchedule.id === lastSentSchedule.id) {
@@ -113,42 +102,33 @@ export default class TimetableManager extends EventEmitter {
     setInterval(async () => {
       if (!this.cache.schedules) return;
       let users = await this.client.userManager.getUsers({
-        autoScheduler: true,
+        autoscheduler: true,
+        id: 408057291,
       });
       users
-        .filter((u) => u.group !== null)
+        .filter((u) => u.usergroup !== null)
         .forEach((u) => {
           if (!this.cache || !this.cache.schedules) return;
-          this.isScheduleNew(u.toObject(), this.cache.schedules[0]);
+          this.isScheduleNew(u, this.cache.schedules[0]);
         });
     }, this.interval);
   }
 
   async run() {
-    const module = await this.client.remoteControl.getModule(
-      this.name,
-      'manager',
-      false
-    );
+    const module = await this.client.remoteControl.getModule(this.name, 'manager', false);
     if (process.env.NODE_ENV !== 'development') {
       this.client.logger.info('Starting Timetable manager');
-      this.interval = module.remoteConfig.cacheInterval
-        ? module.remoteConfig.cacheInterval
-        : 180000;
-      this.isDisabled = module.remoteConfig.isDisabled;
-      if (!module.remoteConfig.isDisabled) {
+      this.interval = module.config.interval ? module.config.interval : 180000;
+      this.isDisabled = module.config.isDisabled;
+      if (!module.config.isDisabled) {
         this.startListeners();
       }
       this.caching();
       this.checker();
     } else {
-      this.interval = module.remoteConfig.cacheInterval
-        ? module.remoteConfig.cacheInterval
-        : 180000;
+      this.interval = module.config.interval ? module.config.interval : 180000;
       this.caching();
-      this.client.logger.info(
-        'Start of timetable manager aborted due to development version!'
-      );
+      this.client.logger.info('Start of timetable manager aborted due to development version!');
     }
   }
   stopListeners() {
@@ -159,9 +139,7 @@ export default class TimetableManager extends EventEmitter {
 
   startListeners() {
     this.client.logger.info('Starting listeners...');
-    this.on('editedSchedule', (...args) =>
-      editedSchedule(this.client, ...args)
-    );
+    this.on('editedSchedule', (...args) => editedSchedule(this.client, ...args));
     this.on('newSchedule', (...args) => newSchedule(this.client, ...args));
   }
 }

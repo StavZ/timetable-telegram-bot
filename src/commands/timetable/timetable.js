@@ -58,7 +58,6 @@ export default class ScheduleCommand extends Command {
    */
   async showUserSchedule(ctx, schedules, message_id = null, key = null) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    if (!user) await this.client.userManager.createUser(ctx.from.id);
     const keys = this.client.parser.getSchedulesKeys(schedules);
     let schedule;
     if (key) {
@@ -66,11 +65,11 @@ export default class ScheduleCommand extends Command {
     } else {
       schedule = schedules[0];
     }
-    if (!user.group) {
+    if (!user.usergroup) {
       return ctx.replyWithMarkdown('Вы не выбрали группу.\nИспользуйте команду /selectgroup, чтобы выбрать группу.');
     }
-    const userSchedule = schedule.getLessonlistByGroup(user.group);
-    let msg = `Расписание на ${userSchedule.date.toString()} (${userSchedule.date.day.toProperCase()})\nГруппа: ${user.group}\n\`\n${this.config.message ? `${this.config.message}\n\n` : ''}`;
+    const userSchedule = schedule.getLessonlistByGroup(user.usergroup);
+    let msg = `Расписание на ${userSchedule.date.toString()} (${userSchedule.date.day.toProperCase()})\nГруппа: ${user.usergroup}\n\`\n${this.config.message ? `${this.config.message}\n\n` : ''}`;
     if (userSchedule.lessons.length) {
       for (const l of userSchedule.lessons) {
         msg += `${
@@ -82,7 +81,9 @@ export default class ScheduleCommand extends Command {
         }`;
         if (l.error && msg.includes(l.error)) break;
       }
-      msg += `\`\`\`${this.client.generateBells(userSchedule) ? `\n${this.client.generateBells(userSchedule)}` : ''}\n\n[Ссылка на сайт](${userSchedule.url}${userSchedule.cartId ? `#${userSchedule.cartId}` : ''})`;
+      msg += `\`\`\`${this.client.generateBells(userSchedule) ? `\n${this.client.generateBells(userSchedule)}` : ''}\n\n[Ссылка на сайт](${userSchedule.url}${
+        userSchedule.cartId ? `#${userSchedule.cartId}` : ''
+      })`;
     } else {
       msg += `\`\`\`Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
@@ -136,7 +137,9 @@ export default class ScheduleCommand extends Command {
         }`;
         if (l.error && msg.includes(l.error)) break;
       }
-      msg += `\`\`\`${this.client.generateBells(groupSchedule) ? `\n${this.client.generateBells(groupSchedule)}` : ''}\n\n[Ссылка на сайт](${groupSchedule.url}${groupSchedule.cartId ? `#${groupSchedule.cartId}` : ''})`;
+      msg += `\`\`\`${this.client.generateBells(groupSchedule) ? `\n${this.client.generateBells(groupSchedule)}` : ''}\n\n[Ссылка на сайт](${groupSchedule.url}${
+        groupSchedule.cartId ? `#${groupSchedule.cartId}` : ''
+      })`;
     } else {
       msg += `\`\`\`Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }

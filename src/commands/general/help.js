@@ -22,6 +22,7 @@ export default class HelpCommand extends Command {
    * @param {string[]} args
    */
   async exec(ctx, args) {
+    console.log(this.config);
     if (!args.length) {
       const commands = this.client.commandHandler.commands.filter((c) => c.config.includeInHelp || !c.config.ownerOnly);
       let msg = `Список команд @ppkslavyanovabot\n\n`;
@@ -34,10 +35,11 @@ export default class HelpCommand extends Command {
     if (this.client.commandHandler.hasCommand(args[0])) {
       const command = this.client.commandHandler.getCommand(args[0]);
       const module = await this.client.remoteControl.getModule(command.name, 'command', false);
+      console.log(module);
       return ctx.replyWithMarkdown(
         `Команда: ${this.client.prefix}${command.name}\nОписание: ${command.description}\nИспользование: ${this.client.prefix}${command.usage}${
           command.aliases.length ? `\nСокращени${command.aliases.length > 1 ? 'я' : 'е'}: ${command.aliases.map((a) => `${this.client.prefix}${a}`).join(' | ')}` : ``
-        }\nЗапусков: \`${module.runs ?? 0}\``
+        }`
       );
     } else {
       return ctx.reply('Команда не найдена!');

@@ -1,10 +1,7 @@
 import moment from 'moment-timezone';
 
 export default class TimeManager {
-  constructor() {}
-
   getCurrentTime(unix = false) {
-    // return moment('2021-05-05T00:00:00+05:00').set({ hours: 0, minutes: 0, seconds: 0 });
     return unix
       ? moment().set({ hours: 0, minutes: 0, seconds: 0 }).format('x')
       : moment().set({ hours: 0, minutes: 0, seconds: 0 });
@@ -34,6 +31,7 @@ export default class TimeManager {
 
   /**
    * @param {string} year
+   * @returns {number}
    */
   getCourse(year) {
     const map = this.getCourseMap();

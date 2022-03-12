@@ -31,7 +31,7 @@ export default class CommandHandler {
       command.aliases.forEach((a) => {
         this.aliases.set(a, command.name);
       });
-      this.commands.set(command.name, Object.assign(command, { path, config: module.remoteConfig }));
+      this.commands.set(command.name, Object.assign(command, { path, config: module.config }));
       next();
     });
     walker.on('end', () => {
@@ -46,7 +46,7 @@ export default class CommandHandler {
     const command = this.getCommand(query);
     if (!command) return false;
     const module = await this.client.remoteControl.getModule(command.name, 'command', false);
-    command.config = module.remoteConfig;
+    command.config = module.config;
   }
 
   /**

@@ -23,8 +23,8 @@ export default class AutoschedulerCommand extends Command {
    */
   async exec(ctx, args) {
     const user = await this.client.userManager.getUser(ctx.from.id);
-    const currentStatus = user.autoScheduler;
-    this.client.userManager.updateUser(ctx.from.id, 'autoScheduler', !currentStatus);
+    const currentStatus = user.autoscheduler;
+    this.client.userManager.updateUser(ctx.from.id, 'autoscheduler', !currentStatus);
     ctx.reply(`Автоматическая рассылка ${!currentStatus ? 'включена' : 'выключена'}.`);
   }
 }

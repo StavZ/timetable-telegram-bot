@@ -30,15 +30,15 @@ export default class ProfileCommand extends Command {
       const user = await this.client.userManager.getUser(args[0]);
       if (!user) return ctx.replyWithMarkdown('Пользователь не найден.');
       return ctx.replyWithMarkdown(
-        `ID: \`${user.id}\`\nГруппа: \`${user.group ? user.group : 'Не выбрана'}\`${
-          user.group ? `\nСтатус рассылки: \`${user.autoScheduler ? 'Включена' : 'Выключена'}\`\nКурс: \`${this.client.userManager.calculateCourse(user.group)}\`` : ''
+        `ID: \`${user.id}\`\nГруппа: \`${user.usergroup ? user.usergroup : 'Не выбрана'}\`${
+          user.usergroup ? `\nСтатус рассылки: \`${user.autoscheduler ? 'Включена' : 'Выключена'}\`\nКурс: \`${this.client.userManager.calculateCourse(user.usergroup)}\`` : ''
         }`
       );
     }
     const user = await this.client.userManager.getUser(ctx.from.id);
     ctx.replyWithMarkdown(
-      `Ваш профиль\n\nID: \`${user.id}\`\nГруппа: \`${user.group ? user.group : 'Не выбрана'}\`${
-        user.group ? `\nКурс: \`${this.client.userManager.calculateCourse(user.group)} (${this.client.time.getStudYear()})\`` : ''
+      `Ваш профиль\n\nID: \`${user.id}\`\nГруппа: \`${user.usergroup ? user.usergroup : 'Не выбрана'}\`${
+        user.usergroup ? `\nКурс: \`${this.client.userManager.calculateCourse(user.usergroup)} (${this.client.time.getStudYear()})\`` : ''
       }`
     );
   }

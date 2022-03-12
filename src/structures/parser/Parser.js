@@ -153,7 +153,7 @@ export default class Parser {
   async generateLessonlist(url) {
     const document = await this.getDocument(url);
     const timetable = [];
-    const carts = document.getElementsByClassName('lesson_on_group').item(0).children;
+    const carts = document.getElementsByClassName('lesson_on_group').item(0)?.children;
     const groupRegex = /(([А-Яа-я])?)-(\d{2})/;
     for (const cart of carts) {
       const id = cart.id;
@@ -164,9 +164,8 @@ export default class Parser {
         group,
         lessonlist: [],
       });
-      const dlist = cart.getElementsByClassName('discepline_list').item(0).children;
+      const dlist = cart.getElementsByClassName('discepline_list').item(0)?.children;
       for (const lesson of dlist) {
-        // console.log(lesson.getElementsByClassName('index').item(0));
         const number = Number(lesson.getElementsByClassName('index').length ? lesson.getElementsByClassName('index').item(0).textContent : 1);
         const title = lesson.getElementsByClassName('discipline_name').item(0).textContent;
         const teacher = lesson.getElementsByClassName('teacher').length ? lesson.getElementsByClassName('teacher').item(0).textContent.trimEnd() : null;

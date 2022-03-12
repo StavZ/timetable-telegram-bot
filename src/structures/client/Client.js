@@ -17,6 +17,7 @@ import RemoteWorksParser from '../parser/RWParser.js';
 import TimeManager from './managers/TimeManager.js';
 import axios from 'axios';
 import Telegraph from 'telegra.ph';
+import pg from 'pg';
 
 export default class Client extends Telegraf {
   constructor(token, ...args) {
@@ -37,6 +38,7 @@ export default class Client extends Telegraf {
     this.mongoose = mongoose;
     this.telegraph = new Telegraph(process.env.TELEGRAPH);
     this.axios = axios;
+    this.db = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
   }
 
   /**
@@ -131,10 +133,10 @@ export default class Client extends Telegraf {
       })
       .catch(this.logger.error);
 
-    mongoose
-      .connect(process.env.MONGOURI)
+    this.db
+      .connect()
       .then(() => {
-        this.logger.success('Connected to Mongodb!');
+        this.logger.success('Connected to Postgres');
       })
       .catch(this.logger.error);
   }

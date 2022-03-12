@@ -49,7 +49,7 @@ export function newSchedule(client, user, schedule) {
         if (e.code === 403) {
           client.logger.log(`${user.id} : 403 Forbidden`);
           client.userManager.setLastSentSchedule(user.id, null);
-          client.userManager.updateUser(user.id, 'autoScheduler', false);
+          client.userManager.updateUser(user.id, 'autoscheduler', false);
         }
       }
     });
@@ -104,7 +104,7 @@ export function editedSchedule(client, user, schedule) {
         if (e.code === 403) {
           client.logger.log(`${user.id} : 403 Forbidden`);
           client.userManager.setLastSentSchedule(user.id, null);
-          client.userManager.updateUser(user.id, 'autoScheduler', false);
+          client.userManager.updateUser(user.id, 'autoscheduler', false);
         }
       }
     });

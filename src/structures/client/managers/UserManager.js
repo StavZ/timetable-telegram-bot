@@ -17,7 +17,7 @@ export default class UserManager {
    * @returns {user}
    */
   setGroup(id, group) {
-    this.updateUser(id, 'group', group);
+    this.updateUser(id, 'usergroup', group);
     this.updateUser(id, 'course', this.calculateCourse(group));
   }
 
@@ -36,8 +36,7 @@ export default class UserManager {
    * @returns {user[]}
    */
   async getUsersByCourse(course) {
-    const users = await this.getUsers({ course });
-    return users;
+    return (await this.client.db.query('SELECT * FROM users WHERE course = ($1)', [course])).rows;
   }
 
   /**
@@ -45,31 +44,24 @@ export default class UserManager {
    * @param {Schedule} schedule
    * @returns {user}
    */
-  setLastSentSchedule(id, schedule) {
-    return this.updateUser(id, 'sentSchedule', schedule);
+  async setLastSentSchedule(id, schedule) {
+    return (await this.client.db.query('UPDATE users SET sentschedule = ($2) WHERE id = ($1) RETURNING *', [id, schedule])).rows[0];
   }
 
   /**
+   * @deprecated
    * @param {number} id
    * @param {supportmessage} message
    */
   async pushSupportMessage(id, message) {
-    const user = await User.findOne({ id });
-    user.supportMessages.push(message);
-    return user.save();
+    return true;
   }
 
   /**
    * @param {number} id
    */
-  createUser(id) {
-    new User({
-      id,
-      group: null,
-      course: null,
-      sentSchedule: {},
-      regDate: this.client.time.getCurrentTime(true),
-    }).save();
+  async createUser(id) {
+    return (await this.client.db.query('INSERT INTO users (id, regdate) VALUES ($1, $2) RETURNING *', [id, this.client.time.getCurrentTime(true)])).rows[0];
   }
 
   /**
@@ -79,7 +71,7 @@ export default class UserManager {
    * @returns {user}
    */
   async updateUser(id, name, value) {
-    return User.updateOne({ id }, { [name]: value });
+    return (await this.client.db.query(`UPDATE users SET ${name} = '${value}' WHERE id = ${id} RETURNING *`)).rows[0];
   }
 
   /**
@@ -87,9 +79,7 @@ export default class UserManager {
    * @returns {Promise<user>}
    */
   async getUser(id) {
-    const schema = await User.findOne({ id });
-    if (!schema) return null;
-    return schema;
+    return (await this.client.db.query('SELECT * FROM users WHERE id = ($1)', [id])).rows[0];
   }
 
   /**
@@ -97,24 +87,29 @@ export default class UserManager {
    * @returns {Promise<user[]>}
    */
   async getUsers(options) {
-    const users = await User.find(options);
-    return users;
+    let query = `SELECT * FROM users`;
+    if (options && Object.keys(options).length) {
+      const keys = Object.keys(options);
+      query += ` where ${keys.map((k) => `${k.toString()} = ${options[k]}`).join(' AND ')}`;
+    }
+    return (await this.client.db.query(query)).rows;
   }
 
   /**
    * @returns {number}
    */
   async getUserCount() {
-    const users = (await User.find({})).filter((u) => u.role !== 'bot');
-    return users.length;
+    return (await this.client.db.query('SELECT * FROM users')).rows.length;
   }
 }
 /**
  * @typedef {object} user
  * @prop {number} id
  * @prop {string} group
- * @prop {boolean} autoScheduler
+ * @prop {boolean} autoscheduler
  * @prop {number} course
+ * @prop {number} regdate
+ * @prop {any} sentschedule
  */
 /**
  * @typedef {object} supportmessage

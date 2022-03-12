@@ -1,4 +1,3 @@
-import Module from '../../models/Module.js';
 import Client from '../Client.js';
 const defaultCommandConfig = {
   includeInHelp: true,
@@ -18,45 +17,30 @@ export default class RemoteControlManager {
   }
 
   /**
-   *
    * @param {string} module
    * @param {moduleType} moduleType
    * @param {boolean} [createIfNotFound=true]
    * @return {moduleObject|null}
    */
   async getModule(module, moduleType, createIfNotFound = true) {
-    const moduleSchema = await Module.findOne({
-      name: module,
-      type: moduleType,
-    });
+    const moduleSchema = (await this.client.db.query('SELECT * FROM modules WHERE modulename = ($1) AND moduletype = ($2)', [module, moduleType])).rows[0];
     if (!moduleSchema && createIfNotFound) {
-      await this.createModule(module, moduleType);
-      return await Module.findOne({ name: module, type: moduleType });
+      return await this.createModule(module, moduleType);
     }
-    return moduleSchema ? moduleSchema.toObject() : null;
+    return moduleSchema ? moduleSchema : null;
   }
 
   /**
    * @param {string} module
    * @param {moduleType} moduleType
    */
-  createModule(module, moduleType) {
+  async createModule(module, moduleType) {
     switch (moduleType) {
       case 'command': {
-        new Module({
-          name: module,
-          type: moduleType,
-          remoteConfig: defaultCommandConfig,
-        }).save();
-        break;
+        return (await this.client.db.query('INSERT INTO modules (modulename, moduletype, config, runs) values ($1, $2, $3, $4) RETURNING *', [module, moduleType, defaultCommandConfig, 0])).rows[0];
       }
       case 'manager': {
-        new Module({
-          name: module,
-          type: moduleType,
-          remoteConfig: defaultManagerConfig,
-        }).save();
-        break;
+        return (await this.client.db.query('INSERT INTO modules (modulename, moduletype, config) values ($1, $2, $3) RETURNING *', [module, moduleType, defaultManagerConfig])).rows[0];
       }
     }
   }
@@ -68,7 +52,12 @@ export default class RemoteControlManager {
    * @param {object} newConfig
    */
   async updateModuleConfig(module, moduleType, newConfig) {
-    return Module.updateOne({ name: module, type: moduleType }, { remoteConfig: newConfig });
+    return (await this.client.db.query(`UPDATE modules SET config = ($1) WHERE modulename = '${module}' AND moduletype = '${moduleType}' RETURNING *`, [newConfig])).rows[0];
+  }
+
+  async addCommandRun(name) {
+    let runs = Number((await this.getModule(name, 'command', false)).runs);
+    return await this.client.db.query(`UPDATE modules SET runs = ($1) WHERE modulename = '${name}' AND moduletype = 'command' RETURNING *`, [runs++]);
   }
 }
 
@@ -77,7 +66,7 @@ export default class RemoteControlManager {
  */
 /**
  * @typedef {object} moduleObject
- * @prop {string} name
- * @prop {moduleType} type
- * @prop {{isDisabled:boolean,includeInHelp:boolean,ownerOnly:boolean}} remoteConfig
+ * @prop {string} modulename
+ * @prop {moduleType} moduletype
+ * @prop {{isDisabled:boolean,includeInHelp:boolean,ownerOnly:boolean}} config
  */

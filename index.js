@@ -14,21 +14,27 @@ moment.tz.setDefault(process.env.TZ);
 import Client from './src/structures/client/Client.js';
 import Command from './src/structures/client/Command.js';
 import Module from './src/structures/models/Module.js';
+
 const client = new Client(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
+
 client.run();
 
 const loggerBlacklist = [1705065791];
 
 process.once('SIGINT', () => {
   client.stop('SIGINT');
-  client.mongoose.disconnect();
+  client.db.end().then(() => {
+    client.logger.info('Disconnected from Postgres');
+  });
   if (!client.manager.isDisabled) {
     client?.manager.stopListeners();
   }
 });
 process.once('SIGTERM', () => {
   client.stop('SIGTERM');
-  client.mongoose.disconnect();
+  client.db.end().then(() => {
+    client.logger.info('Disconnected from Postgres');
+  });
   if (!client.manager.isDisabled) {
     client?.manager.stopListeners();
   }
@@ -66,13 +72,7 @@ client.on('message', (ctx) => {
     if (!cmd.exec) {
       return ctx.replyWithMarkdown(`В данный момент эта команда отключена и не доступна!`);
     }
-    cmd.exec(ctx, args).then(async () => {
-      if (process.env.NODE_ENV === 'production') {
-        const module = await Module.findOne({ name: cmd.name, type: 'command' });
-        module.runs += 1;
-        module.save();
-      }
-    });
+    cmd.exec(ctx, args);
   } catch (e) {
     client.logger.error(e);
   }

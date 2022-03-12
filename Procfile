@@ -1,1 +1,1 @@
-worker: yarn production
+worker: npm run production
