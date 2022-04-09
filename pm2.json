@@ -1,7 +1,13 @@
 {
   "apps": {
     "name": "tg-bot",
-    "script": "npm",
-    "args": ["run", "production"]
+    "script": "./index.js",
+    "args": "",
+    "node_args": "--trace-warnings --experimental-json-modules",
+    "env_production": {
+       "NODE_ENV": "production"
+    },
+    "out_file": "logs.txt",
+    "log_date_format": "YYYY-MM-DD HH:mm"
   }
 }
