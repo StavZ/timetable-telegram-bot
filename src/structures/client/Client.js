@@ -40,7 +40,7 @@ export default class Client extends Telegraf {
     this.telegraph = new Telegraph(process.env.TELEGRAPH);
     this.axios = axios;
     this.os = os;
-    this.db = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+    this.db = new pg.Pool({ host: process.env.DBHOST, port: process.env.DBPORT, user: process.env.DBUSER, password: process.env.DBPASS, database: 'tg_bot_db', ssl: { rejectUnauthorized: false } });
   }
 
   /**

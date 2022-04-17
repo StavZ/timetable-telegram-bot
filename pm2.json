@@ -7,7 +7,10 @@
     "env_production": {
        "NODE_ENV": "production"
     },
+    "instances": 1,
+    "cron_restart": "0 0 * * *",
     "out_file": "logs.txt",
+    "error_file": "errors.txt",
     "log_date_format": "YYYY-MM-DD HH:mm"
   }
 }
