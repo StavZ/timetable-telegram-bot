@@ -85,7 +85,7 @@ export default class ScheduleCommand extends Command {
         userSchedule.cartId ? `#${userSchedule.cartId}` : ''
       })`;
     } else {
-      msg += `\`\`\`Расписание не найдено*\n\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
+      msg += `Расписание не найдено\`\n\`*\`_Расписание не найдено - значит, что пары не были поставлены._`;
     }
     const keyboard = this.parseKeyboard(schedules, key ? key : userSchedule.date.regular, null, 2);
     keyboard.push([{ text: 'Расписание другой группы', callback_data: 'switch-group' }]);
