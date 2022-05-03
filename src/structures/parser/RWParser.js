@@ -159,7 +159,7 @@ export default class RemoteWorksParser {
     group = group.split(' ')[0].replace(',', '');
     const prefix = this.getGroupPrefix(group);
     const groupO = groups.find((g) => g.prefix === prefix);
-    return groupO.groups.find((g) => g.group === group).id;
+    return groupO?.groups.find((g) => String(g.group === group))?.id;
   }
 }
 
