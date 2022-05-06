@@ -183,7 +183,7 @@ export default class StartCommand extends Command {
     const user = await this.client.userManager.getUser(ctx.from.id);
     const task = key ? tasks.find((t) => t.date.regular === key) : tasks[0];
     tasks.forEach((ta) => {
-      this.client.action(`${user.usergroup}${stitle}-${ta.date.regular}`, (c) => {
+      this.client.action(`${user.usergroup}${stitle}-${ta.date?.regular}`, (c) => {
         this.showByTitle(c, tasks, stitle, c.update.callback_query.message.message_id, ta.date.regular);
       });
     });
