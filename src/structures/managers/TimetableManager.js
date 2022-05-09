@@ -48,7 +48,6 @@ export default class TimetableManager extends EventEmitter {
     const cache = this.#client.cache.timetables[0];
     const newTimetable = cache.getTimetable(user.group);
     const lastSent = user.sentTimetable;
-    console.log(newTimetable, lastSent);
     if (newTimetable.id > (lastSent ? lastSent?.id : 0)) {
       return this.emit('onNew', user, newTimetable);
     } else if (newTimetable.id === lastSent.id) {
