@@ -175,17 +175,19 @@ export default class TelegrafClient extends Telegraf {
       case 'all': {
         const users = await this.users.getActive();
         users.forEach((u) => {
-          this.telegram.sendMessage(u.id, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал [t.me/ppkbotnews](https://t.me/ppkbotnews)`, {
+          this.telegram.sendMessage(u.id, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал https://t.me/ppkbotnews.`, {
             disable_notification: true,
             disable_web_page_preview: true,
+            parse_mode: 'Markdown'
           }).catch(this.logger.error);
         });
         break;
       }
       case 'user': {
-        this.telegram.sendMessage(userid, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал [t.me/ppkbotnews](https://t.me/ppkbotnews)`, {
+        this.telegram.sendMessage(userid, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал https://t.me/ppkbotnews.`, {
           disable_notification: true,
           disable_web_page_preview: true,
+          parse_mode: 'Markdown'
         }).catch(this.logger.error);
         break;
       }
