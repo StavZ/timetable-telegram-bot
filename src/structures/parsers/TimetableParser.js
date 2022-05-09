@@ -197,7 +197,7 @@ export default class TimetableParser {
   generateBells(timetable) {
     if (!timetable.lessons.length || !timetable.lessons.filter((l) => !l.isRemote).length) return null;
     const lessons = timetable.lessons.filter((l) => !l.isRemote);
-    return `Начало: \`${this.client.constants.bells[lessons.at(0).number].start}\`\nКонец: \`${this.client.constants.bells[lessons.at(-1).number].end}\``;
+    return `Начало: \`${this.client.constants.bells[lessons.at(0).number]?.start ? this.client.constants.bells[lessons.at(0).number]?.start : 'Не известно'}\`\nКонец: \`${this.client.constants.bells[lessons.at(-1).number]?.end ? this.client.constants.bells[lessons.at(-1).number].end : 'Не известно'}\``;
   }
 
   /**
