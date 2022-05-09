@@ -166,7 +166,7 @@ export default class RemoteWorks extends Command {
     keyboard.push([{ text: 'Назад', callback_data: `${ctx.id}-back-to-titles` }]);
     const msg = `Найдено \`${tasks.length}\` задани${tasks.length === 1 ? 'е' : tasks.length > 1 && tasks.length < 5 ? 'я' : tasks.length >= 5 ? 'й' : 'я'}.\n\nДисциплина: \`${
       task.title
-    }\`\nГруппа: \`${user.group}\`${task.date.day ? `\nДата: \`${task.date.toString()} ${task.date.day ? `(${task.date.day})` : ''}` : ''}\nТема задания: ${task.subject}\nЗадание:\n${
+    }\`\nГруппа: \`${user.group}\`${task.date.day ? `\nДата: \`${task.date.toString()} ${task.date.day ? `(${task.date.day})\`` : ''}` : ''}\nТема задания: ${task.subject}\nЗадание:\n${
       (await this.client.telegraph.get(task)).url
     }${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${task.email ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)` : ''}`;
     if (mid) {
