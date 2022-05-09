@@ -69,10 +69,6 @@ client.commands
   })
   .catch(client.logger.error);
 
-if (dev) {
-  client.dev = true;
-}
-
 client.db.on('error', (err, client) => {
   client.logger.error(err);
 })

@@ -6,7 +6,7 @@ export default class Timetable {
      * ID
      * @type {number}
      */
-    this.id = data.id;
+    this.id = Number(data.id);
     /**
      * URL
      * @type {string}
@@ -32,7 +32,7 @@ export default class Timetable {
   getTimetable (group) {
     const timetable = this.lessonlists.find((l) => l.group === group);
     if (!timetable) return {
-      id: this.id,
+      id: Number(this.id),
       url: this.url, 
       cartId: null,
       date: this.date,
@@ -40,7 +40,7 @@ export default class Timetable {
       lessons: []
     }
     return {
-      id: this.id,
+      id: Number(this.id),
       url: `${this.url}#${timetable.id}`,
       cartId: timetable.id,
       date: this.date,

@@ -14,18 +14,9 @@ export default class TimetableManager extends EventEmitter {
     this.checkInterval;
     this.isDisabled = false;
   }
-
-  /**
-   * Запускается при обнаружении нового расписания
-   * @event
-   * @name TimetableManager#onNew
-   * @param {User} user
-   * @param {import('../parsers/Timetable.js').TimetableTD} timetable
-   */
-
   checkForEdit(user, timetable) {
     const result = [];
-    const keys = ['title', 'subgroup', 'teacher', 'number', 'location', 'classroom'];
+    const keys = ['title', 'teacher', 'number', 'location', 'classroom', 'group'];
     const lessonsN = timetable.lessons;
     const lessonsL = user.sentTimetable.lessons;
 
@@ -57,6 +48,7 @@ export default class TimetableManager extends EventEmitter {
     const cache = this.#client.cache.timetables[0];
     const newTimetable = cache.getTimetable(user.group);
     const lastSent = user.sentTimetable;
+    console.log(newTimetable, lastSent);
     if (newTimetable.id > (lastSent ? lastSent?.id : 0)) {
       return this.emit('onNew', user, newTimetable);
     } else if (newTimetable.id === lastSent.id) {
@@ -67,7 +59,7 @@ export default class TimetableManager extends EventEmitter {
   check() {
     this.checkInterval = setInterval(async () => {
       const users = await this.#client.users.getActive();
-
+      
       users.forEach((u) => {
         this.checkForNew(u);
       });
