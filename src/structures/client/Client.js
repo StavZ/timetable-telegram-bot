@@ -133,7 +133,6 @@ export default class TelegrafClient extends Telegraf {
      * @type {pg.Pool}
      * @description База данных
      */
-    // this.db = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
     this.db = new pg.Pool({ host: process.env.DBHOST, port: process.env.DBPORT, user: process.env.DBUSER, password: process.env.DBPASS, database: 'tg_bot_db', ssl: { rejectUnauthorized: false } });
     /**
      * @type {Telegraph}
@@ -145,11 +144,6 @@ export default class TelegrafClient extends Telegraf {
      * @description Менеджер Telegraph
      */
     this.telegraph = new TelegraphManager(this);
-    /**
-     * @todo REMOVE
-     * @deprecated
-     */
-    this.emails = require('../../../emails.json');
     /**
      * @type {number}
      * @description Количество запусков команд за сессию
