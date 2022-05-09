@@ -51,7 +51,7 @@ TG: https://t.me/stavzdev`;
 
     return ctx.replyWithMarkdown(msg, {
       disable_web_page_preview: true,
-      reply_markup: { inline_keyboard: [[Markup.button.callback('Выбрать группу', 'start-select-group')]], one_time_keyboard: true },
+      // reply_markup: { inline_keyboard: [[Markup.button.callback('Выбрать группу', 'start-select-group')]], one_time_keyboard: true },
     });
   }
 }
