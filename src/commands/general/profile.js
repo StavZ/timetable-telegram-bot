@@ -1,24 +1,18 @@
 import { Context } from 'telegraf';
-import Client from '../../structures/client/Client.js';
-import Command from '../../structures/client/Command.js';
+import TelegrafClient from '../../structures/client/Client.js';
+import Command from '../../structures/models/Command.js';
 
-export default class ProfileCommand extends Command {
+export default class Profile extends Command {
   /**
-   * @param {Client} client
+   * @param {TelegrafClient} client
    */
   constructor(client) {
     super({
       name: 'profile',
-      aliases: ['профиль'],
-      category: 'general',
-      description: 'Ваш профиль.',
-      usage: 'profile',
+      aliases: [],
+      description: 'Профиль',
     });
     this.client = client;
-    this.roles = {
-      student: 'Студент',
-      teacher: 'Преподаватель',
-    };
   }
 
   /**
@@ -27,19 +21,19 @@ export default class ProfileCommand extends Command {
    */
   async exec(ctx, args) {
     if (args.length && this.client.isOwner(ctx)) {
-      const user = await this.client.userManager.getUser(args[0]);
-      if (!user) return ctx.replyWithMarkdown('Пользователь не найден.');
+      const user = await this.client.users.get(Number(args[0]));
+      if (!user) return ctx.replyWithMarkdown(`Пользователь \`${args[0]}\` не найден.`);
       return ctx.replyWithMarkdown(
-        `ID: \`${user.id}\`\nГруппа: \`${user.usergroup ? user.usergroup : 'Не выбрана'}\`${
-          user.usergroup ? `\nСтатус рассылки: \`${user.autoscheduler ? 'Включена' : 'Выключена'}\`\nКурс: \`${this.client.userManager.calculateCourse(user.usergroup)}\`` : ''
-        }`
+        `ID: \`${user.id}\`${user.regDate ? `\nДата регистрации: \`${this.client.moment(new Date(Number(user.regDate))).format('DD-MM-YY')}\`` : ''}\nГруппа: \`${
+          user.group ? user.group : 'Не указана'
+        }\`\n${user.group ? `Курс: \`${this.client.time.getCourse(user.group)} (${this.client.time.getStudYear()})\`` : ''}\nСтатус рассылки: \`${user.autoScheduler ? 'Включена' : 'Выключена'}\``
       );
     }
-    const user = await this.client.userManager.getUser(ctx.from.id);
-    ctx.replyWithMarkdown(
-      `Ваш профиль\n\nID: \`${user.id}\`\nГруппа: \`${user.usergroup ? user.usergroup : 'Не выбрана'}\`${
-        user.usergroup ? `\nКурс: \`${this.client.userManager.calculateCourse(user.usergroup)} (${this.client.time.getStudYear()})\`` : ''
-      }`
+    const user = await this.client.users.get(ctx.from.id);
+    return ctx.replyWithMarkdown(
+      `ID: \`${ctx.from.id}\`${user.regDate ? `\nДата регистрации: \`${this.client.moment(new Date(Number(user.regDate))).format('DD-MM-YY')}\`` : ''}\nГруппа: \`${
+        user.group ? user.group : 'Не указана'
+      }\`${user.group ? `\nКурс: \`${this.client.time.getCourse(user.group)} (${this.client.time.getStudYear()})\`` : ''}`
     );
   }
 }

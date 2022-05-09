@@ -1,133 +1,221 @@
-// prototypes
-import '../protorypes/Array.js';
-import '../protorypes/String.js';
-
-import { Context, Telegraf, TelegramError } from 'telegraf';
-import mongoose from 'mongoose';
+/**
+ * libs
+ */
 import consola from 'consola';
-import Parser from '../parser/Parser.js';
-import UserManager from './managers/UserManager.js';
-import CommandHandler from './CommandHandler.js';
-import moment from 'moment-timezone';
-import TimetableManager from './managers/TimetableManager.js';
-import Lesson from '../parser/Lesson.js';
-import RemoteControlManager from './managers/RemoteControlManager.js';
-import constants from '../../constants.js';
-import RemoteWorksParser from '../parser/RWParser.js';
-import TimeManager from './managers/TimeManager.js';
+import { Context, Telegraf } from 'telegraf';
 import axios from 'axios';
-import Telegraph from 'telegra.ph';
+import { createRequire } from 'module';
+import moment from 'moment-timezone';
 import pg from 'pg';
-import os from 'os';
+import Telegraph from 'telegra.ph';
 
-export default class Client extends Telegraf {
+/**
+ * Managers / Handlers
+ */
+import CommandHandler from '../handlers/CommandHandler.js';
+import RemoteControlManager from '../managers/RemoteControlManager.js';
+import TimeManager from '../managers/TimeManager.js';
+import UserManager from '../managers/UserManager.js';
+import TimetableParser from '../parsers/TimetableParser.js';
+import RemoteWorksParser from '../parsers/RemoteWorksParser.js';
+import CacheManager from '../managers/CacheManager.js';
+import TelegraphManager from '../managers/TelegraphManager.js';
+import TTimetableParser from '../parsers/TTimetableParser.js';
+import TimetableManager from '../managers/TimetableManager.js';
+import constants from '../../constants.js';
+
+/**
+ * Prototypes
+ */
+import '../prototypes/Array.js';
+import '../prototypes/String.js';
+
+const require = createRequire(import.meta.url);
+
+export default class TelegrafClient extends Telegraf {
   constructor(token, ...args) {
     super(token, ...args);
+    /**
+     * @type {string}
+     * @description Префикс бота
+     */
     this.prefix = '/';
-    this.owner = 408057291;
+    /**
+     * @type {consola}
+     * @description Логгер
+     */
     this.logger = consola;
-    this.botId = 1645143260;
-    this.parser = new Parser();
-    this.time = new TimeManager();
-    this.remoteWorks = new RemoteWorksParser(this);
-    this.userManager = new UserManager(this);
-    this.commandHandler = new CommandHandler(this);
-    this.manager = new TimetableManager(this);
-    this.constants = constants;
-    this.remoteControl = new RemoteControlManager(this);
-    this.moment = moment;
-    this.mongoose = mongoose;
-    this.telegraph = new Telegraph(process.env.TELEGRAPH);
+    /**
+     * @type {axios}
+     * @description HTTP(s) клиент
+     */
     this.axios = axios;
-    this.os = os;
+    /**
+     * @type {boolean}
+     * @description Сборка разработчика
+     */
+    this.dev = false;
+    /**
+     * @type {number[]}
+     * @description ID пользователей, которые являются разработчиками бота
+     */
+    this.owners = [408057291, 5152997877];
+    /**
+     * @type {number}
+     * @description ID главного бота
+     */
+    this.botId = 1645143260;
+    /**
+     * @description Константы бота
+     */
+    this.constants = constants;
+    /**
+     * @type {CommandHandler}
+     * @description Обработчик команд
+     */
+    this.commands = new CommandHandler(this);
+    /**
+     * @type {RemoteControlManager}
+     * @description Менеджер удаленного управления - управление модулями бота из ТГ чата с ботом (для разработчика)
+     */
+    this.remote = new RemoteControlManager(this);
+    /**
+     * @type {TimetableManager}
+     * @description Менеджер расписания - отвечает за автоматическую рассылку расписания
+     */
+    this.manager = new TimetableManager(this);
+    /**
+     * @type {TimeManager}
+     * @description Менеджер времени - отвечает за взаимодействие с датой внутри бота с местным часовым поясом
+     */
+    this.time = new TimeManager();
+    /**
+     * @type {UserManager}
+     * @description Менеджер пользователей
+     */
+    this.users = new UserManager(this);
+    /**
+     * @type {TimetableParser}
+     * @description Парсер расписания студентов
+     */
+    this.timetable = new TimetableParser(this);
+    /**
+     * @type {TTimetableParser}
+     * @description Парсер расписания преподавателей - работает от {@link TimetableParser}
+     */
+    this.teachtimetable = new TTimetableParser(this);
+    /**
+     * @type {RemoteWorksParser}
+     * @description Парсер дистанцонных заданий
+     */
+    this.rw = new RemoteWorksParser(this);
+    /**
+     * @type {string}
+     * @description Версия бота
+     */
+    this.version = require('../../../package.json').version;
+    /**
+     * @type {moment}
+     * @description Библиотека для взаимодействия с датой
+     */
+    this.moment = moment;
+    /**
+     * @type {CacheManager}
+     * @description Менеджер кеша
+     */
+    this.cache = new CacheManager(this);
+    /**
+     * @type {number}
+     * @description Глобальный интервал. Используется в парсере, рассылке
+     */
+    this.interval = 15000;
+    /**
+     * @type {pg.Pool}
+     * @description База данных
+     */
+    // this.db = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
     this.db = new pg.Pool({ host: process.env.DBHOST, port: process.env.DBPORT, user: process.env.DBUSER, password: process.env.DBPASS, database: 'tg_bot_db', ssl: { rejectUnauthorized: false } });
+    /**
+     * @type {Telegraph}
+     * @description Telegraph
+     */
+    this.tph = new Telegraph(process.env.TELEGRAPH);
+    /**
+     * @type {TelegraphManager}
+     * @description Менеджер Telegraph
+     */
+    this.telegraph = new TelegraphManager(this);
+    /**
+     * @todo REMOVE
+     * @deprecated
+     */
+    this.emails = require('../../../emails.json');
+    /**
+     * @type {number}
+     * @description Количество запусков команд за сессию
+     */
+    this.cmdRuns = 0;
+    /**
+     * @type {number}
+     * @description Последний перезапуск бота
+     */
+    this.lastRestart = 0;
   }
 
   /**
+   * Проверка пользователя на разработчика
    * @param {Context} ctx
    * @returns {boolean}
    */
   isOwner(ctx) {
-    return ctx.from.id === this.owner;
-  }
-
-  sendToOwner(message, ...options) {
-    return this.telegram.sendMessage(this.owner, message, ...options);
-  }
-
-  getCurrentDate(unix = false) {
-    if (unix) return moment().set({ hours: 0, minutes: 0, seconds: 0 }).format('x');
-    return moment().set({ hours: 0, minutes: 0, seconds: 0 });
-  }
-
-  async manualSetLastSentSchedule() {
-    const schedules = await this.parser.getAvailableSchedules();
-    const users = await this.userManager.getUsers({ autoScheduler: true });
-    users
-      .filter((u) => u.group !== null)
-      .forEach((user) => {
-        const userSchedule = schedules[0].getLessonlistByGroup(user.group);
-        this.userManager.setLastSentSchedule(user.id, userSchedule);
-      });
-  }
-
-  /**
-   * @param {schedule} schedule
-   */
-  generateBells(schedule) {
-    const lessons = schedule.lessons.filter((s) => {
-      return s.address !== 'Дистанционное обучение';
-    });
-    if (!lessons.length) return null;
-    return `Начало: \`${this.constants.bells[lessons[0].number] ? this.constants.bells[lessons[0].number].start : 'нет данных'}\`\nКонец: \`${
-      this.constants.bells[lessons[lessons.length - 1].number] ? this.constants.bells[lessons[lessons.length - 1].number].end : 'нет данных'
-    }\``;
+    return this.owners.includes(ctx.from.id);
   }
 
   /**
    * @param {string} message
    * @param {'all'|'user'} type
-   * @param {number|null} user
+   * @param {number} userid
    */
-  async sendMessageAsDeveloper(message, type = 'all', userID = null) {
+  async sendMessage(message, type = 'all', userid) {
     switch (type) {
       case 'all': {
-        const users = (await this.userManager.getUsers({ autoScheduler: true })).filter((u) => u.group !== null);
+        const users = await this.users.getActive();
         users.forEach((u) => {
-          this.telegram
-            .sendMessage(u.id, `Сообщение от разработчика\`*\`:\n${message}\n\n\`*\`_Сообщения от разработчика отправляются без звукового уведомления!_`, {
-              parse_mode: 'Markdown',
-              disable_notification: true,
-            })
-            .catch((e) => {
-              if (e instanceof TelegramError) {
-                if (e.code === 403) {
-                  this.userManager.updateUser(u.id, 'autoScheduler', false);
-                }
-              }
-            });
+          this.telegram.sendMessage(u.id, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал [t.me/ppkbotnews](https://t.me/ppkbotnews)`, {
+            disable_notification: true,
+            disable_web_page_preview: true,
+          }).catch(this.logger.error);
         });
         break;
       }
       case 'user': {
-        if (!userID) return false;
-        const user = await this.userManager.getUser(userID);
-        if (!user) return false;
-        this.telegram.sendMessage(user.id, message, {
-          parse_mode: 'Markdown',
+        this.telegram.sendMessage(userid, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал [t.me/ppkbotnews](https://t.me/ppkbotnews)`, {
           disable_notification: true,
-        });
-        return true;
+          disable_web_page_preview: true,
+        }).catch(this.logger.error);
+        break;
       }
     }
   }
 
-  run() {
-    if (process.env.NODE_ENV === 'development') {
-      this.logger.warn('Development Version');
+  /**
+   * Запуск бота
+   * @returns {void}
+   */
+  async run() {
+    if (this.dev) {
+      this.logger.warn('Development version');
     }
-    this.commandHandler.loadAll();
-    this.manager.run();
+
+    this.db
+      .connect()
+      .then(() => {
+        this.logger.success('Connected to Database');
+        this.db.query("SELECT * FROM modules WHERE modulename = 'client'").then((r) => {
+          this.interval = r.rows[0].config.interval;
+        });
+      })
+      .catch(this.logger.error);
 
     this.launch({ allowedUpdates: true })
       .then(() => {
@@ -135,26 +223,9 @@ export default class Client extends Telegraf {
       })
       .catch(this.logger.error);
 
-    this.db
-      .connect()
-      .then(() => {
-        this.logger.success('Connected to PostgreSQL');
-      })
-      .catch(this.logger.error);
+    this.manager.start();
+    this.cache.start();
+
+    this.lastRestart = Date.now();
   }
 }
-
-/**
- * @typedef {Object} user
- * @prop {number} id
- * @prop {string} group
- * @prop {boolean} autoScheduler
- */
-/**
- * @typedef {Object} schedule
- * @prop {Lesson[]} lessons
- * @prop {string} url
- * @prop {{toString():string,regular:string}} date
- * @prop {string} group
- * @prop {number} id
- */

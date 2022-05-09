@@ -1,8 +1,12 @@
+/**
+ * .env
+ */
 import * as dotenv from 'dotenv';
 dotenv.config();
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'development';
+  global.dev = true;
 }
 
 /**
@@ -11,71 +15,95 @@ if (!process.env.NODE_ENV) {
 import moment from 'moment-timezone';
 moment.tz.setDefault(process.env.TZ);
 
-import Client from './src/structures/client/Client.js';
-import Command from './src/structures/client/Command.js';
-import Module from './src/structures/models/Module.js';
-
-const client = new Client(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
-
+/**
+ * Client initialization
+ */
+import TelegrafClient from './src/structures/client/Client.js';
+const client = new TelegrafClient(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
 client.run();
 
-const loggerBlacklist = [1705065791];
+client.commands
+  .loadAll()
+  .then(() => {
+    const allCommands = [];
+    client.commands.commands.forEach((c) => {
+      allCommands.push(c.name);
+    });
+    client.commands.aliases.forEach((v, k) => {
+      allCommands.push(k);
+    });
+    allCommands.forEach((c) => {
+      client.command(c, async (ctx) => {
+        if (!ctx.message.text) return;
+        if (!ctx.message.text.startsWith(client.prefix)) return;
+        if (ctx.from.is_bot) return;
+
+        const cmd = client.commands.get(c);
+
+        let args = ctx.message.text.slice(client.prefix.length).trim().split(/ +/g);
+        args.shift();
+        if (cmd.config.ownerOnly && !client.isOwner(ctx)) {
+          return ctx.reply('Данная команда доступна только разработчику!');
+        }
+        if (cmd.config.isDisabled && !client.isOwner(ctx)) {
+          return ctx.reply('Данная команда временно отключена!');
+        }
+        try {
+          if (!cmd.exec) return;
+          const user = await client.users.get(ctx.from.id);
+          return cmd
+            .exec(Object.assign(ctx, {user}), args)
+            .catch((e) => client.logger.error(e))
+            .then(async () => {
+              client.logger.info(`[${ctx.from.id}] ${ctx.from.username ? ctx.from.username : ctx.from.first_name} => ${ctx.message.text}`);
+              if (process.env.NODE_ENV === 'production') {
+                client.cmdRuns += 1;
+              }
+            });
+        } catch (e) {
+          client.logger.error(e);
+        }
+        return ctx;
+      });
+    });
+  })
+  .catch(client.logger.error);
+
+if (dev) {
+  client.dev = true;
+}
+
+client.db.on('error', (err, client) => {
+  client.logger.error(err);
+})
 
 process.once('SIGINT', () => {
   client.stop('SIGINT');
   client.db.end().then(() => {
-    client.logger.info('Disconnected from Postgres');
+    client.logger.info('Disconnected from Database');
   });
+  client.commands.clear();
+  client.cache.stop();
+  client.manager.stop()
   if (!client.manager.isDisabled) {
-    client?.manager.stopListeners();
+    client?.manager.stop();
   }
 });
 process.once('SIGTERM', () => {
   client.stop('SIGTERM');
   client.db.end().then(() => {
-    client.logger.info('Disconnected from Postgres');
+    client.logger.info('Disconnected from Database');
   });
+  client.commands.clear();
+  client.cache.stop();
+  client.manager.stop()
   if (!client.manager.isDisabled) {
-    client?.manager.stopListeners();
+    client?.manager.stop();
   }
 });
 
-client.on('message', (ctx) => {
-  if (!ctx.message.text) return;
-  if (!ctx.message.text.startsWith(client.prefix)) return;
-  if (ctx.from.is_bot) return;
-
-  if (!loggerBlacklist.includes(ctx.from.id)) {
-    client.logger.info(`[${ctx.from.id}] ${ctx.from.username ? ctx.from.username : ctx.from.first_name} > ${ctx.message.text}`);
-  }
-
-  const args = ctx.message.text.slice(client.prefix.length).trim().split(/ +/g);
-  const command = args.shift();
-
-  /**
-   * @type {Command}
-   */
-  let cmd;
-  if (client.commandHandler.commands.has(command)) {
-    cmd = client.commandHandler.commands.get(command);
-  } else if (client.commandHandler.aliases.has(command)) {
-    cmd = client.commandHandler.commands.get(client.commandHandler.aliases.get(command));
-  }
-  if (!cmd) return;
-  if (cmd.config.ownerOnly && !client.isOwner(ctx)) {
-    return ctx.reply('Данная команда доступна только разработчику!');
-  }
-  if (cmd.config.isDisabled && !client.isOwner(ctx)) {
-    return ctx.reply('Данная команда отключена!');
-  }
-  try {
-    if (!cmd.exec) {
-      return ctx.replyWithMarkdown(`В данный момент эта команда отключена и не доступна!`);
-    }
-    cmd.exec(ctx, args);
-  } catch (e) {
-    client.logger.error(e);
-  }
+client.catch((err, ctx) => {
+  client.logger.error(err, ctx)
 });
 
 process.on('unhandledRejection', async (result, error) => {
@@ -85,3 +113,7 @@ process.on('unhandledRejection', async (result, error) => {
 process.on('uncaughtException', (error) => {
   client.logger.error('[uncaughtException]', error);
 });
+
+global.sleep = function (s) {
+  return new Promise((resolve) => setTimeout(resolve, s * 1000));
+};

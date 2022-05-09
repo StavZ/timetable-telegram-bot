@@ -1,19 +1,18 @@
 import { Context } from 'telegraf';
-import Client from '../../structures/client/Client.js';
-import Command from '../../structures/client/Command.js';
 import { inspect } from 'util';
+import TelegrafClient from '../../structures/client/Client.js';
+import Command from '../../structures/models/Command.js';
+import fs from 'fs';
 
-export default class EvalCommand extends Command {
+export default class Eval extends Command {
   /**
-   * @param {Client} client
+   * @param {TelegrafClient} client
    */
   constructor(client) {
     super({
       name: 'eval',
       aliases: [],
-      category: 'utils',
-      description: 'Запускает код JS.',
-      usage: 'eval `[код]`',
+      description: 'Eval',
     });
     this.client = client;
   }
@@ -23,8 +22,10 @@ export default class EvalCommand extends Command {
    * @param {string[]} args
    */
   async exec(ctx, args) {
-    if (!args.length) return ctx.reply('Мне нужен код.');
+    if (!args.length) return ctx.reply('I need a code.');
+
     let code = args.join(' ');
+
     if (code.includes('await')) code = `(async () => { ${code} })()`;
     let result;
     try {
@@ -32,9 +33,8 @@ export default class EvalCommand extends Command {
     } catch (e) {
       result = e;
     }
-    // eslint-disable-next-line camelcase
-    const o_o = RegExp(`${process.env.TOKEN}${process.env.DEV_TOKEN ? `|${process.env.DEV_TOKEN}` : ''}|${process.env.MONGODB_PASS}|${process.env.MONGODB_USER}`, 'gim');
-    result = inspect(result, { depth: 1 }).replace(o_o, '[•••]') + '';
-    ctx.replyWithMarkdown(`\`\`\`js\n${result.length > 4000 ? result.slice(0, 4000) : result}\n\`\`\``);
+
+    result = inspect(result, { depth: 1 });
+    return ctx.replyWithMarkdown(`\`\`\`\n${result.length > 4000 ? result.slice(0, 4000) : result}\n\`\`\``);
   }
 }

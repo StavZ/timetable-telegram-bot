@@ -1,40 +1,39 @@
 import { Context } from 'telegraf';
-import Client from '../../structures/client/Client.js';
-import Command from '../../structures/client/Command.js';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
+import TelegrafClient from '../../structures/client/Client.js';
+import Command from '../../structures/models/Command.js';
 
-export default class InformationCommand extends Command {
+export default class Information extends Command {
   /**
-   * @param {Client} client
+   * @param {TelegrafClient} client
    */
   constructor(client) {
     super({
       name: 'information',
-      aliases: ['информация', 'инфо', 'info', 'about'],
-      category: 'general',
-      description: 'Информация о боте.',
-      usage: 'info',
+      aliases: ['info'],
+      description: 'Информация о боте',
     });
     this.client = client;
   }
 
   /**
    * @param {Context} ctx
-   * @param {string[]} args
    */
-  async exec(ctx, args) {
-    const version = require('../../../package.json').version;
-    const userCount = await this.client.userManager.getUserCount();
-    ctx.replyWithMarkdown(
-      `Версия: \`v${version}\`\nСписок изменений /changelog\nКоличество пользователей: \`${userCount}\`\n\nНовостной канал: [t.me/ppkbotnews](https://t.me/ppkbotnews)\nРазработчик: [VK](https://vk.com/stavzdev) | [TG](https://t.me/stavzdev)\nИсходный код: [GitHub](https://github.com/StavZ/timetable-telegram-bot)`,
+  async exec(ctx) {
+    return ctx.replyWithMarkdown(
+`Версия: \`v${this.client.version}\`
+
+Новостной канал: [t.me/ppkbotnews](https://t.me/ppkbotnews)
+Чат: [t.me/ppkbotchat](https://t.me/ppkbotchat)
+
+Список изменений /changelog
+Политика конфиденциальности /privacy
+
+Разработчик: [VK](https://vk.com/stavzdev) | [TG](https://t.me/stavzdev)
+Исходный код: [GitHub](https://github.com/StavZ/timetable-telegram-bot)`,
       {
         disable_web_page_preview: true,
         reply_markup: {
           inline_keyboard: [
-            [
-              {text: 'Новостной канал', url: 'https://t.me/ppkbotnews'},
-            ],
             [
               { text: 'VK', url: 'https://vk.com/stavzdev' },
               { text: 'TG', url: 'https://t.me/stavzdev' },

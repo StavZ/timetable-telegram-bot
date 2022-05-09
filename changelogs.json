@@ -1,4 +1,46 @@
 {
+  "6.0.0": {
+    "date": "",
+    "post": "",
+    "changelog": [
+      {
+        "important": true,
+        "content": "Ребрендинг бота."
+      },
+      {
+        "important": true,
+        "content": "Улучшенная интеграция с новой базой данных PostgreSQL."
+      },
+      {
+        "important": true,
+        "content": "Улучшенная интеграция с платформой Telegraph."
+      },
+      {
+        "important": true,
+        "content": "Расписание преподавателей."
+      },
+      {
+        "important": false,
+        "content": "Добавлена политика конфиденциальности."
+      },
+      {
+        "important": false,
+        "content": "Переработано меню выбора."
+      },
+      {
+        "important": false,
+        "content": "Удалена встроенная слежба поддержки."
+      },
+      {
+        "important": false,
+        "content": "Изменено меню команд."
+      },
+      {
+        "important": false,
+        "content": "Ссылки на сторонние сайты/сервисы в дистанционных заданиях будут помечаться звёздочкой (`*`)."
+      }
+    ]
+  },
   "5.2.1": {
     "date": "15/02/2022",
     "changelog": [
