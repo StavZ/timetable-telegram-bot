@@ -85,9 +85,6 @@ process.once('SIGINT', () => {
   client.commands.clear();
   client.cache.stop();
   client.manager.stop();
-  if (!client.manager.isDisabled) {
-    client?.manager.stop();
-  }
 });
 process.once('SIGTERM', () => {
   client.stop('SIGTERM');
@@ -97,9 +94,6 @@ process.once('SIGTERM', () => {
   client.commands.clear();
   client.cache.stop();
   client.manager.stop();
-  if (!client.manager.isDisabled) {
-    client?.manager.stop();
-  }
 });
 
 client.catch((err, ctx) => {
