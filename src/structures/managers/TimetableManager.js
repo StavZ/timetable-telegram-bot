@@ -45,6 +45,7 @@ export default class TimetableManager extends EventEmitter {
    * @param {User} user
    */
   checkForNew(user) {
+    if (!this.#client.cache.timetables) return;
     const cache = this.#client.cache.timetables[0];
     const newTimetable = cache.getTimetable(user.group);
     const lastSent = user.sentTimetable;

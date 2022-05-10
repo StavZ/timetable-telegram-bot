@@ -32,7 +32,9 @@ export default class TimetableParser {
         rej(false);
       }
 
-      const jsdom = new JSDOM(page.data);
+      if (!page?.data) return null;
+
+      const jsdom = new JSDOM(page?.data);
       const document = jsdom.window.document;
       res(document);
     });
@@ -197,7 +199,9 @@ export default class TimetableParser {
   generateBells(timetable) {
     if (!timetable.lessons.length || !timetable.lessons.filter((l) => !l.isRemote).length) return null;
     const lessons = timetable.lessons.filter((l) => !l.isRemote);
-    return `Начало: \`${this.client.constants.bells[lessons.at(0).number]?.start ? this.client.constants.bells[lessons.at(0).number]?.start : 'Не известно'}\`\nКонец: \`${this.client.constants.bells[lessons.at(-1).number]?.end ? this.client.constants.bells[lessons.at(-1).number].end : 'Не известно'}\``;
+    return `Начало: \`${this.client.constants.bells[lessons.at(0).number]?.start ? this.client.constants.bells[lessons.at(0).number]?.start : 'Не известно'}\`\nКонец: \`${
+      this.client.constants.bells[lessons.at(-1).number]?.end ? this.client.constants.bells[lessons.at(-1).number].end : 'Не известно'
+    }\``;
   }
 
   /**
@@ -209,12 +213,18 @@ export default class TimetableParser {
   generateMessage(timetable, type = null) {
     const message = this.client.commands.get('schedule').config.message;
     if (!timetable.lessons?.length)
-      return `${type ? (type === 'edited' ? 'Изменения в расписании на' : 'Новое расписание на') : 'Расписание на'} ${timetable.date.string} (${timetable.date.day.toProperCase()})\nГруппа: \`${timetable.group}\`\n${message ? `\n${message}\n` : ''}\nНет пар.`;
-    let msg = `${type ? (type === 'edited' ? 'Изменения в расписании на' : 'Новое расписание на') : 'Расписание на'} ${timetable.date.string} (${timetable.date.day.toProperCase()})\nГруппа: \`${timetable.group}\`\n${message ? `\n${message}\n` : ''}\n\`\`\`\n`;
+      return `${type ? (type === 'edited' ? 'Изменения в расписании на' : 'Новое расписание на') : 'Расписание на'} ${timetable.date.string} (${timetable.date.day.toProperCase()})\nГруппа: \`${
+        timetable.group
+      }\`\n${message ? `\n${message}\n` : ''}\nНет пар.`;
+    let msg = `${type ? (type === 'edited' ? 'Изменения в расписании на' : 'Новое расписание на') : 'Расписание на'} ${timetable.date.string} (${timetable.date.day.toProperCase()})\nГруппа: \`${
+      timetable.group
+    }\`\n${message ? `\n${message}\n` : ''}\n\`\`\`\n`;
     for (const l of timetable.lessons) {
       msg += `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom ? ` • ${l.classroom} | ${l.location}` : !l.classroom && l.location ? ` • ${l.location}` : ''}\n`;
     }
-    msg += `\`\`\`${this.generateBells(timetable) ? `\n${this.generateBells(timetable)}` : ''}\n\n[Ссылка на сайт](${timetable.url}${timetable.cartId ? `#${timetable.cartId}` : ''})\n[t.me/ppkbotnews](https://t.me/ppkbotnews)`;
+    msg += `\`\`\`${this.generateBells(timetable) ? `\n${this.generateBells(timetable)}` : ''}\n\n[Ссылка на сайт](${timetable.url}${
+      timetable.cartId ? `#${timetable.cartId}` : ''
+    })\n[t.me/ppkbotnews](https://t.me/ppkbotnews)`;
     return msg;
   }
 }
