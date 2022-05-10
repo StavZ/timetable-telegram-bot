@@ -22,6 +22,8 @@ import TelegrafClient from './src/structures/client/Client.js';
 const client = new TelegrafClient(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
 client.run();
 
+const ignoreLogID = [1705065791];
+
 client.commands
   .loadAll()
   .then(() => {
@@ -52,12 +54,14 @@ client.commands
           if (!cmd.exec) return;
           const user = await client.users.get(ctx.from.id);
           return cmd
-            .exec(Object.assign(ctx, {user}), args)
+            .exec(Object.assign(ctx, { user }), args)
             .catch((e) => client.logger.error(e))
             .then(async () => {
-              client.logger.info(`[${ctx.from.id}] ${ctx.from.username ? ctx.from.username : ctx.from.first_name} => ${ctx.message.text}`);
-              if (process.env.NODE_ENV === 'production') {
-                client.cmdRuns += 1;
+              if (!ignoreLogID.includes(ctx.from.id)) {
+                client.logger.info(`[${ctx.from.id}] ${ctx.from.username ? ctx.from.username : ctx.from.first_name} => ${ctx.message.text}`);
+                if (process.env.NODE_ENV === 'production') {
+                  client.cmdRuns += 1;
+                }
               }
             });
         } catch (e) {
@@ -71,7 +75,7 @@ client.commands
 
 client.db.on('error', (err, client) => {
   client.logger.error(err);
-})
+});
 
 process.once('SIGINT', () => {
   client.stop('SIGINT');
@@ -80,7 +84,7 @@ process.once('SIGINT', () => {
   });
   client.commands.clear();
   client.cache.stop();
-  client.manager.stop()
+  client.manager.stop();
   if (!client.manager.isDisabled) {
     client?.manager.stop();
   }
@@ -92,14 +96,14 @@ process.once('SIGTERM', () => {
   });
   client.commands.clear();
   client.cache.stop();
-  client.manager.stop()
+  client.manager.stop();
   if (!client.manager.isDisabled) {
     client?.manager.stop();
   }
 });
 
 client.catch((err, ctx) => {
-  client.logger.error(err, ctx)
+  client.logger.error(err, ctx);
 });
 
 process.on('unhandledRejection', async (result, error) => {
