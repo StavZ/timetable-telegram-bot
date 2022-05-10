@@ -22,7 +22,7 @@ import TelegrafClient from './src/structures/client/Client.js';
 const client = new TelegrafClient(process.env.NODE_ENV === 'development' ? process.env.DEV_TOKEN : process.env.TOKEN);
 client.run();
 
-const ignoreLogID = [1705065791];
+const ignoreLogID = [1705065791, 408057291];
 
 client.commands
   .loadAll()
