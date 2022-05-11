@@ -61,8 +61,7 @@ export default class UserManager {
    */
   async setGroup(id, group) {
     this.#client.logger.info(`User ${id} group changed to ${group} [${this.#client.time.getCourse(group)}]`);
-    const user = (await this.#client.db.query(`UPDATE users SET usergroup = '${group}', course = ${this.#client.time.getCourse(group)} WHERE id = ${id}`)).rows[0];
-    return user ? new User(this.#client, user) : null;
+    return await this.#client.db.query(`UPDATE users SET usergroup = '${group}', course = ${this.#client.time.getCourse(group)} WHERE id = ${id}`);
   }
 
   /**
