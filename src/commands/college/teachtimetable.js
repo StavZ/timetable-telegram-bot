@@ -83,11 +83,11 @@ export default class TeacherTimetable extends Command {
    */
   async selectTeacher(ctx) {
     const teachers = this.client.commands.get('email').config.emails.map((e) => e.teacherShort);
-    const keyboard = this.generateKeyboard(ctx.update.callback_query.message.message_id, teachers, 4, 'teacher-selection', null, 'select');
+    const keyboard = this.generateKeyboard(ctx.update.callback_query.message.message_id, teachers, 4, 'teacher-sel', null);
     keyboard.push([{ text: 'Назад', callback_data: 'back-to-teacher-timetable' }]);
 
     teachers.forEach((g) => {
-      this.client.action(`teacher-selection-${ctx.update.callback_query.message.message_id}-${g}-select`, (ctx) => {
+      this.client.action(`teacher-sel-${ctx.update.callback_query.message.message_id}-${g.split(/\s/).length === 1 ? g.toLowerCase() : g.split(/\s/).reduce((response, word) => (response += word.slice(0, 5)), '').toLowerCase()}`, (ctx) => {
         return this.showTeachSchedule(ctx, g, null, ctx.update.callback_query.message.message_id);
       });
     });
@@ -136,7 +136,7 @@ export default class TeacherTimetable extends Command {
     items.forEach((i) => {
       keyboard.push({
         text: `${i}`,
-        callback_data: `${kbtype}-${id}-${i}-${teacher.split(/\s/).length === 1 ? teacher.slice(0, 8) : teacher.split(/\s/).reduce((response, word) => (response += word.slice(0, 3)), '')}`,
+        callback_data: `${kbtype}-${id}-${i.split(/\s/).length === 1 ? i.toLowerCase() : i.split(/\s/).reduce((response, word) => (response += word.slice(0, 5)).toLowerCase(), '')}${teacher ? `-${teacher}` : ''}`,
       });
     });
 
