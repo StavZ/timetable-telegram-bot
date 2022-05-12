@@ -215,7 +215,7 @@ export default class TimetableParser {
     if (!timetable.lessons?.length)
       return `${type ? (type === 'edited' ? 'Изменения в расписании на' : 'Новое расписание на') : 'Расписание на'} ${timetable.date.string} (${timetable.date.day.toProperCase()})\nГруппа: \`${
         timetable.group
-      }\`\n${message ? `\n${message}\n` : ''}\nНет пар.`;
+      }\`\n${message ? `\n${message}\n` : ''}\nНет пар.\n[t.me/ppkbotnews](https://t.me/ppkbotnews)`;
     let msg = `${type ? (type === 'edited' ? 'Изменения в расписании на' : 'Новое расписание на') : 'Расписание на'} ${timetable.date.string} (${timetable.date.day.toProperCase()})\nГруппа: \`${
       timetable.group
     }\`\n${message ? `\n${message}\n` : ''}\n\`\`\`\n`;
