@@ -25,7 +25,7 @@ export default class Emails extends Command {
     const emails = this.config.emails;
 
     if (!args.length) {
-      return ctx.replyWithMarkdown(`Почта преподавателей:\n${emails.map((e) => `${e.teacherShort} - \`${e.email}\``).join('\n')}\n\nНажмите на почту, чтобы скопировать.`);
+      return ctx.replyWithMarkdown(`Почта преподавателей:\n${emails.sort((a, b) => a.teacherShort.localeCompare(b.teacherShort)).map((e) => `${e.teacherShort} - \`${e.email}\``).join('\n')}\n\nНажмите на почту, чтобы скопировать.`);
     }
 
     const match = this.autoComplete(args);
