@@ -24,10 +24,11 @@ export default class Session extends Command {
   async exec (ctx, args) {
     const lastRestart = this.client.lastRestart;
     const cmdRuns = this.client.cmdRuns;
+    // @ts-ignore
     const activeUsers = (await this.client.users.filter({ autoscheduler: true })).filter((u) => u.group !== null);
     const registrationsToday = activeUsers.filter((u) => this.client.moment(Number(u.regDate)).isSame(this.client.moment(), 'day'))?.length || 0;
     const dbSize = (await this.client.db.query('SELECT pg_size_pretty(pg_database_size(\'tg_bot_db\'))')).rows[0].pg_size_pretty;
 
-    ctx.replyWithMarkdown(`Последняя перезагрузка: \`${this.client.moment(lastRestart).format('DD-MM-YY hh:mm')} (online for ${ms(Date.now() - lastRestart)})\`\nРазмер базы данных: \`${dbSize}\`\nЗапусков команд: \`${cmdRuns}\`\nЗарегестрировано сегодня: \`${registrationsToday}\``);
+    ctx.replyWithMarkdown(`Последняя перезагрузка: \`${this.client.moment(lastRestart).format('DD-MM-YY hh:mm')} (online for ${ms(Date.now() - lastRestart)})\`\nРазмер базы данных: \`${dbSize}\`\nЗапусков команд: \`${cmdRuns}\`\nЗарегистрировано сегодня: \`${registrationsToday}\``);
   }
 }
