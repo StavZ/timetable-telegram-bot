@@ -28,10 +28,12 @@ export default class TimetableParser {
         rej(false);
       });
 
+      // @ts-ignore
       if (page?.status !== 200) {
         rej(false);
       }
 
+      // @ts-ignore
       if (!page?.data) return null;
 
       const jsdom = new JSDOM(page?.data);
@@ -42,7 +44,7 @@ export default class TimetableParser {
 
   /**
    * Получить список групп
-   * @returns {string[]}
+   * @returns {Promise<string[]>}
    */
   async getGroups() {
     const document = await this.getPage().catch(this.client.logger.error);
@@ -54,6 +56,7 @@ export default class TimetableParser {
      */
     const groups = [];
     for (let i = 0; i < elements.length; i++) {
+      // @ts-ignore
       groups.push(elements.item(i).textContent.trimEnd().replaceSpaces());
     }
     return groups.sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base' }));
@@ -62,9 +65,12 @@ export default class TimetableParser {
   /**
    * Получить ключи (дата) расписаний
    * @param {Timetable[]} timetables
-   * @returns {Map<string,Timetable>}
+   * @returns {Record<string,Timetable>}
    */
   getKeys(timetables) {
+    /**
+     * @type {Record<string,Timetable>}
+     */
     const output = {};
     for (const timetable of timetables) {
       output[timetable.date.regular] = timetable;
@@ -74,7 +80,6 @@ export default class TimetableParser {
 
   /**
    * Получить расписание
-   * @param {string} url
    * @returns {Promise<Timetable[]>}
    */
   getTimetables() {
@@ -87,7 +92,9 @@ export default class TimetableParser {
 
       for (const day of days) {
         if (day.tagName === 'UL') continue;
-        const url = `https://ppkslavyanova.ru/lessonlist${day.href}`;
+        // @ts-ignore
+        const url = `https://ppkslavyanova.ru/lessonlist${day?.href}`;
+        // @ts-ignore
         const id = /^\?day=([0-9]{4})$/.exec(day.href)[1];
         const date = this.parseDate(day.textContent);
         const lessonlists = await this.generateLessonlist(url);
@@ -100,7 +107,7 @@ export default class TimetableParser {
   /**
    * Обработать дату
    * @param {string} string
-   * @return {{regular:string,toString():string,day:string}}
+   * @return {{regular:string,string:string,day:string}}
    */
   parseDate(string) {
     const months = {
@@ -120,6 +127,7 @@ export default class TimetableParser {
 
     const regex = /([0-9]{1,2})? ?([а-я]+)?/gim;
     const res = regex.exec(string);
+    // @ts-ignore
     const date = this.client.moment(`${this.client.time.getCurrentTime().year()}-${months[res[2]]}-${res[1].length === 1 ? `0${res[1]}` : res[1]}`);
     return {
       regular: date.format('DD/MM/YYYY'),
@@ -131,7 +139,7 @@ export default class TimetableParser {
   /**
    * Сгенерировать расписание пар
    * @param {string} url
-   * @returns {{id:string,group:string,lessons:Lesson[]}[]}
+   * @returns {Promise<{id:string,group:string,lessons:Lesson[]}[]>}
    */
   generateLessonlist(url) {
     return new Promise(async (res, rej) => {
@@ -213,18 +221,18 @@ export default class TimetableParser {
   generateMessage(timetable, type = null) {
     const message = this.client.commands.get('schedule').config.message;
     if (!timetable.lessons?.length)
+      // @ts-ignore
       return `${type ? (type === 'edited' ? 'Изменения в расписании на' : 'Новое расписание на') : 'Расписание на'} ${timetable.date.string} (${timetable.date.day.toProperCase()})\nГруппа: \`${
         timetable.group
       }\`\n${message ? `\n${message}\n` : ''}\nНет пар.\n[t.me/ppkbotnews](https://t.me/ppkbotnews)`;
+    // @ts-ignore
     let msg = `${type ? (type === 'edited' ? 'Изменения в расписании на' : 'Новое расписание на') : 'Расписание на'} ${timetable.date.string} (${timetable.date.day.toProperCase()})\nГруппа: \`${
       timetable.group
     }\`\n${message ? `\n${message}\n` : ''}\n\`\`\`\n`;
     for (const l of timetable.lessons) {
       msg += `${l.number} пара - ${l.title}${l.teacher ? ` у ${l.teacher}` : ''}${l.classroom ? ` • ${l.classroom} | ${l.location}` : !l.classroom && l.location ? ` • ${l.location}` : ''}\n`;
     }
-    msg += `\`\`\`${this.generateBells(timetable) ? `\n${this.generateBells(timetable)}` : ''}\n\n[Ссылка на сайт](${timetable.url}${
-      timetable.cartId ? `#${timetable.cartId}` : ''
-    })\n[t.me/ppkbotnews](https://t.me/ppkbotnews)`;
+    msg += `\`\`\`${this.generateBells(timetable) ? `\n${this.generateBells(timetable)}` : ''}\n\n[Ссылка на сайт](${timetable.url})\n[t.me/ppkbotnews](https://t.me/ppkbotnews)`;
     return msg;
   }
 }
