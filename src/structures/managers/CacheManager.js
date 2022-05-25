@@ -26,10 +26,12 @@ export default class CacheManager extends EventEmitter {
    */
   async timetablesCache() {
     const timetables = await this.#client.timetable.getTimetables().catch(this.#client.logger.error);
+    // @ts-ignore
     this.timetables = timetables;
     this.emit('timetableCache', timetables);
     this.timetableInterval = setInterval(async () => {
       const timetables = await this.#client.timetable.getTimetables().catch(this.#client.logger.error);
+      // @ts-ignore
       this.timetables = timetables;
       this.emit('timetableCache', timetables);
     }, this.#client.interval);
@@ -41,6 +43,7 @@ export default class CacheManager extends EventEmitter {
   async ttimetablesCache() {
     this.ttimetableInterval = setInterval(async () => {
       const ttimetables = await this.#client.teachtimetable.getTimetables().catch(this.#client.logger.error);
+      // @ts-ignore
       this.ttimetables = ttimetables;
     }, this.#client.interval);
   }

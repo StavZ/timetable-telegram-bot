@@ -14,7 +14,7 @@ export default class TTimetable {
     this.url = data.url;
     /**
      * Дата
-     * @type {{regular:string,toString():string,day:string}}
+     * @type {{regular:string,string:string,day:string}}
      */
     this.date = data.date;
     /**

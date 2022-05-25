@@ -24,7 +24,7 @@ export default class RemoteControlManager {
    * @param {string} module
    * @param {moduleType} moduleType
    * @param {boolean} [createIfNotFound=true]
-   * @return {moduleObject|null}
+   * @return {Promise<moduleObject|null>}
    */
   async get(module, moduleType, createIfNotFound = true) {
     const moduleSchema = await this.#client.db.query('SELECT * FROM modules WHERE modulename = ($1) AND moduletype = ($2)', [module, moduleType]);
@@ -76,12 +76,12 @@ export default class RemoteControlManager {
 }
 
 /**
- * @typedef {'command'|'manager'} moduleType
+ * @typedef {('command'|'manager')} moduleType
  */
 
 /**
  * @typedef {object} moduleObject
- * @prop {string} name
- * @prop {moduleType} type
+ * @prop {string} modulename
+ * @prop {moduleType} moduletype
  * @prop {{isDisabled:boolean,includeInHelp:boolean,ownerOnly:boolean}} config
  */

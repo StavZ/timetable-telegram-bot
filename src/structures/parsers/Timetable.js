@@ -30,7 +30,7 @@ export default class Timetable {
    * @returns {TimetableTD}
    */
   getTimetable (group) {
-    const timetable = this.lessonlists.find((l) => l.group === group);
+    const timetable = this?.lessonlists?.find((l) => l.group === group);
     if (!timetable) return {
       id: Number(this.id),
       url: this.url, 

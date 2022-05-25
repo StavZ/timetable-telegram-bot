@@ -29,7 +29,8 @@ export default class RemoteWorks extends Command {
     const id = ctx.message.message_id;
 
     this.client.action(`${id}-by-title`, async (ctxt) => {
-      return await this.startByTitle(Object.assign(ctxt, { id }), user);
+      // @ts-ignore
+      return this.startByTitle(Object.assign(ctxt, { id }), user);
     });
 
     const rw = (await this.client.rw.get(user.group))?.reverse();
@@ -39,11 +40,13 @@ export default class RemoteWorks extends Command {
     titles.forEach((t) => {
       this.client.action(`${id}-${t.short}`, (ctt) => {
         const tasks = rw.filter((r) => r.title === t.title);
+        // @ts-ignore
         return this.showByTitle(Object.assign(ctt, { id }), tasks, t.short);
       });
     });
 
     this.client.action(`${id}-back-to-titles`, (ctxs) => {
+      // @ts-ignore
       return this.startByTitle(Object.assign(ctxs, { id }), user);
     });
 
@@ -84,21 +87,22 @@ export default class RemoteWorks extends Command {
   /**
    *
    * @param {Context} ctx
-   * @param {User} user
-   * @param {RemoteWork[]} rw
    */
   async startByTitle(ctx) {
     const user = await this.client.users.get(ctx.from.id);
     const rw = (await this.client.rw.get(user.group))?.reverse();
+    // @ts-ignore
     const titles = this.shortTitles(rw);
+    // @ts-ignore
     const keyboard = this.parseFullKeyboard(titles, 2, ctx.id);
     ctx.editMessageText('Выберите дисциплину из списка ниже для просмотра дистанционных заданий:', { reply_markup: { inline_keyboard: keyboard } });
   }
 
   /**
-   * @param {RemoteWork[]} rw
+   * @param {number} userid
    * @param {string} date
    */
+  // @ts-ignore
   async findByDate(userid, date) {
     if (!date) return [];
     const user = await this.client.users.get(userid);
@@ -108,7 +112,7 @@ export default class RemoteWorks extends Command {
 
   /**
    * @param {Context} ctx
-   * @param {User} user
+   * @param {?boolean} edit
    * @param {RemoteWork[]} rw
    */
   async showByDate(ctx, rw, edit = false) {
@@ -146,23 +150,27 @@ export default class RemoteWorks extends Command {
 
   /**
    * @param {Context} ctx
-   * @param {User} user
    * @param {RemoteWork[]} tasks
-   * @param {number} mid
-   * @param {string} key
+   * @param {any} stitle
+   * @param {?number} mid
+   * @param {?string} key
    */
   async showByTitle(ctx, tasks, stitle, mid, key) {
     const user = await this.client.users.get(ctx.from.id);
     const task = key ? tasks.find((t) => t.date?.regular === key) : tasks[0];
     tasks.forEach((ta) => {
+      // @ts-ignore
       this.client.action(`${ctx.id}${user.group}${stitle}-${ta.date?.regular}`, (c) => {
+        // @ts-ignore
         this.showByTitle(Object.assign(c, { id: ctx.id }), tasks, stitle, c.update.callback_query.message.message_id, ta.date.regular);
       });
     });
     let keyboard = [];
     if (tasks.length > 1) {
+      // @ts-ignore
       keyboard = this.parseKeyboard(tasks, task, `${ctx.id}${user.group}${stitle}`, 4);
     }
+    // @ts-ignore
     keyboard.push([{ text: 'Назад', callback_data: `${ctx.id}-back-to-titles` }]);
     const msg = `Найдено \`${tasks.length}\` задани${tasks.length === 1 ? 'е' : tasks.length > 1 && tasks.length < 5 ? 'я' : tasks.length >= 5 ? 'й' : 'я'}.\n\nДисциплина: \`${
       task.title
@@ -170,6 +178,7 @@ export default class RemoteWorks extends Command {
       (await this.client.telegraph.get(task)).url
     }${task.teacher ? `\nПреподаватель: ${task.teacher}` : ''}${task.email ? `\nПочта преподавателя: \`${task.email}\`\n(нажмите, чтобы скопировать почту)` : ''}`;
     if (mid) {
+      // @ts-ignore
       this.client.telegram.editMessageText(ctx.chat.id, mid, mid, msg, {
         reply_markup: { inline_keyboard: keyboard },
         parse_mode: 'Markdown',
@@ -200,9 +209,10 @@ export default class RemoteWorks extends Command {
   }
 
   /**
-   * @param {import('../../structures/parser/RWParser.js').task[]} rw
+   * @param {number} userid
    * @param {string} date
    */
+  // @ts-ignore
   async findByDate(userid, date) {
     if (!date) return [];
     const user = await this.client.users.get(userid);
@@ -213,7 +223,7 @@ export default class RemoteWorks extends Command {
 
   /**
    *
-   * @param {RemoteWorks[]} rw
+   * @param {RemoteWork[]} rw
    * @returns {{short:string,title:string}[]}
    */
   shortTitles(rw) {
@@ -223,6 +233,7 @@ export default class RemoteWorks extends Command {
     const titles = [];
     for (let i = 0; i < rw.length; i++) {
       const task = rw[i];
+      // @ts-ignore
       if (!titles.includes(task.title)) titles.push(task.title);
     }
     const data = [];
@@ -247,6 +258,7 @@ export default class RemoteWorks extends Command {
         callback_data: `${id}-${i.short}`,
       });
     });
+    // @ts-ignore
     return keyboard.chunk(chunkSize);
   }
 
@@ -258,6 +270,7 @@ export default class RemoteWorks extends Command {
    */
   parseKeyboard(tasks, stask, prefix, chunk) {
     const list = tasks.map((s) => s.date.regular);
+    // @ts-ignore
     const listWithoutSelected = list.removeItem(stask.date.regular);
     const keyboard = [];
     listWithoutSelected.forEach((a) => {
@@ -266,6 +279,7 @@ export default class RemoteWorks extends Command {
         callback_data: `${prefix}-${a}`,
       });
     });
+    // @ts-ignore
     return keyboard.chunk(chunk);
   }
 }

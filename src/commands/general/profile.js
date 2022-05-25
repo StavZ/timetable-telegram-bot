@@ -11,6 +11,7 @@ export default class Profile extends Command {
       name: 'profile',
       aliases: [],
       description: 'Профиль',
+      priority: false
     });
     this.client = client;
   }

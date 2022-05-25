@@ -23,6 +23,7 @@ export default class SelectTeacher extends Command {
    */
   async exec(ctx, args) {
     const unchunked = this.parseKeyboard(this.client.commands.get('email').config.emails.map((e) => e.teacherShort));
+    // @ts-ignore
     const keyboard = unchunked.chunk(3);
     keyboard.push([{ text: 'Отмена', callback_data: 'cancel-teacher-select-group' }]);
 
@@ -34,7 +35,7 @@ export default class SelectTeacher extends Command {
       });
     });
     this.client.action('cancel-teacher-select-group', (ctx) => {
-      ctx.editMessageReplyMarkup({});
+      ctx.editMessageReplyMarkup(null);
       ctx.editMessageText('Выбор преподавателя был отменен.');
     });
   }

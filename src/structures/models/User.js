@@ -24,7 +24,7 @@ export default class User {
     this.regDate = data.regdate ? Number(data.regdate) : null;
     /**
      * Последнее отправленное расписание
-     * @type {TimetableTD}
+     * @type {import("../parsers/Timetable.js").TimetableTD}
      */
     this.sentTimetable = data.sentschedule;
     /**
@@ -56,16 +56,15 @@ export default class User {
   /**
    * Установить последнее отправленное расписание
    * @param {import("../parsers/Timetable.js").TimetableTD} timetable
-   * @returns {Promise<User>}
    */
   async _setSentTimetable (timetable) {
+    // @ts-ignore
     return await this.#client.users.setSentTimetable(this.id, timetable)
   }
 
   /**
    * Установить статус автоматической рассылки
    * @param {boolean} state 
-   * @returns {Promise<User>}
    */
   async _setAutoschedulerState (state) {
     return await this.#client.users.setAutoschedulerState(this.id, state)

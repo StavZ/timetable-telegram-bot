@@ -10,9 +10,7 @@ export default class Selectgroup extends Command {
     super({
       name: 'selectgroup',
       aliases: [],
-      category: 'timetable',
       description: 'Выбор группы',
-      usage: 'selectgroup',
       priority: true
     });
     this.client = client;
@@ -27,7 +25,7 @@ export default class Selectgroup extends Command {
     const groupIds = this.flip(this.config.groupIds);
     const user = await this.client.users.get(ctx.from.id);
 
-    const keyboard = new Markup.inlineKeyboard(this.parseKeyboard(Object.keys(groupIds), 4));
+    const keyboard = Markup.inlineKeyboard(this.parseKeyboard(Object.keys(groupIds), 4));
 
     this.client.action('cancel-select-group', (ctx) => {
       ctx.editMessageText('Выбор группы был отменен');
@@ -39,7 +37,7 @@ export default class Selectgroup extends Command {
 
     Object.keys(groupIds).forEach((g) => {
       this.client.action(g, (ctx) => {
-        const groupkb = new Markup.inlineKeyboard(this.parseKeyboard(groups[groupIds[g]], 4));
+        const groupkb = Markup.inlineKeyboard(this.parseKeyboard(groups[groupIds[g]], 4));
 
         ctx.editMessageText(`Вы выбрали специальность \`${groupIds[g]}\`.\nВыберите свою группу из списка ниже:`, { ...groupkb, parse_mode: 'Markdown' });
 
@@ -87,10 +85,11 @@ export default class Selectgroup extends Command {
   parseKeyboard(array, chunkSize) {
     let _ = [];
     array.forEach((a) => {
-      _.push(new Markup.button.callback(a, a));
+      _.push(Markup.button.callback(a, a));
     });
+    // @ts-ignore
     _ = _.chunk(chunkSize);
-    _.push([new Markup.button.callback('Отмена', 'cancel-select-group')]);
+    _.push([Markup.button.callback('Отмена', 'cancel-select-group')]);
     return _;
   }
 }

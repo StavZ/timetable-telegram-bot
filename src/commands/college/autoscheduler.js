@@ -23,7 +23,7 @@ export default class Autoscheduler extends Command {
     const user = await this.client.users.get(ctx.from.id);
     const currentStatus = user.autoScheduler;
 
-    const keyboard = new Markup.inlineKeyboard([
+    const keyboard = Markup.inlineKeyboard([
       Markup.button.callback('Выключить', `disable-autoscheduler-${ctx.message.message_id}`, !currentStatus),
       Markup.button.callback('Включить', `enable-autoscheduler-${ctx.message.message_id}`, currentStatus),
     ]);

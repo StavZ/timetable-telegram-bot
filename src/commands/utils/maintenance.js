@@ -11,6 +11,7 @@ export default class Maintenance extends Command {
       name: 'maintenance',
       aliases: ['mt'],
       description: 'Отключение автоматизации',
+      priority: false
     });
     this.client = client;
   }

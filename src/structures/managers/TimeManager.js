@@ -4,7 +4,7 @@ export default class TimeManager {
   /**
    * Получить текущее время
    * @param {boolean} [unix=false]
-   * @returns {number|moment.Moment}
+   * @returns {string|moment.Moment}
    */
   getCurrentTime(unix = false) {
     return unix ? moment().format('x') : moment();
@@ -16,19 +16,25 @@ export default class TimeManager {
    */
   getStudYear() {
     const date = this.getCurrentTime();
+    // @ts-ignore
     if (date.month() + 1 < 7) {
+      // @ts-ignore
       return `${date.year() - 1}-${date.year()}`;
     } else {
+      // @ts-ignore
       return `${date.year()}-${date.year() + 1}`;
     }
   }
 
   /**
    * Карта курсов (год-курс)
-   * @returns {Record<string:number>}
+   * @returns {Record<string,number>}
    */
   getCourseMap() {
     const studYear = Number(this.getStudYear().split('-')[0]);
+    /**
+     * @type {Record<string,number>}
+     */
     const data = {};
 
     for (let i = 0; i < 4; i++) {

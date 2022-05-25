@@ -11,6 +11,7 @@ export default class Stats extends Command {
       name: 'stats',
       aliases: ['статистика'],
       description: 'Статистика бота',
+      priority: false
     });
     this.client = client;
   }
@@ -21,12 +22,14 @@ export default class Stats extends Command {
    */
   async exec(ctx, args) {
     const userCount = await this.client.users.size();
+    // @ts-ignore
     const activeUsers = (await this.client.users.filter({ autoscheduler: true })).filter((u) => u.group !== null);
     const registrationsToday = activeUsers.filter((u) => this.client.moment(Number(u.regDate)).isSame(this.client.moment(), 'day'))?.length || 0;
     const newsUsersCount = await this.client.telegram.getChatMembersCount('@ppkbotnews');
 
     let msg = `Количество пользователей за всё время: \`${userCount}\`\nКоличество активных пользователей: \`${activeUsers.length}\`\nЗарегистрировано сегодня: \`${registrationsToday}\`\n[Новостной канал](https://t.me/ppkbotnews): \`${newsUsersCount}\`\n\n*Таблица активных пользователей*\n\`\`\`\n`;
     for (let i = 1; i < 5; i++) {
+      // @ts-ignore
       const users = (await this.client.users.filter({ course: i })).filter((u) => u.autoScheduler);
       msg += `${Number(i)} курс | ${users.length}\n`;
     }

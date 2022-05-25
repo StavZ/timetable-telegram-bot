@@ -11,6 +11,7 @@ export default class Remote extends Command {
       name: 'remote',
       description: 'Удаленное управление модулями',
       aliases: [],
+      priority: false
     });
     this.client = client;
   }
@@ -25,6 +26,7 @@ export default class Remote extends Command {
 
     const moduleName = args[0];
     const moduleType = args[1];
+    // @ts-ignore
     const module = await this.client.remote.get(moduleName, moduleType, false);
     if (!module) return ctx.reply(`Модуль ${moduleName} [${moduleType}] не найден.`);
 

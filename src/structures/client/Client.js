@@ -8,6 +8,9 @@ import { createRequire } from 'module';
 import moment from 'moment-timezone';
 import pg from 'pg';
 import Telegraph from 'telegra.ph';
+import Translit from 'cyrillic-to-translit-js';
+// @ts-ignore
+const translit = new Translit();
 
 /**
  * Managers / Handlers
@@ -133,6 +136,7 @@ export default class TelegrafClient extends Telegraf {
      * @type {pg.Pool}
      * @description База данных
      */
+    // @ts-ignore
     this.db = new pg.Pool({ host: process.env.DBHOST, port: process.env.DBPORT, user: process.env.DBUSER, password: process.env.DBPASS, database: 'tg_bot_db', ssl: { rejectUnauthorized: false } });
     /**
      * @type {Telegraph}
@@ -154,6 +158,51 @@ export default class TelegrafClient extends Telegraf {
      * @description Последний перезапуск бота
      */
     this.lastRestart = 0;
+    /**
+     * @param {string} string
+     * @returns {string}
+     */
+    this.toEng = (string) => {
+      return translit.transform(string, '_');
+    };
+  }
+
+  /**
+   * @param {string[]} values
+   * @param {boolean} cancel
+   * @returns {{}}
+   */
+  generateKeyboard(values, chunkSize, cancel = false) {
+    const keyboard = [];
+    const callbacks = [];
+    const map = new Map();
+
+    values.forEach((v) => {
+      const cbdata = `${this.toEng(v)}`;
+
+      callbacks.push(cbdata);
+      map.set(v, cbdata);
+
+      keyboard.push({
+        callback_data: cbdata,
+        text: v,
+      });
+    });
+
+    return {
+      // @ts-ignore
+      keyboard: keyboard.chunk(chunkSize),
+      callbacks,
+      values,
+      map,
+    };
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  checkAviability() {
+    return ![6, 7].includes(this.moment().month() + 1);
   }
 
   /**
@@ -168,27 +217,31 @@ export default class TelegrafClient extends Telegraf {
   /**
    * @param {string} message
    * @param {'all'|'user'} type
-   * @param {number} userid
+   * @param {number} [userid=undefined]
    */
   async sendMessage(message, type = 'all', userid) {
     switch (type) {
       case 'all': {
         const users = await this.users.getActive();
         users.forEach((u) => {
-          this.telegram.sendMessage(u.id, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал https://t.me/ppkbotnews.`, {
-            disable_notification: true,
-            disable_web_page_preview: true,
-            parse_mode: 'Markdown'
-          }).catch(this.logger.error);
+          this.telegram
+            .sendMessage(u.id, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал https://t.me/ppkbotnews.`, {
+              disable_notification: true,
+              disable_web_page_preview: true,
+              parse_mode: 'Markdown',
+            })
+            .catch(this.logger.error);
         });
         break;
       }
       case 'user': {
-        this.telegram.sendMessage(userid, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал https://t.me/ppkbotnews.`, {
-          disable_notification: true,
-          disable_web_page_preview: true,
-          parse_mode: 'Markdown'
-        }).catch(this.logger.error);
+        this.telegram
+          .sendMessage(userid, `Сообщение от разработчика:\n\n${message}\nЧтобы не пропускать новости бота - подпишись на новостной канал https://t.me/ppkbotnews.`, {
+            disable_notification: true,
+            disable_web_page_preview: true,
+            parse_mode: 'Markdown',
+          })
+          .catch(this.logger.error);
         break;
       }
     }
@@ -196,7 +249,7 @@ export default class TelegrafClient extends Telegraf {
 
   /**
    * Запуск бота
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async run() {
     if (this.dev) {
@@ -213,6 +266,7 @@ export default class TelegrafClient extends Telegraf {
       })
       .catch(this.logger.error);
 
+    // @ts-ignore
     this.launch({ allowedUpdates: true })
       .then(() => {
         this.logger.success(`Logged in as @${this.botInfo.username}`);

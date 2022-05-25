@@ -11,6 +11,7 @@ export default class Support extends Command {
       name: 'support',
       aliases: [],
       description: 'Служба поддержки',
+      priority: false
     });
     this.client = client;
   }

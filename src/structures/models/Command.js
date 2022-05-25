@@ -37,6 +37,12 @@ export default class Command {
      */
     this.config = {};
   }
+  /**
+   * @param {Context} ctx 
+   * @param {string[]} args
+   * @returns {Promise<any>}
+   */
+  async exec (ctx, args) {}
 }
 
 /**
@@ -44,5 +50,5 @@ export default class Command {
  * @prop {string} name
  * @prop {string[]} aliases
  * @prop {string} description
- * @prop {string} priority
+ * @prop {boolean} priority
  */

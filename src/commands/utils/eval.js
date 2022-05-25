@@ -13,6 +13,7 @@ export default class Eval extends Command {
       name: 'eval',
       aliases: [],
       description: 'Eval',
+      priority: false
     });
     this.client = client;
   }

@@ -73,7 +73,7 @@ client.commands
   })
   .catch(client.logger.error);
 
-client.db.on('error', (err, client) => {
+client.db.on('error', (err, dbclient) => {
   client.logger.error(err);
 });
 

@@ -11,6 +11,7 @@ export default class faq extends Command {
       name: 'faq',
       aliases: [],
       description: 'Информация о проекте и ответы на вопросы',
+      priority: false
     });
     this.client = client;
   }

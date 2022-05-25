@@ -70,6 +70,7 @@ export default class TimetableManager extends EventEmitter {
     const module = await this.#client.remote.get('timetable', 'manager', false);
     if (process.env.NODE_ENV !== 'development') {
       this.#client.logger.info('Starting Timetable manager...');
+      // @ts-ignore
       this.interval = module.config.interval ? module.config.interval : 180000;
       this.isDisabled = module.config.isDisabled;
       if (!module.config.isDisabled) {
@@ -77,6 +78,7 @@ export default class TimetableManager extends EventEmitter {
         this.check();
       }
     } else {
+      // @ts-ignore
       this.interval = module.config.interval ? module.config.interval : 180000;
       this.#client.logger.info('Start of timetable manager aborted due to development version!');
     }
@@ -90,7 +92,9 @@ export default class TimetableManager extends EventEmitter {
 
   startListeners() {
     this.#client.logger.info('Starting listeners...');
+    // @ts-ignore
     this.on('onNew', (...args) => newTimetable(this.#client, ...args));
+    // @ts-ignore
     this.on('onEdit', (...args) => editedTimetable(this.#client, ...args));
   }
   stopListeners() {

@@ -14,6 +14,7 @@ export default class ChangelogCommand extends Command {
       name: 'changelog',
       aliases: [],
       description: 'Список изменений',
+      priority: false
     });
     this.client = client;
   }
@@ -49,7 +50,7 @@ export default class ChangelogCommand extends Command {
    * @param {Context} ctx
    * @param {any} changelogs
    * @param {string} key
-   * @param {{}} edit
+   * @param {any?} edit
    */
   showChangelog(ctx, changelogs, key, edit) {
     const changelog = changelogs[key].changelog;
@@ -61,7 +62,7 @@ export default class ChangelogCommand extends Command {
     keyboard.push([{ text: 'Убрать кнопки', callback_data: 'cancel-changelog' }]);
     if (edit) {
       this.client.telegram.editMessageText(ctx.chat.id, edit.message_id, edit.message_id, msg, {
-        reply_markup: { inline_keyboard: keyboard, one_time_keyboard: true },
+        reply_markup: { inline_keyboard: keyboard },
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
       });
@@ -75,11 +76,13 @@ export default class ChangelogCommand extends Command {
 
   parseKeyboard(changelogs, selected) {
     const keys = Object.keys(changelogs).slice(0, 4);
+    // @ts-ignore
     keys.removeItem(selected);
     const data = [];
     keys.forEach((k) => {
       data.push({ text: `v${k}`, callback_data: k });
     });
+    // @ts-ignore
     return data.chunk(3);
   }
 }

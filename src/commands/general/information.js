@@ -11,6 +11,7 @@ export default class Information extends Command {
       name: 'information',
       aliases: ['info'],
       description: 'Информация о боте',
+      priority: false
     });
     this.client = client;
   }

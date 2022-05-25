@@ -21,7 +21,7 @@ export default class RemoteWorksParser {
   /**
    *
    * @param {string} group
-   * @returns {RemoteWork[]}
+   * @returns {Promise<RemoteWork[]>}
    */
   async get(group) {
     const id = this.#getGroupId(group);
@@ -54,7 +54,7 @@ export default class RemoteWorksParser {
 
   /**
    * @param {Document} document
-   * @returns {RemoteWork[]}
+   * @returns {Promise<RemoteWork[]>}
    */
   async #parse(document, group) {
     const data = [];
@@ -79,10 +79,13 @@ export default class RemoteWorksParser {
         .item(0)
         .textContent.split(/(?=[А-Я])/g);
 
+      // @ts-ignore
       shouldBeContentButNot = matches.slice(1).join('\n').replaceSpaces().replace(date, '');
+      // @ts-ignore
       return matches[0].replaceSpaces().replace(date, '').trim();
     };
 
+    // @ts-ignore
     const taskSubject = this.#removeRandomUnderscores(task.getElementsByClassName('subtitle').item(0).textContent.trim().replaceSpaces());
     const taskText = this.#removeRandomUnderscores(
       task
@@ -103,6 +106,7 @@ export default class RemoteWorksParser {
       }
     }
 
+    // @ts-ignore
     const teacher = task.getElementsByClassName('prepod').item(0).textContent.replaceSpaces().toProperCase();
     let email = null;
     for (let y = 0; y < task.getElementsByTagName('div').length; y++) {
@@ -144,6 +148,7 @@ export default class RemoteWorksParser {
    * @returns {{toString():string,regular:string,day:string}}
    */
   #parseDate(string) {
+    // @ts-ignore
     string = string.replaceSpaces();
     const months = {
       января: '01',
@@ -185,7 +190,7 @@ export default class RemoteWorksParser {
   /**
    *
    * @param {string} group
-   * @returns {number}
+   * @returns {string}
    */
   #getGroupId(group) {
     group = group.split(' ')[0].replace(',', '');
@@ -198,7 +203,7 @@ export default class RemoteWorksParser {
 
   /**
    * @todo
-   * @returns {{group:string,works:RemoteWork[]}[]}
+   * @returns {Promise<{group:string,works:RemoteWork[]}[]>}
    */
   async #getAll() {
     const data = [];

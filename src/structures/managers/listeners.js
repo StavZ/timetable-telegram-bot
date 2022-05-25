@@ -8,6 +8,9 @@ import User from '../models/User.js';
  * @param {import("../parsers/Timetable.js").TimetableTD} timetable
  */
 export function newTimetable(client, user, timetable) {
+  if (!timetable.lessons.length && !client.checkAviability()) {
+    return user._setSentTimetable(timetable);
+  }
   const message = client.timetable.generateMessage(timetable, 'new');
   return client.telegram
     .sendMessage(user.id, message, { parse_mode: 'Markdown', disable_web_page_preview: true })

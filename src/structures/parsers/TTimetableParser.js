@@ -29,11 +29,13 @@ export default class TTimetableParser {
         rej(false);
       });
 
+      // @ts-ignore
       if (page?.status !== 200) {
         rej(false);
       }
 
-      const jsdom = new JSDOM(page.data);
+      // @ts-ignore
+      const jsdom = new JSDOM(page?.data);
       const document = jsdom.window.document;
       res(document);
     });
@@ -41,7 +43,7 @@ export default class TTimetableParser {
 
   /**
    * Получить преподавателей
-   * @returns {string[]}
+   * @returns {Promise<string[]>}
    */
   async getTeachers() {
     const document = await this.getPage().catch(this.client.logger.error);
@@ -54,6 +56,7 @@ export default class TTimetableParser {
      */
     const teachers = [];
     for (let i = 0; i < elements.length; i++) {
+      // @ts-ignore
       teachers.push(elements.item(i).textContent.trimEnd().replaceSpaces());
     }
     return teachers.sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base' }));
@@ -62,9 +65,12 @@ export default class TTimetableParser {
   /**
    * Получить ключи (дата) расписаний
    * @param {TTimetable[]} timetables
-   * @returns {Map<string,TTimetable>}
+   * @returns {Record<string,TTimetable>}
    */
   getKeys(timetables) {
+    /**
+     * @type {Record<string,TTimetable>}
+     */
     const output = {};
     for (const timetable of timetables) {
       output[timetable.date.regular] = timetable;
@@ -74,7 +80,6 @@ export default class TTimetableParser {
 
   /**
    * Получить расписание
-   * @param {string} url
    * @returns {Promise<TTimetable[]>}
    */
   getTimetables() {
@@ -108,7 +113,7 @@ export default class TTimetableParser {
 
   /**
    * Сгенерировать звонки
-   * @param {import('./Timetable.js').TimetableTD} timetable
+   * @param {import('./TTimetable.js').TTimetableTD} timetable
    * @returns {string|null}
    */
   generateBells(timetable) {
@@ -125,7 +130,9 @@ export default class TTimetableParser {
   generateMessage(timetable) {
     const message = this.client.commands.get('schedule').config.message;
     if (!timetable.lessons.length)
+      // @ts-ignore
       return `Расписание ${timetable.date.string} (${timetable.date.day.toProperCase()})\nПреподаватель: \`${timetable.teacher}\`\n${message ? `\n${message}\n` : ''}\nПар нет.`;
+    // @ts-ignore
     let msg = `Расписание на ${timetable.date.string} (${timetable.date.day.toProperCase()})\nПреподаватель: \`${timetable.teacher}\`\n${message ? `\n${message}\n` : ''}\n\`\`\`\n`;
     for (const l of timetable.lessons.sort((a, b) => a.number - b.number)) {
       const group = l.group.split(' ').length > 1 ? l.group.split(' ')[0].slice(0, -1) : l.group;

@@ -11,6 +11,7 @@ export default class SendMessage extends Command {
       name: 'sendMessage',
       aliases: [],
       description: 'Отправить сообщение от имени разработчика',
+      priority: false
     });
     this.client = client;
   }
@@ -22,7 +23,7 @@ export default class SendMessage extends Command {
   async exec(ctx, args) {
     if (!args.length) return;
 
-    const userID = args[0];
+    const userID = Number(args[0]);
     if (isNaN(userID)) {
       return this.client.sendMessage(args.join(' '), 'all').catch(this.client.logger.error);
     } else {

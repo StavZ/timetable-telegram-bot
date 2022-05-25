@@ -3,6 +3,7 @@
     "@discordjs/collection": "^0.6.0",
     "axios": "^0.26.1",
     "consola": "^2.15.3",
+    "cyrillic-to-translit-js": "^3.2.1",
     "dotenv": "^16.0.0",
     "enum": "^3.0.4",
     "form-data": "^4.0.0",

@@ -143,36 +143,40 @@ export default class TimetableParser {
    */
   generateLessonlist(url) {
     return new Promise(async (res, rej) => {
-      const document = await this.getPage(url);
-      const timetable = [];
-      const carts = document.getElementsByClassName('lesson_on_group').item(0).children;
-      const groupRegex = /(([А-Яа-я])?)-(\d{2})/;
-      for (const cart of carts) {
-        const id = cart.id;
-        const group = cart.getElementsByClassName('title').item(0).textContent;
-        if (!groupRegex.test(group)) return res(null);
+      try {
+        const document = await this.getPage(url);
+        const timetable = [];
+        const carts = document.getElementsByClassName('lesson_on_group').item(0).children;
+        const groupRegex = /(([А-Яа-я])?)-(\d{2})/;
+        for (const cart of carts) {
+          const id = cart.id;
+          const group = cart.getElementsByClassName('title').item(0).textContent;
+          if (!groupRegex.test(group)) return res(null);
 
-        timetable.push({
-          id,
-          group,
-          lessons: [],
-        });
+          timetable.push({
+            id,
+            group,
+            lessons: [],
+          });
 
-        const dlist = cart.getElementsByClassName('discepline_list').item(0).children;
-        for (const lesson of dlist) {
-          const number = Number(lesson.getElementsByClassName('index').item(0)?.textContent ?? 1);
-          const title = lesson.getElementsByClassName('discipline_name').item(0)?.textContent;
-          const teacher = (lesson.getElementsByClassName('teacher').item(0)?.textContent ?? null)?.trimEnd();
-          const location = this.parseLocation(
-            lesson.getElementsByClassName('location').item(0),
-            lesson.getElementsByClassName('classroom').item(0),
-            lesson.getElementsByClassName('location_string').item(0)
-          );
+          const dlist = cart.getElementsByClassName('discepline_list').item(0).children;
+          for (const lesson of dlist) {
+            const number = Number(lesson.getElementsByClassName('index').item(0)?.textContent ?? 1);
+            const title = lesson.getElementsByClassName('discipline_name').item(0)?.textContent;
+            const teacher = (lesson.getElementsByClassName('teacher').item(0)?.textContent ?? null)?.trimEnd();
+            const location = this.parseLocation(
+              lesson.getElementsByClassName('location').item(0),
+              lesson.getElementsByClassName('classroom').item(0),
+              lesson.getElementsByClassName('location_string').item(0)
+            );
 
-          timetable.find((t) => t.group === group).lessons.push(new Lesson({ number, title, teacher, location, group }));
+            timetable.find((t) => t.group === group).lessons.push(new Lesson({ number, title, teacher, location, group }));
+          }
         }
+        res(timetable);
+      } catch (error) {
+        rej(error)
       }
-      res(timetable);
     });
   }
 
@@ -181,7 +185,7 @@ export default class TimetableParser {
    * @param {Element} location
    * @param {Element} classroom
    * @param {Element} locationString
-   * @returns {}
+   * @returns {{location?:string,classroom?:number}}
    */
   parseLocation(location, classroom, locationString) {
     if (!location && !classroom && !locationString) return { location: null, classroom: null };

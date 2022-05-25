@@ -11,14 +11,16 @@ export default class Start extends Command {
       name: 'start',
       aliases: [],
       description: 'Стартовая команда бота',
+      priority: false
     });
     this.client = client;
   }
 
   /**
    * @param {Context} ctx
+   * @param {string[]} args
    */
-  async exec(ctx) {
+  async exec(ctx, args) {
     let user = await this.client.users.get(ctx.from.id);
     if (!user) user = await this.client.users.create(ctx.from.id);
 
