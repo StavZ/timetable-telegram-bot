@@ -11,7 +11,8 @@ export default class Help extends Command {
       name: 'help',
       aliases: [],
       description: 'Список команд бота',
-      priority: false
+      priority: false,
+      tempHide: false
     });
     this.client = client;
   }
@@ -24,7 +25,7 @@ export default class Help extends Command {
     // @ts-ignore
     const priorityCommands = this.client.commands.filter((c) => (c.config.includeInHelp || !c.config.ownerOnly) && c.priority);
     // @ts-ignore
-    const commands = this.client.commands.filter((c) => (c.config.includeInHelp || !c.config.ownerOnly) && !c.priority).sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
+    const commands = this.client.commands.filter((c) => (c.config.includeInHelp || !c.config.ownerOnly) && !c.priority && !c.tempHide).sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
     msg += `Основные команды:\n${priorityCommands.map((c) => `• /${c.name} - ${c.description}`).join('\n')}\n\n`;
     msg += `${commands.map((c) => `- /${c.name} - ${c.description}`).join('\n')}`;
     return ctx.reply(msg);

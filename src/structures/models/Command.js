@@ -10,6 +10,7 @@ export default class Command {
       aliases: [],
       description: '',
       priority: false,
+      tempHide: false
     }
   ) {
     /**
@@ -32,6 +33,7 @@ export default class Command {
      * @type {boolean}
      */
     this.priority = options.priority;
+    this.tempHide = !!options.tempHide
     /**
      * Конфигурация команды
      */
@@ -51,4 +53,5 @@ export default class Command {
  * @prop {string[]} aliases
  * @prop {string} description
  * @prop {boolean} priority
+ * @prop {boolean} tempHide
  */
