@@ -11,7 +11,8 @@ export default class Selectgroup extends Command {
       name: 'selectgroup',
       aliases: [],
       description: 'Выбор группы',
-      priority: true
+      priority: true,
+      tempHide: false
     });
     this.client = client;
   }
@@ -56,8 +57,8 @@ export default class Selectgroup extends Command {
       });
     });
 
-    this.client.action('agree-selectgroup', (ctx) => {
-      user._setGroup(group);
+    this.client.action('agree-selectgroup', async (ctx) => {
+      await user._setGroup(group);
       ctx.editMessageText('Вы выбрали группу `' + group + '`', {
         parse_mode: 'Markdown',
       });
