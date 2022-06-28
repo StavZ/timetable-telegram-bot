@@ -50,7 +50,8 @@ export default class User {
    * @returns {Promise<User>} 
    */
   async _setGroup (group) {
-    return await this.#client.users.setGroup(this.id, group);
+    const id = this.id;
+    return await this.#client.users.setGroup(id, group);
   }
 
   /**
